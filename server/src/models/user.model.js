@@ -34,12 +34,19 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    ressetPasswordToken: {
+        type: String,
+        default: undefined,
+    },
+    ressetPasswordExpires: {
+        type: Date,
+        default: undefined,
+    }
 }, { timestamps: true });
 // Hash the password before saving the user
 userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 10);
-    }
+    if (!this.isModified('password')) return next();
+    this.password = await bcrypt.hash(this.password, 10);
     next();
 });
 // Compare the password with the hashed password
