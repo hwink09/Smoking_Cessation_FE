@@ -8,6 +8,7 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const db = require('./db/index.js');
 
+const authRouter = require('./routes/auth.route.js');
 
 app.use(bodyParser.json());
 app.use(morgan("dev"));
@@ -21,6 +22,8 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
     res.send('API Smoking website')
 })
+
+app.use('/api/auth', authRouter);
 
 app.use(async (err, req, res, next) => {
     res.status = err.status || 500,
