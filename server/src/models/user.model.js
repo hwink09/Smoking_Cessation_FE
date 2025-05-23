@@ -25,7 +25,15 @@ const userSchema = new mongoose.Schema({
     avatar_url: {
         type: String,
         default: 'https://example.com/default-avatar.png',
-    }
+    },
+    vertificationToken: {
+        type: String,
+        default: null,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true });
 // Hash the password before saving the user
 userSchema.pre('save', async function (next) {
