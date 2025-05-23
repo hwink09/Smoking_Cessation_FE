@@ -9,6 +9,7 @@ const morgan = require("morgan");
 const db = require('./db/index.js');
 
 const authRouter = require('./routes/auth.route.js');
+const userRouter = require('./routes/user.route.js');
 
 app.use(bodyParser.json());
 app.use(morgan("dev"));
@@ -22,9 +23,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
     res.send('API Smoking website')
 })
-
+// Routes
 app.use('/api/auth', authRouter);
-
+app.use('/api/user', userRouter);
 app.use(async (err, req, res, next) => {
     res.status = err.status || 500,
         res.send({
