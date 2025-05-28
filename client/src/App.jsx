@@ -11,6 +11,9 @@ import { WorkProcess } from "./components/workProcess/WorkProcess";
 import { Pricing } from "./components/pricing/Pricing";
 import { ContactForm } from "./components/contactForm/ContactForm";
 import { Testimonials } from "./components/testimonials/Testimonials";
+import DashboardAdmin from "./pages/admin/DashboardAdmin";
+import UserManagerAdmin from "./pages/admin/UserManagement";
+import UserManagement from "./pages/admin/UserManagement";
 
 const Layout = ({ children }) => {
   return (
@@ -59,6 +62,14 @@ const router = createBrowserRouter([
         <ForgotPassword />
       </Layout>
     ),
+  },
+  {
+    path: "/admin/dashboard",
+    element: <DashboardAdmin/>
+  },
+  {
+    path: "/admin/users",
+    element: <UserManagement/>
   },
 ]);
 
