@@ -1,36 +1,166 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import {
+  validateEmail,
+  validatePassword,
+  validateName,
+  passwordsMatch,
+  formatAuthError,
+} from "~/utils/validations";
 
 function Register() {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    terms: false,
+  });
+  const [errors, setErrors] = useState({});
+  const [authError, setAuthError] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: "",
+      });
+    }
+
+    // Clear auth error when form changes
+    if (authError) {
+      setAuthError("");
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!validateName(formData.name)) {
+      newErrors.name = "Name must be at least 2 characters";
+    }
+
+    if (!validateEmail(formData.email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.errors[0];
+    }
+
+    if (!passwordsMatch(formData.password, formData.confirmPassword)) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (!formData.terms) {
+      newErrors.terms = "You must agree to the Terms and Conditions";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setAuthError("");
+
+    const auth = getAuth();
+
+    try {
+      // Create user with email and password
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      // Update profile with name
+      await updateProfile(userCredential.user, {
+        displayName: formData.name,
+      });
+
+      // Here you would typically also save the user to your database
+      // with additional information not stored in Firebase Auth
+
+      // Redirect to dashboard or welcome page
+      navigate("/dashboard");
+    } catch (error) {
+      setAuthError(formatAuthError(error.code));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-black p-10 rounded-xl shadow-md border border-gray-800">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950">
+      <div className="max-w-md w-full space-y-8 bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800">
         <div>
           <h1 className="text-3xl font-extrabold text-center text-white">
-            Register
+            Create Account
           </h1>
           <p className="mt-2 text-center text-sm text-gray-400">
-            Create your account
+            Join our community to start your journey
           </p>
         </div>
-        <form className="mt-8 space-y-6">
-          <div className="rounded-md shadow-sm -space-y-px">
+
+        {authError && (
+          <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-md text-sm">
+            {authError}
+          </div>
+        )}
+
+        <form className="mt-8 space-y-6" onSubmit={handleRegister}>
+          <div className="space-y-4">
             <div>
-              <label htmlFor="full-name" className="sr-only">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Full Name
               </label>
               <input
-                id="full-name"
+                id="name"
                 name="name"
                 type="text"
                 autoComplete="name"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-700 bg-gray-900 placeholder-gray-500 text-white rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Full Name"
+                value={formData.name}
+                onChange={handleChange}
+                className={`mt-1 appearance-none block w-full px-3 py-2 border ${
+                  errors.name ? "border-red-500" : "border-gray-700"
+                } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
+                placeholder="John Doe"
               />
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+              )}
             </div>
+
             <div>
-              <label htmlFor="email-address" className="sr-only">
+              <label
+                htmlFor="email-address"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Email address
               </label>
               <input
@@ -38,13 +168,23 @@ function Register() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-700 bg-gray-900 placeholder-gray-500 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                value={formData.email}
+                onChange={handleChange}
+                className={`mt-1 appearance-none block w-full px-3 py-2 border ${
+                  errors.email ? "border-red-500" : "border-gray-700"
+                } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
+                placeholder="you@example.com"
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+              )}
             </div>
+
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Password
               </label>
               <input
@@ -52,13 +192,23 @@ function Register() {
                 name="password"
                 type="password"
                 autoComplete="new-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-700 bg-gray-900 placeholder-gray-500 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`mt-1 appearance-none block w-full px-3 py-2 border ${
+                  errors.password ? "border-red-500" : "border-gray-700"
+                } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
+                placeholder="••••••••"
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+              )}
             </div>
+
             <div>
-              <label htmlFor="confirm-password" className="sr-only">
+              <label
+                htmlFor="confirm-password"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Confirm Password
               </label>
               <input
@@ -66,41 +216,91 @@ function Register() {
                 name="confirmPassword"
                 type="password"
                 autoComplete="new-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-700 bg-gray-900 placeholder-gray-500 text-white rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm Password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className={`mt-1 appearance-none block w-full px-3 py-2 border ${
+                  errors.confirmPassword ? "border-red-500" : "border-gray-700"
+                } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
+                placeholder="••••••••"
               />
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center">
-            <input
-              id="terms"
-              name="terms"
-              type="checkbox"
-              required
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-700 rounded bg-gray-900"
-            />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-300">
-              I agree to the{" "}
-              <a href="#" className="text-indigo-600 hover:text-indigo-500">
-                Terms and Conditions
-              </a>
-            </label>
+          <div className="flex items-start">
+            <div className="flex items-center h-5">
+              <input
+                id="terms"
+                name="terms"
+                type="checkbox"
+                checked={formData.terms}
+                onChange={handleChange}
+                className={`h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-700 rounded bg-gray-900 ${
+                  errors.terms ? "border-red-500" : ""
+                }`}
+              />
+            </div>
+            <div className="ml-3 text-sm">
+              <label
+                htmlFor="terms"
+                className="font-medium text-gray-300"
+              >
+                I agree to the{" "}
+                <a
+                  href="#"
+                  className="text-indigo-500 hover:text-indigo-400"
+                >
+                  Terms and Conditions
+                </a>
+              </label>
+              {errors.terms && (
+                <p className="mt-1 text-sm text-red-500">{errors.terms}</p>
+              )}
+            </div>
           </div>
 
           <button
             type="submit"
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            disabled={isLoading}
+            className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
+              isLoading ? "opacity-70 cursor-not-allowed" : ""
+            }`}
           >
-            Sign up
+            {isLoading ? (
+              <svg
+                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            ) : (
+              "Create Account"
+            )}
           </button>
 
           <div className="text-sm text-center">
             <span className="text-gray-400">Already have an account?</span>{" "}
             <Link
               to="/login"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
             >
               Sign in
             </Link>
