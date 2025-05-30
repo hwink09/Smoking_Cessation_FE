@@ -12,6 +12,8 @@ import HomePages from "./pages/generic/home/HomePages";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import DashboardAdmin from "./pages/admin/DashboardAdmin";
+import UserManagement from "./pages/admin/UserManagement";
 
 // ===== Layout Wrapper =====
 const Layout = () => (
@@ -49,6 +51,9 @@ function App() {
             }
           />
         </Route>
+        {/* Admin routes */}
+        <Route path='/admin/dashboard' element={<DashboardAdmin />} />
+        <Route path='/admin/dashboard/user-management' element={<UserManagement />} />
       </Routes>
     </Router>
   );
