@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
-import { validateEmail, formatAuthError } from "~/utils/validations";
+import { useAuth } from "~/hooks/useAuth";
 
 function ForgotPassword() {
+  const { forgotPassword, validateForgotPasswordForm } = useAuth();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,18 +16,13 @@ function ForgotPassword() {
     if (error) setError("");
     if (successMessage) setSuccessMessage("");
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate email
-    if (!email) {
-      setError("Email is required");
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email");
+    const validation = validateForgotPasswordForm(email);
+    if (!validation.isValid) {
+      setError(validation.error);
       return;
     }
 
@@ -35,14 +30,15 @@ function ForgotPassword() {
     setError("");
     setSuccessMessage("");
 
-    const auth = getAuth();
-
     try {
-      await sendPasswordResetEmail(auth, email);
-      setSuccessMessage("Password reset link sent! Check your email inbox.");
-      setEmail(""); // Clear form on success
-    } catch (error) {
-      setError(formatAuthError(error.code));
+      const result = await forgotPassword(email);
+
+      if (result.success) {
+        setSuccessMessage("Password reset link sent! Check your email inbox.");
+        setEmail(""); // Clear form on success
+      } else {
+        setError(result.error);
+      }
     } finally {
       setIsLoading(false);
     }

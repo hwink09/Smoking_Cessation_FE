@@ -1,105 +1,74 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import {
-  getAuth,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword
-} from "firebase/auth";
-import { provider } from "~/configs/firebase";
-import { validateEmail, formatAuthError } from "~/utils/validations";
+import { useAuth } from "~/hooks/useAuth";
 
 function Login() {
   const navigate = useNavigate();
+  const { login, loginWithGoogle, validateLoginForm } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [errors, setErrors] = useState({});
   const [authError, setAuthError] = useState("");
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors({
         ...errors,
-        [name]: ""
+        [name]: "",
       });
     }
-    
+
     // Clear auth error when form changes
     if (authError) {
       setAuthError("");
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-    }
-    
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
+
+    const validation = validateLoginForm(formData);
+    if (!validation.isValid) {
+      setErrors(validation.errors);
       return;
     }
-    
+
     setIsLoading(true);
     setAuthError("");
-    
-    const auth = getAuth();
-    
-    try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      navigate("/dashboard"); // Redirect to dashboard after successful login
-    } catch (error) {
-      setAuthError(formatAuthError(error.code));
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
+    const result = await login(formData.email, formData.password);
+
+    if (result.success) {
+      navigate("/dashboard"); // Redirect to dashboard after successful login
+    } else {
+      setAuthError(result.error);
+    }
+
+    setIsLoading(false);
+  };
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setAuthError("");
-    
-    const auth = getAuth();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential.accessToken;
-      const user = result.user;
-      
-      // Here you might want to check if the user exists in your database
-      // If not, you could create a new user entry with the Google user info
-      
+
+    const result = await loginWithGoogle();
+
+    if (result.success) {
       navigate("/dashboard"); // Redirect to dashboard after successful login
-    } catch (error) {
-      setAuthError(formatAuthError(error.code));
-    } finally {
-      setIsLoading(false);
+    } else {
+      setAuthError(result.error);
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -113,13 +82,13 @@ function Login() {
             Sign in to your account to continue your journey
           </p>
         </div>
-        
+
         {authError && (
           <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-md text-sm">
             {authError}
           </div>
         )}
-        
+
         <div className="flex flex-col gap-4 mt-8">
           <button
             onClick={handleGoogleLogin}
@@ -169,7 +138,7 @@ function Login() {
                 <p className="mt-1 text-sm text-red-500">{errors.email}</p>
               )}
             </div>
-            
+
             <div>
               <div className="flex justify-between">
                 <label
