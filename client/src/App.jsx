@@ -7,11 +7,14 @@ import { Outlet } from "react-router-dom";
 import { Navbar } from "./components/layouts/Navbar";
 import { Footer } from "./components/layouts/Footer";
 
+// Auth Context
+import { AuthProvider } from "./contexts/AuthContext";
+
 // Pages
 import HomePages from "./pages/generic/home/HomePages";
-import Login from "./pages/Auth/Login";
-import Register from "./pages/Auth/Register";
-import ForgotPassword from "./pages/auth/ForgotPassword";
+import Login from "./pages/Auth/login/LoginPage";
+import Register from "./pages/Auth/register/RegisterPage";
+import ForgotPassword from "./pages/Auth/forgotPassword/ForgotPasswordPage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 
@@ -29,33 +32,38 @@ const Layout = () => (
 // ===== App with Routing =====
 function App() {
   return (
-    <Router>
-      {/* <ScrollToTop /> */}
-      <Routes>
-        {/*  Route useuse layout */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="forgot-password" element={<ForgotPassword />} />
+    <AuthProvider>
+      <Router>
+        {/* <ScrollToTop /> */}
+        <Routes>
+          {/*  Route useuse layout */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
 
-        {/*  Route not useuse layout */}
-        <Route element={<Layout />}>
-          <Route path="/" element={<HomePages />} />
+          {/*  Route not useuse layout */}
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomePages />} />
 
-          {/* 404 layout */}
+            {/* 404 layout */}
+            <Route
+              path="*"
+              element={
+                <div className="text-center py-16 text-2xl">
+                  404 - Page Not Found
+                </div>
+              }
+            />
+          </Route>
+          {/* Admin routes */}
+          <Route path="/admin/dashboard" element={<DashboardAdmin />} />
           <Route
-            path="*"
-            element={
-              <div className="text-center py-16 text-2xl">
-                404 - Page Not Found
-              </div>
-            }
+            path="/admin/dashboard/user-management"
+            element={<UserManagement />}
           />
-        </Route>
-        {/* Admin routes */}
-        <Route path='/admin/dashboard' element={<DashboardAdmin />} />
-        <Route path='/admin/dashboard/user-management' element={<UserManagement />} />
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

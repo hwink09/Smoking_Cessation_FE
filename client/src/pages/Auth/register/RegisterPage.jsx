@@ -1,20 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  updateProfile,
-} from "firebase/auth";
-import {
-  validateEmail,
-  validatePassword,
-  validateName,
-  passwordsMatch,
-  formatAuthError,
-} from "~/utils/validations";
+import { useAuth } from "~/hooks/useAuth";
 
 function Register() {
   const navigate = useNavigate();
+  const { register, validateRegistrationForm } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -46,67 +36,34 @@ function Register() {
       setAuthError("");
     }
   };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!validateName(formData.name)) {
-      newErrors.name = "Name must be at least 2 characters";
-    }
-
-    if (!validateEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-    }
-
-    const passwordValidation = validatePassword(formData.password);
-    if (!passwordValidation.isValid) {
-      newErrors.password = passwordValidation.errors[0];
-    }
-
-    if (!passwordsMatch(formData.password, formData.confirmPassword)) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    if (!formData.terms) {
-      newErrors.terms = "You must agree to the Terms and Conditions";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    const validation = validateRegistrationForm(formData);
+    if (!validation.isValid) {
+      setErrors(validation.errors);
       return;
     }
 
     setIsLoading(true);
     setAuthError("");
 
-    const auth = getAuth();
-
     try {
-      // Create user with email and password
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
+      const result = await register(
+        formData.name,
         formData.email,
         formData.password
       );
 
-      // Update profile with name
-      await updateProfile(userCredential.user, {
-        displayName: formData.name,
-      });
+      if (result.success) {
+        // Here you would typically also save the user to your database
+        // with additional information not stored in Firebase Auth
 
-      // Here you would typically also save the user to your database
-      // with additional information not stored in Firebase Auth
-
-      // Redirect to dashboard or welcome page
-      navigate("/dashboard");
-    } catch (error) {
-      setAuthError(formatAuthError(error.code));
+        // Redirect to dashboard or welcome page
+        navigate("/dashboard");
+      } else {
+        setAuthError(result.error);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -245,15 +202,9 @@ function Register() {
               />
             </div>
             <div className="ml-3 text-sm">
-              <label
-                htmlFor="terms"
-                className="font-medium text-gray-300"
-              >
+              <label htmlFor="terms" className="font-medium text-gray-300">
                 I agree to the{" "}
-                <a
-                  href="#"
-                  className="text-indigo-500 hover:text-indigo-400"
-                >
+                <a href="#" className="text-indigo-500 hover:text-indigo-400">
                   Terms and Conditions
                 </a>
               </label>
