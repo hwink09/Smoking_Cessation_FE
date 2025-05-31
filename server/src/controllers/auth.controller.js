@@ -219,4 +219,99 @@ module.exports.googleAuth = async (req, res) => {
             message: 'Google authentication failed'
         });
     }
+};
+module.exports.fogotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+
+        const ressetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '10m' });
+
+        user.ressetPasswordToken = ressetToken;
+        user.ressetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+        await user.save();
+
+        const resetLink = `http://localhost:${process.env.PORT}/api/auth/resset-password/${ressetToken}`; // sẽ sửa lại resetLink khi có front-end fogetpassword
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Đặt lại mật khẩu',
+            html: `
+            <!DOCTYPE html>
+            <html>
+                <body style="margin: 0; padding: 20px; background-color: #f4f4f4; font-family: Arial, sans-serif;">
+                    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                        <h2 style="color: #2C3E50; text-align: center; margin-bottom: 20px; font-size: 24px;">Xin chào ${user.name}!</h2>
+                        <div style="color: #666; line-height: 1.6; font-size: 16px;">
+                            <p style="margin-bottom: 15px;">Chúng tôi nhận được yêu cầu đặt lại mật khẩu của bạn. Vui lòng click vào nút bên dưới để đặt lại mật khẩu:</p>
+                            <div style="text-align: center; margin: 25px 0;">
+                                <a href="${resetLink}" 
+                                   style="background-color: #3498DB; 
+                                          color: white; 
+                                          padding: 12px 30px; 
+                                          text-decoration: none; 
+                                          border-radius: 5px; 
+                                          font-weight: bold;
+                                          display: inline-block;">
+                                    Đặt lại mật khẩu
+                                </a>
+                            </div>
+                            <p style="color: #999; font-size: 14px; text-align: center; margin-top: 20px;">Link này sẽ hết hạn sau 10 phút.</p>
+                            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                            <p style="color: #999; font-size: 12px; text-align: center;">Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+                        </div>
+                    </div>
+                </body>
+            </html>
+        `
+        }
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log('Error sending email:', error);
+                return res.status(500).json({ message: 'Error sending email' });
+            }
+            console.log('Email sent:', info.response);
+        })
+        return res.status(200).json({ message: 'Password reset link sent to your email' });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+// Resset password 
+module.exports.ressetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { newPassword } = req.body;
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await User.findOne({
+            _id: decoded.id,
+            ressetPasswordToken: token,
+            ressetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid token or token has expried' });
+        }
+
+        user.password = newPassword;
+
+        user.ressetPasswordToken = undefined;
+        user.ressetPasswordExpires = undefined;
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Password reset successfully'
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
 }
