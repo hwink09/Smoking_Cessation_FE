@@ -6,12 +6,14 @@ import { MdOutlineFeedback, MdLogout } from "react-icons/md";
 import { HiOutlineDocumentReport } from "react-icons/hi"
 import { FaUser } from "react-icons/fa";
 import { useEffect } from "react";
+import { SlBadge } from "react-icons/sl";
 
 const menu = [
     { label: "Overview", icon: <DashboardOutlined />, path: "/admin/dashboard" },
     { label: "Management User", icon: <TeamOutlined />, path: "/admin/dashboard/user-management" },
     { label: "Feedback & Rating", icon: <MdOutlineFeedback />, path: "#" },
     { label: "Report", icon: <HiOutlineDocumentReport />, path: "#" },
+    { label: "Badge Management", icon: <SlBadge />, path: "/admin/dashboard/badge-management" },
 ];
 
 export default function Sidebar({ admin }) {
@@ -29,7 +31,7 @@ export default function Sidebar({ admin }) {
     const items = [
         {
             key: '1',
-            label: 'My Account',    
+            label: 'My Account',
             disabled: true,
         },
         {
