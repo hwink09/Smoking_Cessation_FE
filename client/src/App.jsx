@@ -17,6 +17,7 @@ import Register from "./pages/Auth/register/RegisterPage";
 import ForgotPassword from "./pages/Auth/forgotPassword/ForgotPasswordPage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
+import BadgeManagement from "./pages/admin/BadgeManagement";
 
 // ===== Layout Wrapper =====
 const Layout = () => (
@@ -60,6 +61,10 @@ function App() {
           <Route
             path="/admin/dashboard/user-management"
             element={<UserManagement />}
+          />
+          <Route
+            path="/admin/dashboard/badge-management"
+            element={<BadgeManagement />}
           />
         </Routes>
       </Router>

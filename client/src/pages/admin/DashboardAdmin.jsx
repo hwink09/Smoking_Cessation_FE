@@ -2,7 +2,6 @@ import AdminLayout from "../../components/layouts/admin/AdminLayout";
 import Cards from "../../components/Admin/overview/Cards";
 import Overview from "~/components/Admin/overview/Overview";
 import ColourfulText from "../../components/ui/colourful-text";
-import { motion } from "motion/react";
 
 const admin = {
     name: "Admin Nguyễn",
