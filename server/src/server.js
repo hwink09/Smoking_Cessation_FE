@@ -7,11 +7,31 @@ const port = process.env.PORT;
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const db = require('./db/index.js');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const authRouter = require('./routes/auth.route.js');
 
+
+const whiteList = ['http://localhost:5173'];
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (whiteList.indexOf(origin) !== -1 || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+
 app.use(bodyParser.json());
 app.use(morgan("dev"));
+app.use(cookieParser());
 // Connect to MongoDB
 db.connectDB();
 // Middlewares
