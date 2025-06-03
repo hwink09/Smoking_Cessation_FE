@@ -6,6 +6,7 @@ import { Outlet } from "react-router-dom";
 // Layout
 import { Navbar } from "./components/layouts/Navbar";
 import { Footer } from "./components/layouts/Footer";
+import UserLayout from "./components/layouts/user/UserLayout";
 
 // Auth Context
 import { AuthProvider } from "./contexts/AuthContext";
@@ -18,6 +19,7 @@ import ForgotPassword from "./pages/Auth/forgotPassword/ForgotPasswordPage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 import NotFoundPage from "./pages/error/404Page";
+import DashBoardUser from "./pages/user/DashBoardUser";
 
 // ===== Layout Wrapper =====
 const Layout = () => (
@@ -54,6 +56,10 @@ function App() {
             path="/admin/dashboard/user-management"
             element={<UserManagement />}
           />
+          {/* User routes */}
+        <Route path="/user" element={<UserLayout />}>
+          <Route path="dashboard" element={<DashBoardUser />} />
+        </Route>
            {/* 404  */}
             <Route path="*" element={<NotFoundPage/>}/>
         </Routes>
