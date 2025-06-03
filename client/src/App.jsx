@@ -17,6 +17,7 @@ import Register from "./pages/Auth/register/RegisterPage";
 import ForgotPassword from "./pages/Auth/forgotPassword/ForgotPasswordPage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
+import NotFoundPage from "./pages/error/404Page";
 
 // ===== Layout Wrapper =====
 const Layout = () => (
@@ -45,15 +46,7 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
 
-            {/* 404 layout */}
-            <Route
-              path="*"
-              element={
-                <div className="text-center py-16 text-2xl">
-                  404 - Page Not Found
-                </div>
-              }
-            />
+           
           </Route>
           {/* Admin routes */}
           <Route path="/admin/dashboard" element={<DashboardAdmin />} />
@@ -61,6 +54,8 @@ function App() {
             path="/admin/dashboard/user-management"
             element={<UserManagement />}
           />
+           {/* 404  */}
+            <Route path="*" element={<NotFoundPage/>}/>
         </Routes>
       </Router>
     </AuthProvider>
