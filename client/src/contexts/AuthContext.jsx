@@ -19,6 +19,7 @@ import {
   passwordsMatch,
   formatAuthError,
 } from "~/utils/validations";
+import axios from "axios";
 
 // Create the AuthContext
 const AuthContext = createContext(null);
@@ -43,10 +44,29 @@ const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setLoading(true);
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      return { success: true, user: result.user };
+
+      // Call the API endpoint
+      const apiResponse = await axios.post(
+        "http://localhost:3000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
+      console.log("apiResponse:", apiResponse);
+
+      return {
+        success: true,
+        // user: result.user,
+        apiData: apiResponse.data, // Include API response data if needed
+      };
     } catch (error) {
-      return { success: false, error: formatAuthError(error.code) };
+      // Handle errors from both API and Firebase
+      const errorMessage =
+        error.response?.data?.message ||
+        formatAuthError(error.code) ||
+        "An error occurred";
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -72,18 +92,20 @@ const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       // Create user with email and password
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
+      const apiResponse = await axios.post(
+        "http://localhost:3000/api/auth/register",
+        {
+          name,
+          email,
+          password,
+        }
       );
 
-      // Update profile with name
-      await updateProfile(userCredential.user, {
-        displayName: name,
-      });
+      console.log("API registration response:", apiResponse);
 
-      return { success: true, user: userCredential.user };
+      // Update profile with name
+
+      return { success: true };
     } catch (error) {
       return { success: false, error: formatAuthError(error.code) };
     } finally {
