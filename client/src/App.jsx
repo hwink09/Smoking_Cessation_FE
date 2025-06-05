@@ -42,6 +42,8 @@ function App() {
         <Routes>
           {/*  Route useuse layout */}
           <Route path="/login" element={<Login />} />
+          {/* Route Login with token after register */}
+          <Route path="/login/:token" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
 

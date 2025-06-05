@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "~/hooks/useAuth";
+import axios from "axios";
 
 function Login() {
   const navigate = useNavigate();
@@ -13,6 +14,30 @@ function Login() {
   });
   const [errors, setErrors] = useState({});
   const [authError, setAuthError] = useState("");
+  const { token } = useParams();
+
+  // Thêm useEffect để xử lý token verification
+  useEffect(() => {
+    const verifyEmail = async () => {
+      if (token) {
+        try {
+          const response = await axios.get(`http://localhost:3000/api/auth/verify/${token}`);
+          if (response.status === 200) {
+            // Hiển thị thông báo thành công
+            alert('Email verified successfully. Please login.');
+            // Redirect to login page without token
+            navigate('/login');
+          }
+        } catch (error) {
+          // Hiển thị thông báo lỗi
+          alert(error.response?.data?.message || 'Verification failed');
+          navigate('/login');
+        }
+      }
+    };
+
+    verifyEmail();
+  }, [token, navigate]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
