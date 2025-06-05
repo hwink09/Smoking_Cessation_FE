@@ -1,19 +1,21 @@
 import { UserOutlined, DashboardOutlined, TeamOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DownOutlined, SettingOutlined } from "@ant-design/icons";
 import { Avatar, Button, Dropdown, Space } from "antd";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { MdOutlineFeedback, MdLogout } from "react-icons/md";
 import { HiOutlineDocumentReport } from "react-icons/hi"
 import { FaUser } from "react-icons/fa";
 import { useEffect } from "react";
 import { SlBadge } from "react-icons/sl";
+import { IoIosArrowBack } from "react-icons/io";
 
 const menu = [
     { label: "Overview", icon: <DashboardOutlined />, path: "/admin/dashboard" },
     { label: "Management User", icon: <TeamOutlined />, path: "/admin/dashboard/user-management" },
+    { label: "Badge Management", icon: <SlBadge />, path: "/admin/dashboard/badge-management" },
     { label: "Feedback & Rating", icon: <MdOutlineFeedback />, path: "#" },
     { label: "Report", icon: <HiOutlineDocumentReport />, path: "#" },
-    { label: "Badge Management", icon: <SlBadge />, path: "/admin/dashboard/badge-management" },
+
 ];
 
 export default function Sidebar({ admin }) {
@@ -23,6 +25,8 @@ export default function Sidebar({ admin }) {
         const saved = localStorage.getItem("sidebar-collapsed");
         return saved === "true";
     });
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         localStorage.setItem("sidebar-collapsed", collapsed);
@@ -66,7 +70,10 @@ export default function Sidebar({ admin }) {
         <div className={`h-screen sticky top-0 ${collapsed ? "w-20" : "w-64"} bg-gradient-to-b from-[#1a1333] via-[#2b2256] to-[#1a2a3a] flex flex-col  transition-all duration-300`}>
             {/* Collapse button */}
 
-            <div className={`${!collapsed ? "flex justify-between items-center border-b border-[#1f1f1f]" : "flex items-center"} `}>
+            <div className={`${!collapsed ? "flex justify-between items-center border-b" : "flex items-center"} `}>
+                <div className="">
+                    <Button type='text' className="text-white" icon={<IoIosArrowBack />} onClick={() => { navigate('/') }}></Button>
+                </div>
                 {!collapsed && <div className="text-xs uppercase text-gray-500 mt-4 mb-2 px-4">Platform</div>}
                 <div className="flex items-center justify-end p-2">
                     <Button
