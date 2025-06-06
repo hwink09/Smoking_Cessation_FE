@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "~/redux/slices/authSlice";
+import { login, verifyEmail } from "~/redux/slices/authSlice";
 import {
   selectAuthLoading,
   selectAuthError,
@@ -24,6 +24,26 @@ function Login() {
     password: "",
   });
   const [errors, setErrors] = useState({});
+  const { token } = useParams();
+  const hasVerified = useRef(false);
+
+  useEffect(() => {
+    const verifyEmailToken = async () => {
+      if (token && !hasVerified.current) {
+        hasVerified.current = true;
+        try {
+          await dispatch(verifyEmail(token)).unwrap();
+          alert('Email verified successfully. Please login.');
+          navigate('/login');
+        } catch (error) {
+          alert(error.message || 'Verification failed');
+          navigate('/login');
+        }
+      }
+    };
+
+    verifyEmailToken();
+  }, [token, navigate, dispatch]);
 
   const validateForm = (data) => {
     const newErrors = {};
@@ -141,9 +161,8 @@ function Login() {
                 autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`mt-1 appearance-none block w-full px-3 py-2 border ${
-                  errors.email ? "border-red-500" : "border-gray-700"
-                } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                className={`mt-1 appearance-none block w-full px-3 py-2 border ${errors.email ? "border-red-500" : "border-gray-700"
+                  } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
                 placeholder="you@example.com"
               />
               {errors.email && (
@@ -175,9 +194,8 @@ function Login() {
                 autoComplete="current-password"
                 value={formData.password}
                 onChange={handleChange}
-                className={`mt-1 appearance-none block w-full px-3 py-2 border ${
-                  errors.password ? "border-red-500" : "border-gray-700"
-                } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                className={`mt-1 appearance-none block w-full px-3 py-2 border ${errors.password ? "border-red-500" : "border-gray-700"
+                  } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
                 placeholder="••••••••"
               />
               {errors.password && (
@@ -189,9 +207,8 @@ function Login() {
           <button
             type="submit"
             disabled={loading}
-            className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
-              loading ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${loading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
           >
             {loading ? (
               <svg

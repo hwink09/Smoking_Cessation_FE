@@ -29,6 +29,18 @@ export const register = createAsyncThunk(
   }
 );
 
+export const verifyEmail = createAsyncThunk(
+  "auth/verifyEmail",
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/auth/verify/${token}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const initialState = {
   user: null,
   token: localStorage.getItem("token"),
@@ -83,6 +95,18 @@ const authSlice = createSlice({
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "Registration failed";
+      })
+      // Verify Email
+      .addCase(verifyEmail.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyEmail.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(verifyEmail.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Email verification failed";
       });
   },
 });
