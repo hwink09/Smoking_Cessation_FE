@@ -43,7 +43,7 @@ module.exports.register = async (req, res) => {
 
         await newuser.save();
         // Tạo link xác thực
-        const verificationLink = `http://localhost:${process.env.VITE_PORT}/login/${vertificationToken}`;
+        const verificationLink = `http://localhost:${process.env.VITE_PORT}/login/${vertificationToken}`;// sẽ sửa lại verificationLink khi có front-end fogetpassword
         // Gửi email xác thực
         const mailOptions = {
             from: process.env.EMAIL_USER,
@@ -235,7 +235,7 @@ module.exports.fogotPassword = async (req, res) => {
 
         await user.save();
 
-        const resetLink = `http://localhost:${process.env.PORT}/resset-password/${ressetToken}`; // sẽ sửa lại resetLink khi có front-end fogetpassword
+        const resetLink = `http://localhost:${process.env.VITE_PORT}/resset-password/${ressetToken}`; // sẽ sửa lại resetLink khi có front-end fogetpassword
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
@@ -300,7 +300,9 @@ module.exports.ressetPassword = async (req, res) => {
             return res.status(400).json({ message: 'Invalid token or token has expried' });
         }
 
+        // Đánh dấu trường password đã được sửa đổi để kích hoạt middleware pre-save
         user.password = newPassword;
+        user.markModified('password');
 
         user.ressetPasswordToken = undefined;
         user.ressetPasswordExpires = undefined;

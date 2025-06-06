@@ -1,43 +1,69 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { useAuth } from "~/hooks/useAuth";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { login, verifyEmail } from "~/redux/slices/authSlice";
+import {
+  selectAuthLoading,
+  selectAuthError,
+} from "~/redux/selectors/authSelectors";
+import {
+  validateEmail,
+  validatePassword,
+  formatAuthError,
+} from "~/utils/validations";
 
 function Login() {
   const navigate = useNavigate();
-  const { login, loginWithGoogle, validateLoginForm } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const loading = useSelector(selectAuthLoading);
+  const authError = useSelector(selectAuthError);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [errors, setErrors] = useState({});
-  const [authError, setAuthError] = useState("");
   const { token } = useParams();
+  const hasVerified = useRef(false);
 
-  // Thêm useEffect để xử lý token verification
   useEffect(() => {
-    const verifyEmail = async () => {
-      if (token) {
+    const verifyEmailToken = async () => {
+      if (token && !hasVerified.current) {
+        hasVerified.current = true;
         try {
-          const response = await axios.get(`http://localhost:3000/api/auth/verify/${token}`);
-          if (response.status === 200) {
-            // Hiển thị thông báo thành công
-            alert('Email verified successfully. Please login.');
-            // Redirect to login page without token
-            navigate('/login');
-          }
+          await dispatch(verifyEmail(token)).unwrap();
+          alert('Email verified successfully. Please login.');
+          navigate('/login');
         } catch (error) {
-          // Hiển thị thông báo lỗi
-          alert(error.response?.data?.message || 'Verification failed');
+          alert(error.message || 'Verification failed');
           navigate('/login');
         }
       }
     };
 
-    verifyEmail();
-  }, [token, navigate]);
+    verifyEmailToken();
+  }, [token, navigate, dispatch]);
+
+  const validateForm = (data) => {
+    const newErrors = {};
+
+    // Validate email
+    if (!data.email) {
+      newErrors.email = "Email is required";
+    } else if (!validateEmail(data.email)) {
+      newErrors.email = "Email is invalid";
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(data.password);
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.errors[0]; // Show first error
+    }
+
+    return newErrors;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -52,48 +78,29 @@ function Login() {
         [name]: "",
       });
     }
-
-    // Clear auth error when form changes
-    if (authError) {
-      setAuthError("");
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validation = validateLoginForm(formData);
-    if (!validation.isValid) {
-      setErrors(validation.errors);
+    const validationErrors = validateForm(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
-    setIsLoading(true);
-    setAuthError("");
-
-    const result = await login(formData.email, formData.password);
-
-    if (result.success) {
+    try {
+      await dispatch(login(formData)).unwrap();
       navigate("/dashboard"); // Redirect to dashboard after successful login
-    } else {
-      setAuthError(result.error);
+    } catch (error) {
+      // Error is handled by Redux
+      console.error("Login failed:", error);
     }
-
-    setIsLoading(false);
   };
+
   const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    setAuthError("");
-
-    const result = await loginWithGoogle();
-
-    if (result.success) {
-      navigate("/dashboard"); // Redirect to dashboard after successful login
-    } else {
-      setAuthError(result.error);
-    }
-
-    setIsLoading(false);
+    // TODO: Implement Google login with Redux
+    console.log("Google login not implemented yet");
   };
 
   return (
@@ -110,14 +117,14 @@ function Login() {
 
         {authError && (
           <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-md text-sm">
-            {authError}
+            {formatAuthError(authError)}
           </div>
         )}
 
         <div className="flex flex-col gap-4 mt-8">
           <button
             onClick={handleGoogleLogin}
-            disabled={isLoading}
+            disabled={loading}
             className="group relative w-full flex justify-center items-center py-2.5 px-4 border border-gray-700 text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             <span className="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -154,9 +161,8 @@ function Login() {
                 autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`mt-1 appearance-none block w-full px-3 py-2 border ${
-                  errors.email ? "border-red-500" : "border-gray-700"
-                } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                className={`mt-1 appearance-none block w-full px-3 py-2 border ${errors.email ? "border-red-500" : "border-gray-700"
+                  } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
                 placeholder="you@example.com"
               />
               {errors.email && (
@@ -188,9 +194,8 @@ function Login() {
                 autoComplete="current-password"
                 value={formData.password}
                 onChange={handleChange}
-                className={`mt-1 appearance-none block w-full px-3 py-2 border ${
-                  errors.password ? "border-red-500" : "border-gray-700"
-                } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                className={`mt-1 appearance-none block w-full px-3 py-2 border ${errors.password ? "border-red-500" : "border-gray-700"
+                  } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
                 placeholder="••••••••"
               />
               {errors.password && (
@@ -201,12 +206,11 @@ function Login() {
 
           <button
             type="submit"
-            disabled={isLoading}
-            className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
-              isLoading ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            disabled={loading}
+            className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${loading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
           >
-            {isLoading ? (
+            {loading ? (
               <svg
                 className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                 xmlns="http://www.w3.org/2000/svg"
