@@ -13,9 +13,9 @@ import { AuthProvider } from "./contexts/AuthContext";
 
 // Pages
 import HomePages from "./pages/generic/home/HomePages";
-import Login from "./pages/Auth/login/LoginPage";
-import Register from "./pages/Auth/register/RegisterPage";
-import ForgotPassword from "./pages/Auth/forgotPassword/ForgotPasswordPage";
+import Login from "./pages/Auth/LoginPage";
+import Register from "./pages/Auth/RegisterPage";
+import ForgotPassword from "./pages/Auth/ForgotPasswordPage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 import BadgeManagement from "./pages/admin/BadgeManagement";
@@ -48,8 +48,6 @@ function App() {
           {/*  Route not useuse layout */}
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
-
-           
           </Route>
           {/* Admin routes */}
           <Route path="/admin/dashboard" element={<DashboardAdmin />} />
@@ -62,11 +60,11 @@ function App() {
             element={<BadgeManagement />}
           />
           {/* User routes */}
-        <Route path="/user" element={<UserLayout />}>
-          <Route path="dashboard" element={<DashBoardUser />} />
-        </Route>
-           {/* 404  */}
-            <Route path="*" element={<NotFoundPage/>}/>
+          <Route path="/user" element={<UserLayout />}>
+            <Route path="dashboard" element={<DashBoardUser />} />
+          </Route>
+          {/* 404  */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Router>
     </AuthProvider>

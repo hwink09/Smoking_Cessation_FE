@@ -19,7 +19,7 @@ export const validateEmail = (email) => {
  */
 export const validatePassword = (password) => {
   const errors = [];
-  
+
   if (!password || password.length < 8) {
     errors.push("Password must be at least 8 characters");
   }
@@ -32,10 +32,10 @@ export const validatePassword = (password) => {
   if (!/[0-9]/.test(password)) {
     errors.push("Password must contain at least one number");
   }
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
@@ -65,23 +65,23 @@ export const passwordsMatch = (password, confirmPassword) => {
  */
 export const formatAuthError = (errorCode) => {
   switch (errorCode) {
-    case 'auth/email-already-in-use':
-      return 'This email address is already in use';
-    case 'auth/invalid-email':
-      return 'The email address is not valid';
-    case 'auth/weak-password':
-      return 'The password is too weak';
-    case 'auth/user-disabled':
-      return 'This account has been disabled';
-    case 'auth/user-not-found':
-      return 'No account found with this email';
-    case 'auth/wrong-password':
-      return 'Incorrect password';
-    case 'auth/too-many-requests':
-      return 'Too many unsuccessful login attempts. Please try again later';
-    case 'auth/network-request-failed':
-      return 'Network error. Please check your connection';
+    case "auth/email-already-in-use":
+      return "This email address is already in use";
+    case "auth/invalid-email":
+      return "The email address is not valid";
+    case "auth/weak-password":
+      return "The password is too weak";
+    case "auth/user-disabled":
+      return "This account has been disabled";
+    case "auth/user-not-found":
+      return "No account found with this email";
+    case "auth/wrong-password":
+      return "Incorrect password";
+    case "auth/too-many-requests":
+      return "Too many unsuccessful login attempts. Please try again later";
+    case "auth/network-request-failed":
+      return "Network error. Please check your connection";
     default:
-      return 'An error occurred. Please try again';
+      return "An error occurred. Please try again";
   }
 };
