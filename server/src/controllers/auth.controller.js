@@ -300,7 +300,9 @@ module.exports.ressetPassword = async (req, res) => {
             return res.status(400).json({ message: 'Invalid token or token has expried' });
         }
 
+        // Đánh dấu trường password đã được sửa đổi để kích hoạt middleware pre-save
         user.password = newPassword;
+        user.markModified('password');
 
         user.ressetPasswordToken = undefined;
         user.ressetPasswordExpires = undefined;
