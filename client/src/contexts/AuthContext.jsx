@@ -1,12 +1,9 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, createContext } from "react";
+
 import {
   getAuth,
-  signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
-  createUserWithEmailAndPassword,
-  updateProfile,
   sendPasswordResetEmail,
   onAuthStateChanged,
   signOut,
