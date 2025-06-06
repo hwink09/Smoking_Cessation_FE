@@ -11,7 +11,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const authRouter = require('./routes/auth.route.js');
-
+const userRouter = require('./routes/user.route.js');
+const statusRouter = require('./routes/smokingStatus.route.js');
 
 const whiteList = ['http://localhost:5173'];
 const corsOptions = {
@@ -44,6 +45,8 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/auth', authRouter);
+app.use('/api/user', userRouter);
+app.use('/api/smoking-status', statusRouter);
 
 app.use(async (err, req, res, next) => {
     res.status = err.status || 500,
