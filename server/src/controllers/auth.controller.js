@@ -5,7 +5,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 const crypto = require('crypto');
 const transporter = require('../configs/emailConfig');
-
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 //Create token
 const maxAge = 3 * 24 * 60 * 60;
