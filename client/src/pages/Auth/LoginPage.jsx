@@ -38,7 +38,7 @@ function Login() {
           navigate('/login');
         } catch (error) {
           toast.error(error.message || 'Verification failed');
-          navigate('/login');
+          navigate('/login'
         }
       }
     };
@@ -92,10 +92,12 @@ function Login() {
 
     try {
       await dispatch(login(formData)).unwrap();
-      navigate("/dashboard"); // Redirect to dashboard after successful login
+      navigate("/admin/dashboard"); // Redirect to dashboard after successful login
     } catch (error) {
       // Error is handled by Redux
-      toast.error(error)
+
+      toast.error(error);
+
     }
   };
 
