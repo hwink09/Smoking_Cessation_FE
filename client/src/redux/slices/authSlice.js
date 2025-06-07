@@ -41,6 +41,20 @@ export const verifyEmail = createAsyncThunk(
   }
 );
 
+export const forgotPassword = createAsyncThunk(
+  "/auth/fogot-password",
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/auth/fogot-password`, {
+        email: email,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const initialState = {
   user: null,
   token: localStorage.getItem("token"),
@@ -107,6 +121,18 @@ const authSlice = createSlice({
       .addCase(verifyEmail.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "Email verification failed";
+      })
+      // Forgot Password
+      .addCase(forgotPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Email not found";
       });
   },
 });

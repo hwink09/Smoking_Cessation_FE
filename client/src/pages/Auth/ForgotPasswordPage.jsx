@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "~/hooks/useAuth";
+import { useDispatch } from "react-redux";
+import { forgotPassword } from "~/redux/slices/authSlice";
+import { toast } from "react-toastify";
 
 function ForgotPassword() {
-  const { forgotPassword, validateForgotPasswordForm } = useAuth();
+  const { validateForgotPasswordForm } = useAuth();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const dispatch = useDispatch();
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (e) => {
     setEmail(e.target.value);
@@ -28,19 +33,15 @@ function ForgotPassword() {
 
     setIsLoading(true);
     setError("");
-    setSuccessMessage("");
 
     try {
-      const result = await forgotPassword(email);
-
-      if (result.success) {
-        setSuccessMessage("Password reset link sent! Check your email inbox.");
-        setEmail(""); // Clear form on success
-      } else {
-        setError(result.error);
-      }
-    } finally {
+      await dispatch(forgotPassword(email)).unwrap();
+      toast.success("Password reset link sent to your email.");
       setIsLoading(false);
+      setIsSubmitted(true);
+    } catch (error) {
+      // Error is handled by Redux
+      toast.error(error);
     }
   };
 
@@ -91,7 +92,7 @@ function ForgotPassword() {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || isSubmitted}
             className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
               isLoading ? "opacity-70 cursor-not-allowed" : ""
             }`}
