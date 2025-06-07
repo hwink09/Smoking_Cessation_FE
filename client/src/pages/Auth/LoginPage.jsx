@@ -12,6 +12,7 @@ import {
   validatePassword,
   formatAuthError,
 } from "~/utils/validations";
+import { toast } from "react-toastify";
 
 function Login() {
   const navigate = useNavigate();
@@ -33,11 +34,11 @@ function Login() {
         hasVerified.current = true;
         try {
           await dispatch(verifyEmail(token)).unwrap();
-          alert("Email verified successfully. Please login.");
-          navigate("/login");
+          toast.success('Email verified successfully. Please login.');
+          navigate('/login');
         } catch (error) {
-          alert(error.message || "Verification failed");
-          navigate("/login");
+          toast.error(error.message || 'Verification failed');
+          navigate('/login');
         }
       }
     };
@@ -94,7 +95,7 @@ function Login() {
       navigate("/dashboard"); // Redirect to dashboard after successful login
     } catch (error) {
       // Error is handled by Redux
-      console.error("Login failed:", error);
+      toast.error(error)
     }
   };
 
