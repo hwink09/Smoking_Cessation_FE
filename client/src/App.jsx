@@ -33,7 +33,7 @@ const Layout = () => (
   </div>
 );
 
-// ===== App with Routing =====
+// ===== App with Routing ====
 function App() {
   return (
     <AuthProvider>
