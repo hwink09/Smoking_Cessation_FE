@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "~/hooks/useAuth";
+import { toast } from "react-toastify";
 
 function Register() {
   const navigate = useNavigate();
@@ -60,7 +61,8 @@ function Register() {
         // with additional information not stored in Firebase Auth
 
         // Redirect to dashboard or welcome page
-        navigate("/dashboard");
+        navigate("/login");
+        toast.success("Register successfully. Please login.");
       } else {
         setAuthError(result.error);
       }
