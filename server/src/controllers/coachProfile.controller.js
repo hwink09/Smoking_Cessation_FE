@@ -1,6 +1,6 @@
 const CoachProfile = require('../models/coachProfile.model');
 const User = require('../models/user.model');
-
+const Feedback = require('../models/feedback.model');
 //Create a new coach profile
 module.exports.createCoachProfile = async (req, res) => {
     try {
@@ -44,7 +44,7 @@ module.exports.getAllCoachProfiles = async (req, res) => {
         if (profiles.length === 0) {
             return res.status(404).json({ message: 'No coach profiles found' });
         }
-        res.status(200).json(profiles);
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -59,7 +59,11 @@ module.exports.getCoachProfileById = async (req, res) => {
         if (!profile) {
             return res.status(404).json({ message: 'Coach profile not found' });
         }
-        res.status(200).json(profile);
+        // Optionally: lấy feedback và rating
+        const feedbacks = await Feedback.find({ coach_id: coachId });
+        const rating_avg = feedbacks.length ? (feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length).toFixed(1) : 0;
+
+        res.status(200).json({ ...profile.toObject(), feedbacks, rating_avg });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });

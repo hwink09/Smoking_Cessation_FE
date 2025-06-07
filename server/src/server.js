@@ -16,6 +16,7 @@ const statusRouter = require('./routes/smokingStatus.route.js');
 const badgeRouter = require('./routes/badge.route.js');
 const userBadgeRouter = require('./routes/userBadge.route.js');
 const coachProfileRouter = require('./routes/coachProfile.route.js');
+const feedbackRouter = require('./routes/feedback.route.js');
 
 const whiteList = ['http://localhost:5173'];
 const corsOptions = {
@@ -53,6 +54,7 @@ app.use('/api/smoking-status', statusRouter);
 app.use('/api/badges', badgeRouter);
 app.use('/api/user-badge', userBadgeRouter);
 app.use('/api/coach-profile', coachProfileRouter);
+app.use('/api/feedback', feedbackRouter);
 
 app.use(async (err, req, res, next) => {
     res.status = err.status || 500,
