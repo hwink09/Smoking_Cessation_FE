@@ -13,9 +13,9 @@ import { AuthProvider } from "./contexts/AuthContext";
 
 // Pages
 import HomePages from "./pages/generic/home/HomePages";
-import Login from "./pages/Auth/LoginPage";
-import Register from "./pages/Auth/RegisterPage";
-import ForgotPassword from "./pages/Auth/ForgotPasswordPage";
+import Login from "./pages/auth/LoginPage";
+import Register from "./pages/auth/RegisterPage";
+import ForgotPassword from "./pages/auth/ForgotPasswordPage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 import BadgeManagement from "./pages/admin/BadgeManagement";
