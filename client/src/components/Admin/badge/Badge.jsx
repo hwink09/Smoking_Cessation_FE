@@ -34,7 +34,7 @@ export default function Badge() {
     const [shareVisible, setShareVisible] = useState(false);
 
     return (
-        <div className="p-6">
+        <div className="">
             <div className="flex justify-between items-center mb-6">
                 <Button
                     type="primary"

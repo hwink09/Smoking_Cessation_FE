@@ -38,7 +38,7 @@ function Login() {
           navigate('/login');
         } catch (error) {
           toast.error(error.message || 'Verification failed');
-          navigate('/login'
+          navigate('/login')
         }
       }
     };

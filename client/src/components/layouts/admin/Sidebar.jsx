@@ -13,7 +13,7 @@ const menu = [
     { label: "Overview", icon: <DashboardOutlined />, path: "/admin/dashboard" },
     { label: "Management User", icon: <TeamOutlined />, path: "/admin/dashboard/user-management" },
     { label: "Badge Management", icon: <SlBadge />, path: "/admin/dashboard/badge-management" },
-    { label: "Feedback & Rating", icon: <MdOutlineFeedback />, path: "#" },
+    { label: "Feedback & Rating", icon: <MdOutlineFeedback />, path: "/admin/dashboard/feedback-management" },
     { label: "Report", icon: <HiOutlineDocumentReport />, path: "#" },
 
 ];
