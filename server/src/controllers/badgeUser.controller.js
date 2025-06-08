@@ -29,3 +29,15 @@ module.exports.getUserBadges = async (req, res) => {
         res.status(500).json({ message: 'Error fetching user badges', error: err.message });
     }
 };
+module.exports.countBadgeRecipients = async (req, res) => {
+    try {
+        const result = await UserBadge.aggregate([
+            { $group: { _id: "$badge_id", count: { $sum: 1 } } }
+        ]);
+
+        const populated = await Badge.populate(result, { path: '_id' });
+        res.status(200).json(populated);
+    } catch (err) {
+        res.status(500).json({ message: 'Error counting badge users', error: err.message });
+    }
+};
