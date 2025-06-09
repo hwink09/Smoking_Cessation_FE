@@ -2,7 +2,7 @@
 const express = require('express');
 const coachRouter = express.Router();
 const coachController = require('../controllers/coachProfile.controller');
-const { validateToken, checkRole } = require('../middlewares/AuthMiddleware');
+const { validateToken, checkRole } = require('../middlewares/authMiddleware');
 const checkCoach = require('../middlewares/CoachMiddleware');
 
 // create a new coach profile
