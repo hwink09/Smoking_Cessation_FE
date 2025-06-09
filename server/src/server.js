@@ -20,6 +20,7 @@ const feedbackRouter = require('./routes/feedback.route.js');
 const postRouter = require('./routes/post.route.js');
 const tagRouter = require('./routes/tag.route.js');
 const commentRouter = require('./routes/comment.route.js');
+const meetSessionRouter = require('./routes/meetSession.route.js')
 
 const whiteList = ['http://localhost:5173'];
 const corsOptions = {
@@ -61,6 +62,7 @@ app.use('/api/feedback', feedbackRouter);
 app.use('/api/post', postRouter);
 app.use('/api/tag', tagRouter);
 app.use('/api/comment', commentRouter);
+app.use('/api/meet-session', meetSessionRouter);
 
 app.use(async (err, req, res, next) => {
     res.status = err.status || 500,
