@@ -1,7 +1,7 @@
 const express = require('express');
 const userRouter = express.Router();
 const userController = require('../controllers/user.controller');
-const { validateToken, checkRole } = require('../middlewares/AuthMiddleware');
+const { validateToken, checkRole } = require('../middlewares/authMiddleware');
 
 userRouter.get('/', validateToken, checkRole(['admin']), userController.getAllUsers);
 userRouter.get('/:id', validateToken, checkRole(['admin']), userController.getUserById);
