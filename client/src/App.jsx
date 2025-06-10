@@ -24,6 +24,7 @@ import NotFoundPage from "./pages/error/404Page";
 import DashBoardUser from "./pages/user/UserDashBoard";
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
 import UserProgress from "./pages/user/UserProgress";
+import VerifyPage from "./pages/auth/VerifyPage";
 
 // ===== Layout Wrapper =====
 const Layout = () => (
@@ -52,6 +53,7 @@ function App() {
             path="/resset-password/:token"
             element={<ResetPasswordPage />}
           />
+          <Route path="/verify" element={<VerifyPage />} />
 
           {/*  Route use layout */}
           <Route element={<Layout />}>
