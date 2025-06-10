@@ -34,11 +34,11 @@ function Login() {
         hasVerified.current = true;
         try {
           await dispatch(verifyEmail(token)).unwrap();
-          toast.success('Email verified successfully. Please login.');
-          navigate('/login');
+          toast.success("Email verified successfully. Please login.");
+          navigate("/login");
         } catch (error) {
-          toast.error(error.message || 'Verification failed');
-          navigate('/login')
+          toast.error(error.message || "Verification failed");
+          navigate("/login");
         }
       }
     };
@@ -97,7 +97,6 @@ function Login() {
       // Error is handled by Redux
 
       toast.error(error);
-
     }
   };
 
