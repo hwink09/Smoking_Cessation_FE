@@ -21,8 +21,9 @@ import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 import BadgeManagement from "./pages/admin/BadgeManagement";
 import NotFoundPage from "./pages/error/404Page";
-import DashBoardUser from "./pages/user/DashBoardUser";
+import DashBoardUser from "./pages/user/UserDashBoard";
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
+import UserProgress from "./pages/user/UserProgress";
 
 // ===== Layout Wrapper =====
 const Layout = () => (
@@ -42,9 +43,8 @@ function App() {
       <Router>
         {/* <ScrollToTop /> */}
         <Routes>
-          {/*  Route useuse layout */}
+          {/*  Route not use layout */}
           <Route path="/login" element={<Login />} />
-          {/* Route Login with token after register */}
           <Route path="/login/:token" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
@@ -53,10 +53,11 @@ function App() {
             element={<ResetPasswordPage />}
           />
 
-          {/*  Route not useuse layout */}
+          {/*  Route use layout */}
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
           </Route>
+
           {/* Admin routes */}
           <Route path="/admin/dashboard" element={<DashboardAdmin />} />
           <Route
@@ -71,10 +72,13 @@ function App() {
             path="/admin/dashboard/feedback-management"
             element={<FeedbackManagement />}
           />
+
           {/* User routes */}
           <Route path="/user" element={<UserLayout />}>
             <Route path="dashboard" element={<DashBoardUser />} />
+            <Route path="progress" element={<UserProgress />} />
           </Route>
+
           {/* 404  */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
