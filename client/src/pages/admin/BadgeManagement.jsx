@@ -10,7 +10,7 @@ const admin = {
 function BadgeManagement() {
     return (
         <AdminLayout admin={admin}>
-            <h1 className="text-2xl font-bold">Quản lý huy hiệu</h1>
+            <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-[#6a5af9] to-[#1ecbe1] text-transparent bg-clip-text">Quản lý huy hiệu</h1>
             <Badge />
         </AdminLayout>
     )

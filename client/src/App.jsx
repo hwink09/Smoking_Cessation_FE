@@ -22,6 +22,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import BadgeManagement from "./pages/admin/BadgeManagement";
 import NotFoundPage from "./pages/error/404Page";
 import DashBoardUser from "./pages/user/DashBoardUser";
+import FeedbackManagement from "./pages/admin/FeedbackManagement";
 
 // ===== Layout Wrapper =====
 const Layout = () => (
@@ -65,6 +66,10 @@ function App() {
           <Route
             path="/admin/dashboard/badge-management"
             element={<BadgeManagement />}
+          />
+          <Route
+            path="/admin/dashboard/feedback-management"
+            element={<FeedbackManagement />}
           />
           {/* User routes */}
           <Route path="/user" element={<UserLayout />}>

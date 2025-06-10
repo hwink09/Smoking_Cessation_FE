@@ -1,7 +1,7 @@
 const express = require('express');
 const badgeController = require('../controllers/badge.controller');
 const badgeRouter = express.Router();
-const { validateToken, checkRole } = require('../middlewares/AuthMiddleware');
+const { validateToken, checkRole } = require('../middlewares/authMiddleware');
 
 badgeRouter.put('/:id', validateToken, checkRole(['admin', 'coach']), badgeController.updateBadge);
 badgeRouter.delete('/:id', validateToken, checkRole(['admin', 'coach']), badgeController.deleteBadge);
