@@ -16,6 +16,7 @@ import HomePages from "./pages/generic/home/HomePages";
 import Login from "./pages/auth/LoginPage";
 import Register from "./pages/auth/RegisterPage";
 import ForgotPassword from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 import BadgeManagement from "./pages/admin/BadgeManagement";
@@ -46,6 +47,10 @@ function App() {
           <Route path="/login/:token" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route
+            path="/resset-password/:token"
+            element={<ResetPasswordPage />}
+          />
 
           {/*  Route not useuse layout */}
           <Route element={<Layout />}>
