@@ -25,6 +25,7 @@ import DashBoardUser from "./pages/user/UserDashBoard";
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
 import UserProgress from "./pages/user/UserProgress";
 import VerifyPage from "./pages/auth/VerifyPage";
+import ProfilePage from "./pages/admin/ProfilePage";
 
 // ===== Layout Wrapper =====
 const Layout = () => (
@@ -75,6 +76,10 @@ function App() {
             element={<FeedbackManagement />}
           />
 
+          <Route
+            path="/admin/profile"
+            element={<ProfilePage />}
+          />
           {/* User routes */}
           <Route path="/user" element={<UserLayout />}>
             <Route path="dashboard" element={<DashBoardUser />} />
