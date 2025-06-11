@@ -45,7 +45,9 @@ export default function Sidebar({ admin }) {
             key: '2',
             label: 'Profile',
             icon: <FaUser />,
-
+            onClick: () => {
+                navigate('/admin/profile'); // Điều hướng đến trang profile
+            }
         },
 
         {
