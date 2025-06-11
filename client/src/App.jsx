@@ -16,12 +16,15 @@ import HomePages from "./pages/generic/home/HomePages";
 import Login from "./pages/auth/LoginPage";
 import Register from "./pages/auth/RegisterPage";
 import ForgotPassword from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 import BadgeManagement from "./pages/admin/BadgeManagement";
 import NotFoundPage from "./pages/error/404Page";
-import DashBoardUser from "./pages/user/DashBoardUser";
+import DashBoardUser from "./pages/user/UserDashBoard";
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
+import UserProgress from "./pages/user/UserProgress";
+import VerifyPage from "./pages/auth/VerifyPage";
 import ProfilePage from "./pages/admin/ProfilePage";
 
 // ===== Layout Wrapper =====
@@ -42,17 +45,22 @@ function App() {
       <Router>
         {/* <ScrollToTop /> */}
         <Routes>
-          {/*  Route useuse layout */}
+          {/*  Route not use layout */}
           <Route path="/login" element={<Login />} />
-          {/* Route Login with token after register */}
           <Route path="/login/:token" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route
+            path="/resset-password/:token"
+            element={<ResetPasswordPage />}
+          />
+          <Route path="/verify" element={<VerifyPage />} />
 
-          {/*  Route not useuse layout */}
+          {/*  Route use layout */}
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
           </Route>
+
           {/* Admin routes */}
           <Route path="/admin/dashboard" element={<DashboardAdmin />} />
           <Route
@@ -67,6 +75,7 @@ function App() {
             path="/admin/dashboard/feedback-management"
             element={<FeedbackManagement />}
           />
+
           <Route
             path="/admin/profile"
             element={<ProfilePage />}
@@ -74,7 +83,9 @@ function App() {
           {/* User routes */}
           <Route path="/user" element={<UserLayout />}>
             <Route path="dashboard" element={<DashBoardUser />} />
+            <Route path="progress" element={<UserProgress />} />
           </Route>
+
           {/* 404  */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

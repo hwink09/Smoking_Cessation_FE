@@ -133,6 +133,28 @@ const AuthProvider = ({ children }) => {
     }
   };
 
+  // Reset password function
+  const resetPassword = async (token, newPassword) => {
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `http://localhost:3000/api/auth/resset-password/${token}`,
+        {
+          newPassword,
+        }
+      );
+      return { success: true, data: response.data };
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        formatAuthError(error.code) ||
+        "Failed to reset password";
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Form validation functions
   const validateLoginForm = (formData) => {
     const errors = {};
@@ -189,6 +211,22 @@ const AuthProvider = ({ children }) => {
     return { isValid: true, error: "" };
   };
 
+  // Validation function for reset password form
+  const validateResetPasswordForm = (password, confirmPassword) => {
+    const errors = {};
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      errors.password = passwordValidation.errors[0];
+    }
+
+    if (!passwordsMatch(password, confirmPassword)) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    return { isValid: Object.keys(errors).length === 0, errors };
+  };
+
   const value = {
     currentUser,
     loading,
@@ -197,9 +235,11 @@ const AuthProvider = ({ children }) => {
     register,
     forgotPassword,
     logout,
+    resetPassword,
     validateLoginForm,
     validateRegistrationForm,
     validateForgotPasswordForm,
+    validateResetPasswordForm,
   };
 
   return (

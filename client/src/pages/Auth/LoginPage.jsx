@@ -8,9 +8,10 @@ import {
   selectAuthError,
 } from "~/redux/selectors/authSelectors";
 import {
-  validateEmail,
-  validatePassword,
+  validateLoginForm,
   formatAuthError,
+  sanitizeInput,
+  isFormValid,
 } from "~/utils/validations";
 import { toast } from "react-toastify";
 
@@ -25,6 +26,8 @@ function Login() {
     password: "",
   });
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { token } = useParams();
   const hasVerified = useRef(false);
 
@@ -34,11 +37,11 @@ function Login() {
         hasVerified.current = true;
         try {
           await dispatch(verifyEmail(token)).unwrap();
-          toast.success('Email verified successfully. Please login.');
-          navigate('/login');
+          toast.success("Email verified successfully. Please login.");
+          navigate("/login");
         } catch (error) {
-          toast.error(error.message || 'Verification failed');
-          navigate('/login')
+          toast.error(error.message || "Verification failed");
+          navigate("/login");
         }
       }
     };
@@ -46,65 +49,60 @@ function Login() {
     verifyEmailToken();
   }, [token, navigate, dispatch]);
 
-  const validateForm = (data) => {
-    const newErrors = {};
-
-    // Validate email
-    if (!data.email) {
-      newErrors.email = "Email is required";
-    } else if (!validateEmail(data.email)) {
-      newErrors.email = "Email is invalid";
-    }
-
-    // Validate password
-    const passwordValidation = validatePassword(data.password);
-    if (!passwordValidation.isValid) {
-      newErrors.password = passwordValidation.errors[0]; // Show first error
-    }
-
-    return newErrors;
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const sanitizedValue = sanitizeInput(value);
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: sanitizedValue,
+    }));
 
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors({
-        ...errors,
+      setErrors((prev) => ({
+        ...prev,
         [name]: "",
-      });
+      }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validationErrors = validateForm(formData);
-    if (Object.keys(validationErrors).length > 0) {
+    if (isSubmitting) return;
+
+    // Validate form using the separated validation function
+    const validationErrors = validateLoginForm(formData);
+    if (!isFormValid(validationErrors)) {
       setErrors(validationErrors);
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
       await dispatch(login(formData)).unwrap();
-      navigate("/admin/dashboard"); // Redirect to dashboard after successful login
+      toast.success("Welcome back!");
+      navigate("/admin/dashboard");
     } catch (error) {
-      // Error is handled by Redux
+      toast.error(formatAuthError(error.message || error));
 
-      toast.error(error);
-
+      // Clear password on error for security
+      setFormData((prev) => ({ ...prev, password: "" }));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleLogin = async () => {
     // TODO: Implement Google login with Redux
     console.log("Google login not implemented yet");
+    toast.info("Google login will be implemented soon");
   };
+
+  const formIsValid =
+    isFormValid(errors) && formData.email && formData.password;
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950">
@@ -127,7 +125,7 @@ function Login() {
         <div className="flex flex-col gap-4 mt-8">
           <button
             onClick={handleGoogleLogin}
-            disabled={loading}
+            disabled={loading || isSubmitting}
             className="group relative w-full flex justify-center items-center py-2.5 px-4 border border-gray-700 text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             <span className="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -211,32 +209,37 @@ function Login() {
 
           <button
             type="submit"
-            disabled={loading}
-            className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
-              loading ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            disabled={loading || isSubmitting || !formIsValid}
+            className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-all duration-200 ${
+              formIsValid && !loading && !isSubmitting
+                ? "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500"
+                : "bg-gray-700 cursor-not-allowed"
+            } focus:outline-none focus:ring-2 focus:ring-offset-2`}
           >
-            {loading ? (
-              <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+            {loading || isSubmitting ? (
+              <>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Signing in...
+              </>
             ) : (
               "Sign in"
             )}
