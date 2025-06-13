@@ -21,11 +21,16 @@ import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 import BadgeManagement from "./pages/admin/BadgeManagement";
 import NotFoundPage from "./pages/error/404Page";
-import DashBoardUser from "./pages/user/UserDashBoard";
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
 import UserProgress from "./pages/user/UserProgress";
 import VerifyPage from "./pages/auth/VerifyPage";
+
+import UserDashboard from "./pages/user/UserDashBoard";
+import UserAchievement from "./pages/user/UserAchievement";
+import UserSupport from "./pages/user/UserSupport";
+
 import ProfilePage from "./pages/admin/ProfilePage";
+
 
 // ===== Layout Wrapper =====
 const Layout = () => (
@@ -82,8 +87,10 @@ function App() {
           />
           {/* User routes */}
           <Route path="/user" element={<UserLayout />}>
-            <Route path="dashboard" element={<DashBoardUser />} />
+            <Route path="dashboard" element={<UserDashboard />} />
             <Route path="progress" element={<UserProgress />} />
+            <Route path="achievements" element={<UserAchievement />} />
+            <Route path="support" element={<UserSupport />} />
           </Route>
 
           {/* 404  */}
