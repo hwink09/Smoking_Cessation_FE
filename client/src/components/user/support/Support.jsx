@@ -13,7 +13,7 @@ const Support = () => {
       title: "24/7 Helpline",
       description: "Talk to a professional counselor anytime",
       icon: <Phone className="h-6 w-6 text-blue-500" />,
-      contact: "1-800-QUIT-NOW",
+      contact: "0123456789",
       type: "phone",
     },
     {
@@ -71,7 +71,7 @@ const Support = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+    <div className="min-h-screen p-2">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -159,11 +159,6 @@ const Support = () => {
                         {faq.question}
                       </span>
                     }
-                    headStyle={{
-                      backgroundColor: "rgba(255, 255, 255, 0.1)",
-                      borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
-                    }}
-                    bodyStyle={{ backgroundColor: "transparent" }}
                   >
                     <p className="text-gray-300">{faq.answer}</p>
                   </Card>
