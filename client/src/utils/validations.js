@@ -10,7 +10,7 @@ export const validateEmail = (email) => {
 
 /**
  * Password validation - Requires:
- * - At least 8 characters
+ * - At least 6 characters
  * - At least 1 uppercase letter
  * - At least 1 lowercase letter
  * - At least 1 number
@@ -20,8 +20,8 @@ export const validateEmail = (email) => {
 export const validatePassword = (password) => {
   const errors = [];
 
-  if (!password || password.length < 8) {
-    errors.push("Password must be at least 8 characters");
+  if (!password || password.length < 6) {
+    errors.push("Password must be at least 6 characters");
   }
   if (!/[A-Z]/.test(password)) {
     errors.push("Password must contain at least one uppercase letter");

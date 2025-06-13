@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Card,
   Button,
@@ -24,7 +24,6 @@ import {
   Award,
   Cigarette,
   Trophy,
-  TrendingUp,
   Target,
   Clock,
   MessageCircle,
@@ -44,10 +43,6 @@ import {
   MehOutlined,
   FrownOutlined,
 } from "@ant-design/icons";
-import { LineChart } from "../../ui/line-chart";
-import { AreaChart } from "../../ui/area-chart";
-import { BarChart } from "../../ui/bar-chart";
-import { PieChart } from "../../ui/pie-chart";
 import ColourfulText from "../../ui/colourful-text";
 import dayjs from "dayjs";
 
@@ -178,33 +173,6 @@ function Progress() {
 
   const stats = calculateStats();
 
-  // Mock data for charts
-  const weeklyProgressData = [
-    { week: "Week 1", smokeFree: 5, cravings: 8, mood: 6 },
-    { week: "Week 2", smokeFree: 7, cravings: 6, mood: 7 },
-    { week: "Week 3", smokeFree: 7, cravings: 4, mood: 8 },
-    { week: "Week 4", smokeFree: 7, cravings: 3, mood: 8 },
-    { week: "Week 5", smokeFree: 7, cravings: 2, mood: 9 },
-    { week: "Week 6", smokeFree: 7, cravings: 2, mood: 9 },
-  ];
-
-  const monthlyProgressData = [
-    { month: "Jan", days: 17, money: 425000 },
-    { month: "Feb", days: 28, money: 700000 },
-    { month: "Mar", days: 31, money: 775000 },
-    { month: "Apr", days: 30, money: 750000 },
-    { month: "May", days: 31, money: 775000 },
-    { month: "Jun", days: 10, money: 250000 },
-  ];
-
-  const healthImprovementData = [
-    { metric: "Lung Function", improvement: 85 },
-    { metric: "Circulation", improvement: 92 },
-    { metric: "Oxygen Levels", improvement: 88 },
-    { metric: "Energy", improvement: 78 },
-    { metric: "Sleep Quality", improvement: 82 },
-  ];
-
   const formatMoney = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -252,6 +220,13 @@ function Progress() {
     },
   ];
 
+  const TabHeader = ({ icon, label }) => (
+    <span className="flex items-center gap-2">
+      {icon}
+      <span>{label}</span>
+    </span>
+  );
+
   // Journal entry handlers
   const handleAddJournalEntry = () => {
     setEditingEntry(null);
@@ -292,11 +267,6 @@ function Progress() {
 
     setIsJournalModalVisible(false);
     form.resetFields();
-  };
-
-  const handleShareBadge = (badge) => {
-    // Mock sharing functionality
-    message.success(`Badge "${badge.name}" shared successfully!`);
   };
 
   const handleShareProgress = () => {
@@ -382,10 +352,7 @@ function Progress() {
         </div>
 
         {/* Overall Progress Bar */}
-        <Card
-          className="mb-8 bg-white/10 backdrop-blur-sm border border-white/20"
-          bodyStyle={{ padding: "24px" }}
-        >
+        <Card className="mb-8 bg-white/10 backdrop-blur-sm border border-white/20">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white flex items-center">
               <Target className="w-6 h-6 mr-2" />
@@ -400,6 +367,7 @@ function Progress() {
               Share Progress
             </Button>
           </div>
+
           <AntProgress
             percent={Math.round(stats.progressPercentage)}
             strokeColor={{
@@ -416,99 +384,16 @@ function Progress() {
         </Card>
 
         {/* Main Content Tabs */}
-        <Tabs defaultActiveKey="1" className="custom-tabs">
-          {/* Statistics & Charts Tab */}
-          <TabPane
-            tab={
-              <span className="text-white">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Statistics & Charts
-              </span>
-            }
-            key="1"
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              <Card
-                title={
-                  <span className="text-white">Weekly Progress Trends</span>
-                }
-                className="bg-white/10 backdrop-blur-sm border border-white/20"
-                headStyle={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
-              >
-                <LineChart
-                  data={weeklyProgressData}
-                  index="week"
-                  categories={["smokeFree", "mood"]}
-                  colors={["#52c41a", "#1890ff"]}
-                  valueFormatter={(value) => `${value}`}
-                />
-              </Card>
-
-              <Card
-                title={<span className="text-white">Monthly Money Saved</span>}
-                className="bg-white/10 backdrop-blur-sm border border-white/20"
-                headStyle={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
-              >
-                <BarChart
-                  data={monthlyProgressData}
-                  index="month"
-                  categories={["money"]}
-                  colors={["#1890ff"]}
-                  valueFormatter={(value) => `${value / 1000}k VND`}
-                />
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card
-                title={
-                  <span className="text-white">
-                    Craving Intensity Over Time
-                  </span>
-                }
-                className="bg-white/10 backdrop-blur-sm border border-white/20"
-                headStyle={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
-              >
-                <AreaChart
-                  data={weeklyProgressData}
-                  index="week"
-                  categories={["cravings"]}
-                  colors={["#f5222d"]}
-                  valueFormatter={(value) => `Level ${value}`}
-                />
-              </Card>
-
-              <Card
-                title={<span className="text-white">Health Improvements</span>}
-                className="bg-white/10 backdrop-blur-sm border border-white/20"
-                headStyle={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
-              >
-                <PieChart
-                  data={healthImprovementData.map((item) => ({
-                    name: item.metric,
-                    value: item.improvement,
-                  }))}
-                  colors={[
-                    "#52c41a",
-                    "#1890ff",
-                    "#faad14",
-                    "#f5222d",
-                    "#722ed1",
-                  ]}
-                />
-              </Card>
-            </div>
-          </TabPane>
-
+        <Tabs defaultActiveKey="1" type="card" className="achievements-tabs">
           {/* Daily Journal Tab */}
           <TabPane
             tab={
-              <span className="text-white">
-                <BookOpen className="w-4 h-4 mr-2" />
-                Daily Journal
-              </span>
+              <TabHeader
+                icon={<BookOpen className="w-5 h-5" />}
+                label="Daily Journal"
+              />
             }
-            key="2"
+            key="1"
           >
             <div className="mb-6">
               <Button
@@ -521,7 +406,6 @@ function Progress() {
                 Add New Entry
               </Button>
             </div>
-
             <div className="grid gap-4">
               {journalEntries.length === 0 ? (
                 <Card className="bg-white/10 backdrop-blur-sm border border-white/20 text-center py-12">
@@ -630,94 +514,15 @@ function Progress() {
             </div>
           </TabPane>
 
-          {/* Achievements & Badges Tab */}
-          <TabPane
-            tab={
-              <span className="text-white">
-                <Trophy className="w-4 h-4 mr-2" />
-                Achievements
-              </span>
-            }
-            key="3"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {badges.map((badge) => (
-                <Card
-                  key={badge.id}
-                  className={`bg-white/10 backdrop-blur-sm border transition-all duration-300 ${
-                    badge.earned
-                      ? "border-green-400/50 shadow-lg shadow-green-400/20"
-                      : "border-white/20"
-                  }`}
-                  actions={
-                    badge.earned
-                      ? [
-                          <Button
-                            type="text"
-                            icon={<ShareAltOutlined />}
-                            onClick={() => handleShareBadge(badge)}
-                            className="text-blue-400 hover:text-blue-300"
-                          >
-                            Share
-                          </Button>,
-                        ]
-                      : []
-                  }
-                >
-                  <div className="text-center">
-                    <div
-                      className={`text-6xl mb-4 ${
-                        badge.earned ? "" : "grayscale opacity-50"
-                      }`}
-                    >
-                      {badge.icon}
-                    </div>
-
-                    <h3 className="text-xl font-bold text-white mb-2">
-                      {badge.name}
-                      {badge.earned && (
-                        <AntBadge
-                          count="✓"
-                          style={{ backgroundColor: "#52c41a", marginLeft: 8 }}
-                        />
-                      )}
-                    </h3>
-
-                    <p className="text-gray-300 mb-4">{badge.description}</p>
-
-                    {badge.earned ? (
-                      <div className="text-green-400 font-medium">
-                        <Gift className="w-4 h-4 inline mr-1" />
-                        Earned on {badge.earnedAt}
-                      </div>
-                    ) : (
-                      <div>
-                        <AntProgress
-                          percent={badge.progress}
-                          strokeColor={badge.color}
-                          size="small"
-                          className="mb-2"
-                        />
-                        <p className="text-gray-400 text-sm">
-                          {badge.progress}% complete
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </TabPane>
-
           {/* Motivational Reminders Tab */}
           <TabPane
             tab={
-              <span className="text-white">
-                <Star className="w-4 h-4 mr-2" />
-                Motivation
-              </span>
+              <TabHeader
+                icon={<Star className="w-5 h-5" />}
+                label="Motivational Reminders"
+              />
             }
-            key="4"
+            key="2"
           >
             <div className="grid gap-6">
               {/* Daily Motivation */}
@@ -817,12 +622,12 @@ function Progress() {
           {/* Quit History Timeline Tab */}
           <TabPane
             tab={
-              <span className="text-white">
-                <Clock className="w-4 h-4 mr-2" />
-                Timeline
-              </span>
+              <TabHeader
+                icon={<Clock className="w-5 h-5" />}
+                label="Timeline"
+              />
             }
-            key="5"
+            key="3"
           >
             <Card
               title={
@@ -947,32 +752,6 @@ function Progress() {
           </Form>
         </Modal>
       </div>
-
-      <style jsx>{`
-        .custom-tabs .ant-tabs-nav {
-          margin-bottom: 24px;
-        }
-
-        .custom-tabs .ant-tabs-tab {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          margin-right: 8px;
-          border-radius: 8px;
-        }
-
-        .custom-tabs .ant-tabs-tab-active {
-          background: rgba(255, 255, 255, 0.2);
-          border-color: #1890ff;
-        }
-
-        .custom-tabs .ant-tabs-tab:hover {
-          background: rgba(255, 255, 255, 0.15);
-        }
-
-        .custom-tabs .ant-tabs-content-holder {
-          background: transparent;
-        }
-      `}</style>
     </div>
   );
 }

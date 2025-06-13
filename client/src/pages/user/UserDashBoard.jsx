@@ -1,8 +1,8 @@
 import React from "react";
 import QuitSmokingTracker from "~/components/user/overview/QuitSmokingTracker";
 
-function DashBoardUser() {
+function UserDashboard() {
   return <QuitSmokingTracker />;
 }
 
-export default DashBoardUser;
+export default UserDashboard;
