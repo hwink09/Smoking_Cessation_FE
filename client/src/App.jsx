@@ -24,9 +24,13 @@ import NotFoundPage from "./pages/error/404Page";
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
 import UserProgress from "./pages/user/UserProgress";
 import VerifyPage from "./pages/auth/VerifyPage";
+
 import UserDashboard from "./pages/user/UserDashBoard";
 import UserAchievement from "./pages/user/UserAchievement";
 import UserSupport from "./pages/user/UserSupport";
+
+import ProfilePage from "./pages/admin/ProfilePage";
+
 
 // ===== Layout Wrapper =====
 const Layout = () => (
@@ -77,6 +81,10 @@ function App() {
             element={<FeedbackManagement />}
           />
 
+          <Route
+            path="/admin/profile"
+            element={<ProfilePage />}
+          />
           {/* User routes */}
           <Route path="/user" element={<UserLayout />}>
             <Route path="dashboard" element={<UserDashboard />} />
