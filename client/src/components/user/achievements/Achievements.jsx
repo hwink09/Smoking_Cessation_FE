@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Award,
   Trophy,
   Share2,
   Calendar,
@@ -12,14 +11,14 @@ import {
   Info,
 } from "lucide-react";
 import { Progress, Button, Modal, Tooltip, message, Tabs } from "antd";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { Marquee } from "~/components/ui/Marquee";
 import ColourfulText from "~/components/ui/colourful-text";
 
 const { TabPane } = Tabs;
 
 const Achievements = () => {
-  // Mock data for demonstrations - this would come from your API/Redux in a real app
+  // Mock data for demonstrations - this would come from API in real implementation
   const [quitDate] = useState(new Date("2024-01-15"));
   const [cigarettesPerDay] = useState(20);
   const [pricePerPack] = useState(50000);
@@ -33,12 +32,9 @@ const Achievements = () => {
     const timeDiff = now.getTime() - quitDate.getTime();
     const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
 
-    // Calculate money saved
     const cigarettesAvoided = daysDiff * cigarettesPerDay;
     const packsAvoided = cigarettesAvoided / cigarettesPerPack;
     const moneySaved = packsAvoided * pricePerPack;
-
-    // Calculate health improvement (linear assumption, max 100% after 1 year)
     const healthImprovement = Math.min((daysDiff / 365) * 100, 100);
 
     return {
@@ -51,9 +47,9 @@ const Achievements = () => {
 
   const stats = calculateStats();
 
-  // These would be fetched from your backend in a real application
+  // Sample badges - would be fetched from API in real implementation
   const badges = [
-    // Time-based achievements
+    // Time-based achievements (keeping a few examples)
     {
       id: 1,
       name: "First Day Free",
@@ -64,28 +60,6 @@ const Achievements = () => {
       icon: "🌱",
       color: "#52c41a",
       tier: "Bronze",
-    },
-    {
-      id: 2,
-      name: "One Week Warrior",
-      description: "7 days smoke-free",
-      category: "time",
-      earned: true,
-      earnedAt: "2024-01-22",
-      icon: "🏆",
-      color: "#52c41a",
-      tier: "Bronze",
-    },
-    {
-      id: 3,
-      name: "Fortnight Fighter",
-      description: "14 days smoke-free",
-      category: "time",
-      earned: true,
-      earnedAt: "2024-01-29",
-      icon: "🔥",
-      color: "#fa8c16",
-      tier: "Silver",
     },
     {
       id: 4,
@@ -100,30 +74,6 @@ const Achievements = () => {
       tier: "Silver",
     },
     {
-      id: 5,
-      name: "Quarterly Champion",
-      description: "90 days smoke-free",
-      category: "time",
-      earned: stats.days >= 90,
-      earnedAt: stats.days >= 90 ? "2024-04-15" : null,
-      progress: Math.min(Math.round((stats.days / 90) * 100), 100),
-      icon: "🏅",
-      color: "#722ed1",
-      tier: "Gold",
-    },
-    {
-      id: 6,
-      name: "Half-Year Hero",
-      description: "180 days smoke-free",
-      category: "time",
-      earned: stats.days >= 180,
-      earnedAt: stats.days >= 180 ? "2024-07-15" : null,
-      progress: Math.min(Math.round((stats.days / 180) * 100), 100),
-      icon: "🎖️",
-      color: "#eb2f96",
-      tier: "Platinum",
-    },
-    {
       id: 7,
       name: "One Year Legend",
       description: "365 days smoke-free",
@@ -136,7 +86,7 @@ const Achievements = () => {
       tier: "Diamond",
     },
 
-    // Health achievements
+    // Health achievements (1 example)
     {
       id: 8,
       name: "Breath of Fresh Air",
@@ -149,32 +99,8 @@ const Achievements = () => {
       color: "#13c2c2",
       tier: "Bronze",
     },
-    {
-      id: 9,
-      name: "Heart Protector",
-      description: "Reduced risk of heart attack after 30 days",
-      category: "health",
-      earned: stats.days >= 30,
-      earnedAt: stats.days >= 30 ? "2024-02-15" : null,
-      progress: Math.min(Math.round((stats.days / 30) * 100), 100),
-      icon: "❤️",
-      color: "#f5222d",
-      tier: "Silver",
-    },
-    {
-      id: 10,
-      name: "Lung Liberator",
-      description: "Lung function improved after 90 days",
-      category: "health",
-      earned: stats.days >= 90,
-      earnedAt: stats.days >= 90 ? "2024-04-15" : null,
-      progress: Math.min(Math.round((stats.days / 90) * 100), 100),
-      icon: "🫁",
-      color: "#1890ff",
-      tier: "Gold",
-    },
 
-    // Money savings
+    // Money savings (1 example)
     {
       id: 11,
       name: "Penny Pincher",
@@ -187,32 +113,8 @@ const Achievements = () => {
       color: "#faad14",
       tier: "Bronze",
     },
-    {
-      id: 12,
-      name: "Money Manager",
-      description: "Saved 1,000,000 VND",
-      category: "money",
-      earned: stats.moneySaved >= 1000000,
-      earnedAt: stats.moneySaved >= 1000000 ? "2024-02-04" : null,
-      progress: Math.min(Math.round((stats.moneySaved / 1000000) * 100), 100),
-      icon: "💸",
-      color: "#52c41a",
-      tier: "Silver",
-    },
-    {
-      id: 13,
-      name: "Wealth Builder",
-      description: "Saved 5,000,000 VND",
-      category: "money",
-      earned: stats.moneySaved >= 5000000,
-      earnedAt: stats.moneySaved >= 5000000 ? "2024-03-15" : null,
-      progress: Math.min(Math.round((stats.moneySaved / 5000000) * 100), 100),
-      icon: "💎",
-      color: "#1890ff",
-      tier: "Gold",
-    },
 
-    // Cigarette avoidance
+    // Cigarette avoidance (1 example)
     {
       id: 14,
       name: "Clean Lungs Starter",
@@ -220,28 +122,10 @@ const Achievements = () => {
       category: "avoidance",
       earned: stats.cigarettesAvoided >= 100,
       earnedAt: stats.cigarettesAvoided >= 100 ? "2024-01-20" : null,
-      progress: Math.min(
-        Math.round((stats.cigarettesAvoided / 100) * 100),
-        100
-      ),
+      progress: Math.min(Math.round((stats.cigarettesAvoided / 100) * 100), 100),
       icon: "🚭",
       color: "#52c41a",
       tier: "Bronze",
-    },
-    {
-      id: 15,
-      name: "Cigarette Conqueror",
-      description: "Avoided 1000 cigarettes",
-      category: "avoidance",
-      earned: stats.cigarettesAvoided >= 1000,
-      earnedAt: stats.cigarettesAvoided >= 1000 ? "2024-02-28" : null,
-      progress: Math.min(
-        Math.round((stats.cigarettesAvoided / 1000) * 100),
-        100
-      ),
-      icon: "🦸‍♂️",
-      color: "#722ed1",
-      tier: "Platinum",
     },
   ];
 
@@ -264,13 +148,6 @@ const Achievements = () => {
   const totalBadges = badges.length;
   const completionRate = (totalEarnedBadges / totalBadges) * 100;
 
-  const formatMoney = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  };
-
   const handleViewBadge = (badge) => {
     setSelectedBadge(badge);
     setBadgeModalVisible(true);
@@ -279,34 +156,11 @@ const Achievements = () => {
   const handleShareBadge = (badge) => {
     setSelectedBadge(badge);
     setShareModalVisible(true);
-    // In a real app, you would implement social sharing functionality
     message.success(`Sharing badge: ${badge.name}`);
   };
 
-  const getCategoryIcon = (category) => {
-    switch (category) {
-      case "time":
-        return <Calendar className="w-5 h-5" />;
-      case "health":
-        return <Heart className="w-5 h-5" />;
-      case "money":
-        return <DollarSign className="w-5 h-5" />;
-      case "avoidance":
-        return <BadgeCheck className="w-5 h-5" />;
-      default:
-        return <Award className="w-5 h-5" />;
-    }
-  };
-
-  const TabHeader = ({ icon, label }) => (
-    <span className="flex items-center gap-2">
-      {icon}
-      <span>{label}</span>
-    </span>
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+    <div className="min-h-screen p-2">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
@@ -385,8 +239,7 @@ const Achievements = () => {
                 </div>
               ))}
 
-            {badges.filter((badge) => !badge.earned && badge.progress)
-              .length === 0 && (
+            {badges.filter((badge) => !badge.earned && badge.progress).length === 0 && (
               <div className="text-center py-4">
                 <p className="text-gray-300">No achievements in progress</p>
               </div>
@@ -396,9 +249,7 @@ const Achievements = () => {
           {/* Recent Achievements */}
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-white">
-                Recent Achievements
-              </h3>
+              <h3 className="text-xl font-bold text-white">Recent Achievements</h3>
               <Zap className="w-7 h-7 text-yellow-400" />
             </div>
 
@@ -431,9 +282,7 @@ const Achievements = () => {
 
         {/* Featured Badge Marquee */}
         <div className="mb-10">
-          <h3 className="text-xl font-bold text-white mb-4">
-            Featured Achievements
-          </h3>
+          <h3 className="text-xl font-bold text-white mb-4">Featured Achievements</h3>
           <div className="bg-white/5 backdrop-blur-md rounded-2xl p-3 border border-white/10">
             <Marquee pauseOnHover>
               {badges
@@ -454,9 +303,7 @@ const Achievements = () => {
                     >
                       <span className="text-4xl">{badge.icon}</span>
                     </div>
-                    <p className="text-center text-white text-xs mt-1">
-                      {badge.name}
-                    </p>
+                    <p className="text-center text-white text-xs mt-1">{badge.name}</p>
                   </motion.div>
                 ))}
             </Marquee>
@@ -465,102 +312,32 @@ const Achievements = () => {
 
         {/* Badge Categories */}
         <div className="mb-6">
-          <h3 className="text-xl font-bold text-white mb-4">
-            All Achievements
-          </h3>
+          <h3 className="text-xl font-bold text-white mb-4">All Achievements</h3>
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20">
-            <Tabs
-              defaultActiveKey="time"
-              type="card"
-              className="achievements-tabs"
-            >
-              <TabPane
-                tab={
-                  <TabHeader
-                    icon={<Calendar className="w-5 h-5" />}
-                    label="Time Milestones"
-                  />
-                }
-                key="time"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-                  {badgesByCategory.time.map((badge) => (
-                    <BadgeCard
-                      key={badge.id}
-                      badge={badge}
-                      onView={handleViewBadge}
-                      onShare={handleShareBadge}
-                      tierColors={tierColors}
+            <Tabs defaultActiveKey="time" type="card" className="achievements-tabs">
+              {Object.entries(badgesByCategory).map(([category, badges]) => (
+                <TabPane
+                  key={category}
+                  tab={
+                    <TabHeader
+                      icon={getCategoryIcon(category)}
+                      label={getCategoryLabel(category)}
                     />
-                  ))}
-                </div>
-              </TabPane>
-
-              <TabPane
-                tab={
-                  <TabHeader
-                    icon={<Heart className="w-5 h-5" />}
-                    label="Health Benefits"
-                  />
-                }
-                key="health"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-                  {badgesByCategory.health.map((badge) => (
-                    <BadgeCard
-                      key={badge.id}
-                      badge={badge}
-                      onView={handleViewBadge}
-                      onShare={handleShareBadge}
-                      tierColors={tierColors}
-                    />
-                  ))}
-                </div>
-              </TabPane>
-
-              <TabPane
-                tab={
-                  <TabHeader
-                    icon={<DollarSign className="w-5 h-5" />}
-                    label="Money Saved"
-                  />
-                }
-                key="money"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-                  {badgesByCategory.money.map((badge) => (
-                    <BadgeCard
-                      key={badge.id}
-                      badge={badge}
-                      onView={handleViewBadge}
-                      onShare={handleShareBadge}
-                      tierColors={tierColors}
-                    />
-                  ))}
-                </div>
-              </TabPane>
-
-              <TabPane
-                tab={
-                  <TabHeader
-                    icon={<BadgeCheck className="w-5 h-5" />}
-                    label="Cigarettes Avoided"
-                  />
-                }
-                key="avoidance"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-                  {badgesByCategory.avoidance.map((badge) => (
-                    <BadgeCard
-                      key={badge.id}
-                      badge={badge}
-                      onView={handleViewBadge}
-                      onShare={handleShareBadge}
-                      tierColors={tierColors}
-                    />
-                  ))}
-                </div>
-              </TabPane>
+                  }
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+                    {badges.map((badge) => (
+                      <BadgeCard
+                        key={badge.id}
+                        badge={badge}
+                        onView={handleViewBadge}
+                        onShare={handleShareBadge}
+                        tierColors={tierColors}
+                      />
+                    ))}
+                  </div>
+                </TabPane>
+              ))}
             </Tabs>
           </div>
         </div>
@@ -568,22 +345,18 @@ const Achievements = () => {
         {/* Badge Detail Modal */}
         <Modal
           title={
-            <div className="flex items-center">
-              {selectedBadge && (
-                <>
-                  <span className="text-2xl mr-2">{selectedBadge.icon}</span>
-                  <span>{selectedBadge.name}</span>
-                </>
-              )}
-            </div>
+            selectedBadge && (
+              <div className="flex items-center">
+                <span className="text-2xl mr-2">{selectedBadge.icon}</span>
+                <span>{selectedBadge.name}</span>
+              </div>
+            )
           }
           open={badgeModalVisible}
           onCancel={() => setBadgeModalVisible(false)}
           footer={[
-            <Button key="close" onClick={() => setBadgeModalVisible(false)}>
-              Close
-            </Button>,
-            selectedBadge && selectedBadge.earned && (
+            <Button key="close" onClick={() => setBadgeModalVisible(false)}>Close</Button>,
+            selectedBadge?.earned && (
               <Button
                 key="share"
                 type="primary"
@@ -595,86 +368,31 @@ const Achievements = () => {
             ),
           ]}
         >
-          {selectedBadge && (
-            <div className="flex flex-col items-center">
-              <div
-                className="w-32 h-32 rounded-full flex items-center justify-center mb-4 shadow-lg"
-                style={{
-                  background: `radial-gradient(circle at center, ${selectedBadge.color}40 0%, ${selectedBadge.color}20 70%)`,
-                  border: `3px solid ${selectedBadge.color}80`,
-                }}
-              >
-                <span className="text-6xl">{selectedBadge.icon}</span>
-              </div>
-
-              <div
-                className={`px-3 py-1 rounded-full text-xs font-semibold mb-3 ${
-                  tierColors[selectedBadge.tier]
-                }`}
-              >
-                {selectedBadge.tier.charAt(0).toUpperCase() +
-                  selectedBadge.tier.slice(1)}
-              </div>
-
-              <p className="text-center mb-4">{selectedBadge.description}</p>
-
-              {selectedBadge.earned ? (
-                <p className="text-green-500 flex items-center">
-                  <BadgeCheck className="w-5 h-5 mr-1" />
-                  Earned on{" "}
-                  {new Date(selectedBadge.earnedAt).toLocaleDateString()}
-                </p>
-              ) : (
-                <>
-                  <p className="text-gray-500 mb-2">
-                    Progress: {selectedBadge.progress || 0}%
-                  </p>
-                  <Progress
-                    percent={selectedBadge.progress || 0}
-                    status="active"
-                    strokeColor={selectedBadge.color}
-                  />
-                </>
-              )}
-            </div>
-          )}
+          {selectedBadge && <BadgeDetail badge={selectedBadge} tierColors={tierColors} />}
         </Modal>
 
-        {/* Share Modal - in a real app, this would contain social media sharing options */}
+        {/* Share Modal */}
         <Modal
           title="Share Your Achievement"
           open={shareModalVisible}
           onCancel={() => setShareModalVisible(false)}
-          footer={[
-            <Button key="close" onClick={() => setShareModalVisible(false)}>
-              Close
-            </Button>,
-          ]}
+          footer={<Button onClick={() => setShareModalVisible(false)}>Close</Button>}
         >
-          {selectedBadge && (
-            <div>
-              <p>Share your achievement with friends!</p>
-              <div className="flex justify-center space-x-4 my-4">
-                {/* These would be actual social media buttons in a real app */}
-                <Button type="primary" className="bg-blue-600">
-                  Facebook
-                </Button>
-                <Button type="primary" className="bg-sky-500">
-                  Twitter
-                </Button>
-                <Button type="primary" className="bg-green-600">
-                  WhatsApp
-                </Button>
-              </div>
-            </div>
-          )}
+          {selectedBadge && <ShareOptions />}
         </Modal>
       </div>
     </div>
   );
 };
 
-// Badge Card Component
+// Helper components
+const TabHeader = ({ icon, label }) => (
+  <span className="flex items-center gap-2">
+    {icon}
+    <span>{label}</span>
+  </span>
+);
+
 const BadgeCard = ({ badge, onView, onShare, tierColors }) => {
   return (
     <motion.div
@@ -684,11 +402,7 @@ const BadgeCard = ({ badge, onView, onShare, tierColors }) => {
       }`}
     >
       <div className="flex justify-between">
-        <div
-          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-            tierColors[badge.tier]
-          }`}
-        >
+        <div className={`px-2 py-0.5 rounded-full text-xs font-semibold ${tierColors[badge.tier]}`}>
           {badge.tier}
         </div>
 
@@ -717,16 +431,10 @@ const BadgeCard = ({ badge, onView, onShare, tierColors }) => {
         </div>
 
         <div>
-          <h4
-            className={`font-semibold ${
-              badge.earned ? "text-white" : "text-gray-400"
-            }`}
-          >
+          <h4 className={`font-semibold ${badge.earned ? "text-white" : "text-gray-400"}`}>
             {badge.name}
           </h4>
-          <p className="text-xs text-gray-400 line-clamp-1">
-            {badge.description}
-          </p>
+          <p className="text-xs text-gray-400 line-clamp-1">{badge.description}</p>
         </div>
       </div>
 
@@ -766,6 +474,70 @@ const BadgeCard = ({ badge, onView, onShare, tierColors }) => {
       )}
     </motion.div>
   );
+};
+
+const BadgeDetail = ({ badge, tierColors }) => (
+  <div className="flex flex-col items-center">
+    <div
+      className="w-32 h-32 rounded-full flex items-center justify-center mb-4 shadow-lg"
+      style={{
+        background: `radial-gradient(circle at center, ${badge.color}40 0%, ${badge.color}20 70%)`,
+        border: `3px solid ${badge.color}80`,
+      }}
+    >
+      <span className="text-6xl">{badge.icon}</span>
+    </div>
+
+    <div className={`px-3 py-1 rounded-full text-xs font-semibold mb-3 ${tierColors[badge.tier]}`}>
+      {badge.tier}
+    </div>
+
+    <p className="text-center mb-4">{badge.description}</p>
+
+    {badge.earned ? (
+      <p className="text-green-500 flex items-center">
+        <BadgeCheck className="w-5 h-5 mr-1" />
+        Earned on {new Date(badge.earnedAt).toLocaleDateString()}
+      </p>
+    ) : (
+      <>
+        <p className="text-gray-500 mb-2">Progress: {badge.progress || 0}%</p>
+        <Progress percent={badge.progress || 0} status="active" strokeColor={badge.color} />
+      </>
+    )}
+  </div>
+);
+
+const ShareOptions = () => (
+  <div>
+    <p>Share your achievement with friends!</p>
+    <div className="flex justify-center space-x-4 my-4">
+      <Button type="primary" className="bg-blue-600">Facebook</Button>
+      <Button type="primary" className="bg-sky-500">Twitter</Button>
+      <Button type="primary" className="bg-green-600">WhatsApp</Button>
+    </div>
+  </div>
+);
+
+// Helper functions
+const getCategoryIcon = (category) => {
+  const icons = {
+    time: <Calendar className="w-5 h-5" />,
+    health: <Heart className="w-5 h-5" />,
+    money: <DollarSign className="w-5 h-5" />,
+    avoidance: <BadgeCheck className="w-5 h-5" />,
+  };
+  return icons[category] || <Badge className="w-5 h-5" />;
+};
+
+const getCategoryLabel = (category) => {
+  const labels = {
+    time: "Time Milestones",
+    health: "Health Benefits",
+    money: "Money Saved",
+    avoidance: "Cigarettes Avoided",
+  };
+  return labels[category] || category;
 };
 
 export default Achievements;
