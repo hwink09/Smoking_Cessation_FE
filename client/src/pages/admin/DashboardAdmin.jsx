@@ -2,12 +2,7 @@ import AdminLayout from "../../components/layouts/admin/AdminLayout";
 import Cards from "../../components/Admin/overview/Cards";
 import Overview from "~/components/Admin/overview/Overview";
 import ColourfulText from "../../components/ui/colourful-text";
-
-const admin = {
-    name: "Admin Nguyễn",
-    avatar: "https://i.pravatar.cc/150?img=3",
-    role: "Super Admin",
-};
+import { useSelector } from "react-redux";
 
 const stats = {
     users: 1200,
@@ -18,8 +13,12 @@ const stats = {
 };
 
 export default function DashboardAdmin() {
+    // Get user data from auth slice
+    const { user, loading } = useSelector((state) => state.auth);
+    console.log("user:", user);
+    console.log("loading:", loading);
     return (
-        <AdminLayout admin={admin}>
+        <AdminLayout admin={user}>
             <div className="flex items-center justify-start relative overflow-hidden ml-6">
                 <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-center text-white relative z-10 font-sans">
                     <ColourfulText text="Overview" /> <br />

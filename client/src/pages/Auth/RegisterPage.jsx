@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "~/hooks/useAuth";
 import { toast } from "react-toastify";
 import { validateRegisterForm, formatAuthError } from "~/utils/validations";
+import { useDispatch } from "react-redux";
+import { register } from "~/redux/slices/authSlice";
 
 function Register() {
   const navigate = useNavigate();
-  const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -18,11 +18,11 @@ function Register() {
   const [errors, setErrors] = useState({});
   const [authError, setAuthError] = useState("");
 
+  const dispatch = useDispatch();
   // Handle input changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === "checkbox" ? checked : value;
-
     setFormData((prev) => ({
       ...prev,
       [name]: newValue,
@@ -67,22 +67,14 @@ function Register() {
     setAuthError("");
 
     try {
-      const result = await register(
-        formData.name.trim(),
-        formData.email.trim(),
-        formData.password
-      );
-
-      if (result.success) {
-        // Navigate to verify page with email
+      const result = await dispatch(register(formData)).unwrap();
+      if (result.message) {
         navigate("/verify", {
           state: {
             email: formData.email.trim(),
           },
         });
-        toast.success(
-          "Account created successfully! Please verify your email."
-        );
+        toast.success(result.message);
       } else {
         setAuthError(formatAuthError(result.error));
       }

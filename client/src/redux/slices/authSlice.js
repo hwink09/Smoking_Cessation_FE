@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api";
-
+const API_URL = "https://smokingswp.onrender.com/api";
 // Async thunks
 export const login = createAsyncThunk(
   "auth/login",
@@ -56,11 +55,12 @@ export const forgotPassword = createAsyncThunk(
 );
 
 const initialState = {
-  user: null,
+  user: JSON.parse(localStorage.getItem("user")) || null,
   token: localStorage.getItem("token"),
   isAuthenticated: false,
   loading: false,
   error: null,
+  message: null
 };
 
 const authSlice = createSlice({
@@ -69,6 +69,7 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
@@ -87,9 +88,12 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
+        
         state.isAuthenticated = true;
-        state.user = action.payload.user;
         state.token = action.payload.token;
+        state.user = action.payload.user;
+        localStorage.setItem("user", JSON.stringify(action.payload.user));  // Lưu user vào localStorage
+
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;

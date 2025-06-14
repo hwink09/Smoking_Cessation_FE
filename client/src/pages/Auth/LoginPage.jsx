@@ -30,13 +30,22 @@ function Login() {
 
   const { token } = useParams();
   const hasVerified = useRef(false);
+  const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user && user.id) {
+      navigate("/admin/dashboard");
+    }
+  }, [user, navigate]);
+
 
   useEffect(() => {
     const verifyEmailToken = async () => {
       if (token && !hasVerified.current) {
         hasVerified.current = true;
         try {
-          await dispatch(verifyEmail(token)).unwrap();
+          const result = await dispatch(verifyEmail(token)).unwrap();
+          console.log("result:", result);
           toast.success("Email verified successfully. Please login.");
           navigate("/login");
         } catch (error) {
@@ -82,10 +91,14 @@ function Login() {
     setIsSubmitting(true);
 
     try {
-      await dispatch(login(formData)).unwrap();
-      toast.success("Welcome back!");
-      navigate("/admin/dashboard");
-    } catch (error) {
+      const result = await dispatch(login(formData)).unwrap();
+      if (result.message) {
+        toast.success(result.message);
+        navigate("/admin/dashboard");
+      } else {
+        toast.error(formatAuthError(result.error));
+      }
+     } catch (error) {
       toast.error(formatAuthError(error.message || error));
 
       // Clear password on error for security
