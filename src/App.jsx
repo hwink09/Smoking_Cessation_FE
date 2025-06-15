@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Outlet,
+} from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 
 // Layouts
@@ -31,6 +36,7 @@ import UserSupport from "./pages/user/UserSupport";
 
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
+import CommunityPage from "./pages/generic/community/CommunityPage";
 
 // Layout Wrapper for common UI elements
 const Layout = ({ children }) => (
@@ -42,9 +48,7 @@ const Layout = ({ children }) => (
 );
 
 // Routes Component for Admin and User Routes
-const ProtectedRoute = ({ element }) => (
-  <PrivateRoute>{element}</PrivateRoute>
-);
+const ProtectedRoute = ({ element }) => <PrivateRoute>{element}</PrivateRoute>;
 
 function App() {
   return (
@@ -56,28 +60,59 @@ function App() {
           <Route path="/login/:token" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
-          <Route path="/resset-password/:token" element={<ResetPasswordPage />} />
+          <Route
+            path="/resset-password/:token"
+            element={<ResetPasswordPage />}
+          />
           <Route path="/verify" element={<VerifyPage />} />
 
           {/* Layout Routes */}
 
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
+            <Route path="/community" element={<CommunityPage />} />
           </Route>
 
           {/* Admin Routes (protected) */}
-          <Route element={<ProtectedRoute element={<DashboardAdmin />} />} path="/admin/dashboard" />
-          <Route element={<ProtectedRoute element={<UserManagement />} />} path="/admin/dashboard/user-management" />
-          <Route element={<ProtectedRoute element={<BadgeManagement />} />} path="/admin/dashboard/badge-management" />
-          <Route element={<ProtectedRoute element={<FeedbackManagement />} />} path="/admin/dashboard/feedback-management" />
-          <Route element={<ProtectedRoute element={<ProfilePage />} />} path="/admin/profile" />
+          <Route
+            element={<ProtectedRoute element={<DashboardAdmin />} />}
+            path="/admin/dashboard"
+          />
+          <Route
+            element={<ProtectedRoute element={<UserManagement />} />}
+            path="/admin/dashboard/user-management"
+          />
+          <Route
+            element={<ProtectedRoute element={<BadgeManagement />} />}
+            path="/admin/dashboard/badge-management"
+          />
+          <Route
+            element={<ProtectedRoute element={<FeedbackManagement />} />}
+            path="/admin/dashboard/feedback-management"
+          />
+          <Route
+            element={<ProtectedRoute element={<ProfilePage />} />}
+            path="/admin/profile"
+          />
 
           {/* User Routes (protected) */}
           <Route element={<UserLayout />}>
-            <Route element={<ProtectedRoute element={<UserDashboard />} />} path="user/dashboard" />
-            <Route element={<ProtectedRoute element={<UserProgress />} />} path="user/progress" />
-            <Route element={<ProtectedRoute element={<UserAchievement />} />} path="user/achievements" />
-            <Route element={<ProtectedRoute element={<UserSupport />} />} path="user/support" />
+            <Route
+              element={<ProtectedRoute element={<UserDashboard />} />}
+              path="user/dashboard"
+            />
+            <Route
+              element={<ProtectedRoute element={<UserProgress />} />}
+              path="user/progress"
+            />
+            <Route
+              element={<ProtectedRoute element={<UserAchievement />} />}
+              path="user/achievements"
+            />
+            <Route
+              element={<ProtectedRoute element={<UserSupport />} />}
+              path="user/support"
+            />
           </Route>
 
           {/* 404 */}

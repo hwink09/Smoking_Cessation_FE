@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -42,7 +40,7 @@ export function Navbar() {
               Plan
             </Link>
             <Link
-              to="*"
+              to="/community"
               className="text-white/80 hover:text-white transition-colors"
             >
               Community
