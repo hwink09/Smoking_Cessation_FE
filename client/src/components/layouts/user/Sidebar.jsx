@@ -15,7 +15,9 @@ import { FaUser } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 import { Link, useLocation } from "react-router-dom";
 import ColourfulText from "~/components/ui/colourful-text";
-
+import { useDispatch } from "react-redux";
+import { logout } from "~/redux/slices/authSlice";
+import { toast } from "react-toastify";
 
 const menu = [
   { label: "Dashboard", icon: <DashboardOutlined />, path: "/user/dashboard" },
@@ -26,6 +28,7 @@ const menu = [
   { label: "Support", icon: <MessageCircleHeart />, path: "/user/support" },
 ];
 function Sidebar({ user = {} }) {
+  const dispatch = useDispatch()
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(() => {
     const saved = localStorage.getItem("sidebar-collaped");
@@ -60,9 +63,14 @@ function Sidebar({ user = {} }) {
       key: "4",
       label: "Logout",
       icon: <MdLogout />,
-      onClick: () => {
-        // Xử lý đăng xuất ở đây
-        console.log("Logout clicked");
+      onClick: async () => {
+
+        const result = await dispatch(logout()).unwrap();
+        console.log("result:", result);
+        if (result.message) {
+          toast.success(result.message);
+          navigate("/login");
+        }
       },
     },
   ];

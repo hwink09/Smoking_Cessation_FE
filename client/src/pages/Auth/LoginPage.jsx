@@ -1,19 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
+import { FcGoogle } from "react-icons/fc"; // Biểu tượng Google
 import { useDispatch, useSelector } from "react-redux";
 import { login, verifyEmail } from "~/redux/slices/authSlice";
-import {
-  selectAuthLoading,
-  selectAuthError,
-} from "~/redux/selectors/authSelectors";
-import {
-  validateLoginForm,
-  formatAuthError,
-  sanitizeInput,
-  isFormValid,
-} from "~/utils/validations";
+import { selectAuthLoading, selectAuthError } from "~/redux/selectors/authSelectors";
+import { validateLoginForm, formatAuthError, sanitizeInput, isFormValid } from "~/utils/validations";
 import { toast } from "react-toastify";
+import { GoogleLogin } from '@react-oauth/google'; // Import GoogleLogin component
 
 function Login() {
   const navigate = useNavigate();
@@ -30,13 +23,20 @@ function Login() {
 
   const { token } = useParams();
   const hasVerified = useRef(false);
+  const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user && user.userId) {
+      navigate("/admin/dashboard");
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const verifyEmailToken = async () => {
       if (token && !hasVerified.current) {
         hasVerified.current = true;
         try {
-          await dispatch(verifyEmail(token)).unwrap();
+          const result = await dispatch(verifyEmail(token)).unwrap();
           toast.success("Email verified successfully. Please login.");
           navigate("/login");
         } catch (error) {
@@ -58,7 +58,6 @@ function Login() {
       [name]: sanitizedValue,
     }));
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -72,7 +71,6 @@ function Login() {
 
     if (isSubmitting) return;
 
-    // Validate form using the separated validation function
     const validationErrors = validateLoginForm(formData);
     if (!isFormValid(validationErrors)) {
       setErrors(validationErrors);
@@ -82,27 +80,35 @@ function Login() {
     setIsSubmitting(true);
 
     try {
-      await dispatch(login(formData)).unwrap();
-      toast.success("Welcome back!");
-      navigate("/admin/dashboard");
+      const result = await dispatch(login(formData)).unwrap();
+      if (result.message) {
+        toast.success(result.message);
+        navigate("/admin/dashboard");
+      } else {
+        toast.error(formatAuthError(result.error));
+      }
     } catch (error) {
       toast.error(formatAuthError(error.message || error));
 
-      // Clear password on error for security
       setFormData((prev) => ({ ...prev, password: "" }));
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleGoogleLogin = async () => {
-    // TODO: Implement Google login with Redux
-    console.log("Google login not implemented yet");
-    toast.info("Google login will be implemented soon");
+  const handleGoogleLogin = async (response) => {
+    const { credential } = response;
+
+    try {
+      const result = await dispatch(googleAuth({ credential })).unwrap();
+      toast.success("Google login successful");
+      navigate("/admin/dashboard");
+    } catch (error) {
+      toast.error(formatAuthError(error.message || error));
+    }
   };
 
-  const formIsValid =
-    isFormValid(errors) && formData.email && formData.password;
+  const formIsValid = isFormValid(errors) && formData.email && formData.password;
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950">
@@ -122,18 +128,18 @@ function Login() {
           </div>
         )}
 
-        <div className="flex flex-col gap-4 mt-8">
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading || isSubmitting}
-            className="group relative w-full flex justify-center items-center py-2.5 px-4 border border-gray-700 text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-              <FcGoogle className="h-5 w-5" />
-            </span>
-            Continue with Google
-          </button>
-
+        <div className="flex flex-col gap-4 mt-8 w-full">
+          {/* Google Login Button */}
+          <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={(error) => toast.error('Google login failed')}
+            useOneTap
+            size="large"
+            text="Continue with Google"
+            theme="outline"
+          />
+          </div>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-700"></div>
@@ -149,10 +155,7 @@ function Login() {
         <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label
-                htmlFor="email-address"
-                className="block text-sm font-medium text-gray-300"
-              >
+              <label htmlFor="email-address" className="block text-sm font-medium text-gray-300">
                 Email address
               </label>
               <input
@@ -167,24 +170,16 @@ function Login() {
                 } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
                 placeholder="you@example.com"
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-              )}
+              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
             </div>
 
             <div>
               <div className="flex justify-between">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-300"
-                >
+                <label htmlFor="password" className="block text-sm font-medium text-gray-300">
                   Password
                 </label>
                 <div className="text-sm">
-                  <Link
-                    to="/forgot-password"
-                    className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
-                  >
+                  <Link to="/forgot-password" className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors">
                     Forgot password?
                   </Link>
                 </div>
@@ -201,9 +196,7 @@ function Login() {
                 } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
                 placeholder="••••••••"
               />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
-              )}
+              {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
             </div>
           </div>
 
@@ -224,19 +217,8 @@ function Login() {
                   fill="none"
                   viewBox="0 0 24 24"
                 >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 Signing in...
               </>
@@ -247,10 +229,7 @@ function Login() {
 
           <div className="text-sm text-center pt-2">
             <span className="text-gray-400">Don't have an account?</span>{" "}
-            <Link
-              to="/register"
-              className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
-            >
+            <Link to="/register" className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors">
               Create an account
             </Link>
           </div>

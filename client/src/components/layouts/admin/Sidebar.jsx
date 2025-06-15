@@ -8,6 +8,9 @@ import { FaUser } from "react-icons/fa";
 import { useEffect } from "react";
 import { SlBadge } from "react-icons/sl";
 import { IoIosArrowBack } from "react-icons/io";
+import { useDispatch } from "react-redux";
+import { logout } from "~/redux/slices/authSlice";
+import { toast } from "react-toastify";
 
 const menu = [
     { label: "Overview", icon: <DashboardOutlined />, path: "/admin/dashboard" },
@@ -19,6 +22,7 @@ const menu = [
 ];
 
 export default function Sidebar({ admin }) {
+    const dispatch = useDispatch()
     const location = useLocation();
     const [collapsed, setCollapsed] = useState(() => {
         // Lấy trạng thái từ localStorage khi khởi tạo
@@ -60,9 +64,12 @@ export default function Sidebar({ admin }) {
             key: '4',
             label: 'Logout',
             icon: <MdLogout />,
-            onClick: () => {
-                // Xử lý đăng xuất ở đây
-                console.log("Logout clicked");
+            onClick: async () => {
+                const result = await dispatch(logout()).unwrap();
+                if (result.message) {
+                    toast.success(result.message);
+                    navigate("/login");
+                }
             }
 
         },
