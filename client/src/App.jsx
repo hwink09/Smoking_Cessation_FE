@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 
 // Layouts
@@ -36,7 +36,7 @@ import PrivateRoute from "./PrivateRouter";
 const Layout = ({ children }) => (
   <div className="min-h-screen bg-black text-white mt-20">
     <Navbar />
-    <main>{children}</main>
+    <main>{<Outlet />} </main>
     <Footer />
   </div>
 );
@@ -60,6 +60,7 @@ function App() {
           <Route path="/verify" element={<VerifyPage />} />
 
           {/* Layout Routes */}
+
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
           </Route>

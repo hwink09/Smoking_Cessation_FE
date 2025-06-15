@@ -15,8 +15,6 @@ const stats = {
 export default function DashboardAdmin() {
     // Get user data from auth slice
     const { user, loading } = useSelector((state) => state.auth);
-    console.log("user:", user);
-    console.log("loading:", loading);
     return (
         <AdminLayout admin={user}>
             <div className="flex items-center justify-start relative overflow-hidden ml-6">
