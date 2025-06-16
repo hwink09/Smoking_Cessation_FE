@@ -1,16 +1,16 @@
-import { Outlet } from 'react-router-dom';
-import Sidebar from './Sidebar';
-
+import { Outlet } from "react-router-dom";
+import Sidebar from "./Sidebar";
+import { useSelector } from "react-redux";
 
 export default function UserLayout() {
-    const { user } = useSelector((state) => state.auth);
-    
-    return (
-        <div className="flex min-h-screen bg-gray-900">
-            <Sidebar user={user} />
-            <main className="flex-1 p-8">
-                <Outlet />
-            </main>
-        </div>
-    );
+  const { user } = useSelector((state) => state.auth);
+
+  return (
+    <div className="flex min-h-screen bg-gray-900">
+      <Sidebar user={user} />
+      <main className="flex-1 p-8">
+        <Outlet />
+      </main>
+    </div>
+  );
 }
