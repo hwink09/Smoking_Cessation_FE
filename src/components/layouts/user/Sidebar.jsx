@@ -13,7 +13,7 @@ import { MessageCircleHeart, Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import ColourfulText from "~/components/ui/colourful-text";
 import { useDispatch } from "react-redux";
 import { logout } from "~/redux/slices/authSlice";
@@ -28,7 +28,7 @@ const menu = [
   { label: "Support", icon: <MessageCircleHeart />, path: "/user/support" },
 ];
 function Sidebar({ user = {} }) {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(() => {
     const saved = localStorage.getItem("sidebar-collaped");
@@ -64,12 +64,11 @@ function Sidebar({ user = {} }) {
       label: "Logout",
       icon: <MdLogout />,
       onClick: async () => {
-
         const result = await dispatch(logout()).unwrap();
         console.log("result:", result);
         if (result.message) {
           toast.success(result.message);
-          navigate("/login");
+          Navigate("/login");
         }
       },
     },
@@ -90,10 +89,10 @@ function Sidebar({ user = {} }) {
         } `}
       >
         {!collapsed && (
-            <Link to="/">
-          <div  className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500">
-            <ColourfulText text="EXHELA" />
-          </div>
+          <Link to="/">
+            <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500">
+              <ColourfulText text="EXHELA" />
+            </div>
           </Link>
         )}
         <div className="flex items-center justify-end p-2">
