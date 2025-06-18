@@ -1,22 +1,12 @@
 import React, { useState, useEffect, createContext } from "react";
-
-import {
-  getAuth,
-  signInWithPopup,
-  GoogleAuthProvider,
-  sendPasswordResetEmail,
-  onAuthStateChanged,
-  signOut,
-} from "firebase/auth";
-import { provider } from "~/configs/firebase";
+import api from "~/services/api";
+import authService from "~/services/authService";
 import {
   validateEmail,
   validatePassword,
   validateName,
   passwordsMatch,
-  formatAuthError,
 } from "~/utils/validations";
-import axios from "axios";
 
 // Create the AuthContext
 const AuthContext = createContext(null);
@@ -25,60 +15,48 @@ const AuthContext = createContext(null);
 const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const auth = getAuth();
 
-  // Monitor auth state
+  // Check if user is logged in on initial load
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
+    const checkAuthStatus = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const user = await authService.getCurrentUser();
+          setCurrentUser(user);
+        }
+      } catch (error) {
+        console.error("Authentication status check failed:", error);
+        localStorage.removeItem("token");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return unsubscribe;
-  }, [auth]);
+    checkAuthStatus();
+  }, []);
 
   // Login function
   const login = async (email, password) => {
     try {
       setLoading(true);
+      const response = await authService.login({ email, password });
 
-      // Call the API endpoint
-      const apiResponse = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
-      console.log("apiResponse:", apiResponse);
+      // Store token in localStorage
+      if (response.token) {
+        localStorage.setItem("token", response.token);
+        setCurrentUser(response.user);
+      }
 
       return {
         success: true,
-        // user: result.user,
-        apiData: apiResponse.data, // Include API response data if needed
+        user: response.user,
+        token: response.token,
       };
     } catch (error) {
-      // Handle errors from both API and Firebase
       const errorMessage =
-        error.response?.data?.message ||
-        formatAuthError(error.code) ||
-        "An error occurred";
+        error.response?.data?.message || "Invalid email or password";
       return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Google login function
-  const loginWithGoogle = async () => {
-    try {
-      setLoading(true);
-      const result = await signInWithPopup(auth, provider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential.accessToken;
-      return { success: true, user: result.user, token };
-    } catch (error) {
-      return { success: false, error: formatAuthError(error.code) };
     } finally {
       setLoading(false);
     }
@@ -88,23 +66,18 @@ const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       setLoading(true);
-      // Create user with email and password
-      const apiResponse = await axios.post(
-        "http://localhost:3000/api/auth/register",
-        {
-          name,
-          email,
-          password,
-        }
-      );
+      const response = await authService.register({
+        name,
+        email,
+        password,
+      });
 
-      console.log("API registration response:", apiResponse);
-
-      // Update profile with name
-
-      return { success: true };
+      return { success: true, message: response.message };
     } catch (error) {
-      return { success: false, error: formatAuthError(error.code) };
+      const errorMessage =
+        error.response?.data?.message ||
+        "Registration failed. Please try again.";
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -114,10 +87,15 @@ const AuthProvider = ({ children }) => {
   const forgotPassword = async (email) => {
     try {
       setLoading(true);
-      await sendPasswordResetEmail(auth, email);
-      return { success: true };
+      await api.post("/auth/forgot-password", { email });
+      return {
+        success: true,
+        message: "Password reset email sent successfully",
+      };
     } catch (error) {
-      return { success: false, error: formatAuthError(error.code) };
+      const errorMessage =
+        error.response?.data?.message || "Failed to send password reset email";
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -126,10 +104,11 @@ const AuthProvider = ({ children }) => {
   // Logout function
   const logout = async () => {
     try {
-      await signOut(auth);
+      authService.logout();
+      setCurrentUser(null);
       return { success: true };
     } catch (error) {
-      return { success: false, error: formatAuthError(error.code) };
+      return { success: false, error: "Failed to logout" };
     }
   };
 
@@ -137,18 +116,13 @@ const AuthProvider = ({ children }) => {
   const resetPassword = async (token, newPassword) => {
     try {
       setLoading(true);
-      const response = await axios.post(
-        `http://localhost:3000/api/auth/resset-password/${token}`,
-        {
-          newPassword,
-        }
-      );
+      const response = await api.post(`/auth/reset-password/${token}`, {
+        newPassword,
+      });
       return { success: true, data: response.data };
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message ||
-        formatAuthError(error.code) ||
-        "Failed to reset password";
+        error.response?.data?.message || "Failed to reset password";
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
@@ -225,6 +199,31 @@ const AuthProvider = ({ children }) => {
     }
 
     return { isValid: Object.keys(errors).length === 0, errors };
+  };
+
+  // Google login function
+  const loginWithGoogle = async (tokenId) => {
+    try {
+      setLoading(true);
+      const response = await authService.loginWithGoogle(tokenId);
+
+      if (response.user) {
+        setCurrentUser(response.user);
+      }
+
+      return {
+        success: true,
+        user: response.user,
+        token: response.token,
+      };
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        "Google login failed. Please try again.";
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const value = {
