@@ -1,12 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc"; // Biểu tượng Google
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { login, verifyEmail } from "~/redux/slices/authSlice";
-import { selectAuthLoading, selectAuthError } from "~/redux/selectors/authSelectors";
-import { validateLoginForm, formatAuthError, sanitizeInput, isFormValid } from "~/utils/validations";
+import { login, googleAuth } from "~/redux/slices/authSlice";
+import {
+  selectAuthLoading,
+  selectAuthError,
+} from "~/redux/selectors/authSelectors";
+import {
+  validateLoginForm,
+  formatAuthError,
+  sanitizeInput,
+  isFormValid,
+} from "~/utils/validations";
 import { toast } from "react-toastify";
-import { GoogleLogin } from '@react-oauth/google'; // Import GoogleLogin component
+import { GoogleLogin } from "@react-oauth/google";
 
 function Login() {
   const navigate = useNavigate();
@@ -20,34 +27,30 @@ function Login() {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { token } = useParams();
-  const hasVerified = useRef(false);
+  const [searchParams] = useSearchParams();
   const { user } = useSelector((state) => state.auth);
+
+  // Kiểm tra các tham số truy vấn khi trang được tải
+  useEffect(() => {
+    // Xử lý kết quả từ quá trình xác thực email
+    if (searchParams.get("verified") === "true") {
+      toast.success("Email đã được xác thực thành công. Vui lòng đăng nhập.");
+    }
+
+    if (searchParams.get("error") === "invalid_token") {
+      toast.error("Liên kết xác thực không hợp lệ hoặc đã hết hạn.");
+    }
+
+    if (searchParams.get("error") === "server_error") {
+      toast.error("Đã xảy ra lỗi khi xác thực email. Vui lòng thử lại sau.");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (user && user.userId) {
       navigate("/admin/dashboard");
     }
   }, [user, navigate]);
-
-  useEffect(() => {
-    const verifyEmailToken = async () => {
-      if (token && !hasVerified.current) {
-        hasVerified.current = true;
-        try {
-          const result = await dispatch(verifyEmail(token)).unwrap();
-          toast.success("Email verified successfully. Please login.");
-          navigate("/login");
-        } catch (error) {
-          toast.error(error.message || "Verification failed");
-          navigate("/login");
-        }
-      }
-    };
-
-    verifyEmailToken();
-  }, [token, navigate, dispatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -95,20 +98,35 @@ function Login() {
       setIsSubmitting(false);
     }
   };
-
   const handleGoogleLogin = async (response) => {
     const { credential } = response;
 
+    if (!credential) {
+      toast.error("Google login failed - No credential received");
+      return;
+    }
+
     try {
+      toast.info("Authenticating with Google...");
       const result = await dispatch(googleAuth({ credential })).unwrap();
-      toast.success("Google login successful");
-      navigate("/admin/dashboard");
+
+      if (result && result.success) {
+        toast.success("Google login successful!");
+        navigate(
+          result.user.role === "admin" ? "/admin/dashboard" : "/user/dashboard"
+        );
+      } else {
+        toast.error(
+          "Google login failed - Server returned unsuccessful response"
+        );
+      }
     } catch (error) {
-      toast.error(formatAuthError(error.message || error));
+      console.error("Google login error:", error);
     }
   };
 
-  const formIsValid = isFormValid(errors) && formData.email && formData.password;
+  const formIsValid =
+    isFormValid(errors) && formData.email && formData.password;
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950">
@@ -129,16 +147,15 @@ function Login() {
         )}
 
         <div className="flex flex-col gap-4 mt-8 w-full">
-          {/* Google Login Button */}
+          {/* Google Login Button */}{" "}
           <div className="flex justify-center">
-          <GoogleLogin
-            onSuccess={handleGoogleLogin}
-            onError={(error) => toast.error('Google login failed')}
-            useOneTap
-            size="large"
-            text="Continue with Google"
-            theme="outline"
-          />
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+              useOneTap
+              size="large"
+              text="Continue with Google"
+              theme="outline"
+            />
           </div>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -155,7 +172,10 @@ function Login() {
         <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email-address" className="block text-sm font-medium text-gray-300">
+              <label
+                htmlFor="email-address"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Email address
               </label>
               <input
@@ -170,16 +190,24 @@ function Login() {
                 } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
                 placeholder="you@example.com"
               />
-              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+              )}
             </div>
 
             <div>
               <div className="flex justify-between">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-300"
+                >
                   Password
                 </label>
                 <div className="text-sm">
-                  <Link to="/forgot-password" className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors">
+                  <Link
+                    to="/forgot-password"
+                    className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
+                  >
                     Forgot password?
                   </Link>
                 </div>
@@ -196,7 +224,9 @@ function Login() {
                 } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
                 placeholder="••••••••"
               />
-              {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+              )}
             </div>
           </div>
 
@@ -217,8 +247,19 @@ function Login() {
                   fill="none"
                   viewBox="0 0 24 24"
                 >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Signing in...
               </>
@@ -229,7 +270,10 @@ function Login() {
 
           <div className="text-sm text-center pt-2">
             <span className="text-gray-400">Don't have an account?</span>{" "}
-            <Link to="/register" className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors">
+            <Link
+              to="/register"
+              className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
+            >
               Create an account
             </Link>
           </div>
