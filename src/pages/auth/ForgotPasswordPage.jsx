@@ -1,59 +1,61 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "~/hooks/useAuth";
-import { useDispatch } from "react-redux";
-import { forgotPassword } from "~/redux/slices/authSlice";
 import { toast } from "react-toastify";
 
 function ForgotPassword() {
-  const { validateForgotPasswordForm } = useAuth();
+  const { validateForgotPasswordForm, forgotPassword } = useAuth();
   const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (e) => {
     setEmail(e.target.value);
-
-    // Clear messages when input changes
     if (error) setError("");
-    if (successMessage) setSuccessMessage("");
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate email
-    const validation = validateForgotPasswordForm(email);
-    if (!validation.isValid) {
-      setError(validation.error);
-      return;
-    }
-
-    setIsLoading(true);
+    // Reset previous errors
     setError("");
 
+    // Validate email
     try {
-      await dispatch(forgotPassword(email)).unwrap();
-      toast.success("Password reset link sent to your email.");
+      const validationError = validateForgotPasswordForm(email);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+
+      setIsLoading(true);
+      const result = await forgotPassword(email);
+
+      if (result.success) {
+        toast.success("Đã gửi liên kết đặt lại mật khẩu đến email của bạn.");
+        setIsSubmitted(true);
+      } else {
+        setError(result.error || "Yêu cầu thất bại, vui lòng thử lại.");
+      }
+    } catch (err) {
+      toast.error(
+        err?.message ||
+          "Gửi liên kết đặt lại mật khẩu thất bại. Vui lòng thử lại."
+      );
+    } finally {
       setIsLoading(false);
-      setIsSubmitted(true);
-    } catch (error) {
-      // Error is handled by Redux
-      toast.error(error);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950">
-      <div className="max-w-md w-full space-y-8 bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gray-950">
+      <div className="max-w-md w-full bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800 space-y-8">
         <div>
           <h1 className="text-3xl font-extrabold text-center text-white">
-            Reset Password
+            Đặt lại mật khẩu
           </h1>
           <p className="mt-2 text-center text-sm text-gray-400">
-            Enter your email to receive a password reset link
+            Nhập email của bạn để nhận liên kết đặt lại mật khẩu
           </p>
         </div>
 
@@ -63,19 +65,13 @@ function ForgotPassword() {
           </div>
         )}
 
-        {successMessage && (
-          <div className="bg-green-900/50 border border-green-700 text-green-200 px-4 py-3 rounded-md text-sm">
-            {successMessage}
-          </div>
-        )}
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label
               htmlFor="email-address"
               className="block text-sm font-medium text-gray-300"
             >
-              Email address
+              Email
             </label>
             <input
               id="email-address"
@@ -85,7 +81,7 @@ function ForgotPassword() {
               value={email}
               onChange={handleChange}
               required
-              className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-700 bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               placeholder="you@example.com"
             />
           </div>
@@ -93,8 +89,8 @@ function ForgotPassword() {
           <button
             type="submit"
             disabled={isLoading || isSubmitted}
-            className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
-              isLoading ? "opacity-70 cursor-not-allowed" : ""
+            className={`w-full flex justify-center py-2.5 px-4 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
+              isLoading || isSubmitted ? "opacity-70 cursor-not-allowed" : ""
             }`}
           >
             {isLoading ? (
@@ -119,17 +115,14 @@ function ForgotPassword() {
                 ></path>
               </svg>
             ) : (
-              "Send Reset Link"
+              "Gửi liên kết đặt lại mật khẩu"
             )}
           </button>
 
           <div className="text-sm text-center">
-            <span className="text-gray-400">Remember your password?</span>{" "}
-            <Link
-              to="/login"
-              className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
-            >
-              Back to login
+            <span className="text-gray-400">Đã nhớ mật khẩu?</span>{" "}
+            <Link to="/login" className="text-indigo-500 hover:text-indigo-400">
+              Quay lại đăng nhập
             </Link>
           </div>
         </form>
