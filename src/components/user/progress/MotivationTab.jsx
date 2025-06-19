@@ -14,7 +14,6 @@ function MotivationTab({ motivationalMessages }) {
           </span>
         }
         className="bg-white/10 backdrop-blur-sm border border-white/20"
-        headStyle={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
       >
         <div className="text-center py-8">
           <div className="text-6xl mb-4">🌟</div>
@@ -44,7 +43,6 @@ function MotivationTab({ motivationalMessages }) {
           </span>
         }
         className="bg-white/10 backdrop-blur-sm border border-white/20"
-        headStyle={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
       >
         <List
           dataSource={[
@@ -76,7 +74,6 @@ function MotivationTab({ motivationalMessages }) {
           </span>
         }
         className="bg-white/10 backdrop-blur-sm border border-white/20"
-        headStyle={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
       >
         <div className="text-center py-6">
           <Users className="w-16 h-16 text-blue-400 mx-auto mb-4" />

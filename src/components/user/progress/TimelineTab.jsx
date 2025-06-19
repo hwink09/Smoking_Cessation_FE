@@ -12,7 +12,6 @@ function TimelineTab({ quitHistory }) {
         </span>
       }
       className="bg-white/10 backdrop-blur-sm border border-white/20"
-      headStyle={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
     >
       <Timeline className="mt-6">
         {quitHistory.map((item, index) => (
