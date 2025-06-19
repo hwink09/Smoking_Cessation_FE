@@ -1,7 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api";
+// Make sure to use the environment variable correctly
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+
 // Async thunks
 export const login = createAsyncThunk(
   "auth/login",
@@ -39,11 +41,25 @@ export const verifyEmail = createAsyncThunk(
   }
 );
 
-export const forgotPassword = createAsyncThunk(
-  "/auth/fogot-password",
+export const resendVerification = createAsyncThunk(
+  "auth/resendVerification",
   async (email, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/fogot-password`, {
+      const response = await axios.post(`${API_URL}/auth/resend-verification`, {
+        email,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const forgotPassword = createAsyncThunk(
+  "auth/forgotPassword",
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/auth/forgot-password`, {
         email: email,
       });
       return response.data;
@@ -72,7 +88,7 @@ const initialState = {
   isAuthenticated: false,
   loading: false,
   error: null,
-  message: null
+  message: null,
 };
 
 const authSlice = createSlice({
@@ -100,13 +116,12 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
-        
+
         state.isAuthenticated = true;
         state.token = action.payload.token;
         state.user = action.payload.user;
         localStorage.setItem("user", JSON.stringify(action.payload.user));
         localStorage.setItem("token", action.payload.token);
-
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
@@ -138,6 +153,18 @@ const authSlice = createSlice({
       .addCase(verifyEmail.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "Email verification failed";
+      })
+      // Resend Verification
+      .addCase(resendVerification.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resendVerification.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(resendVerification.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Resend verification failed";
       })
       // Forgot Password
       .addCase(forgotPassword.pending, (state) => {
