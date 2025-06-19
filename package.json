@@ -18,6 +18,7 @@
     "axios": "^1.9.0",
     "client": "file:",
     "firebase": "^11.8.1",
+    "jwt-decode": "^4.0.0",
     "lib-utils-ts": "^0.0.0-test",
     "lucide-react": "^0.511.0",
     "motion": "^12.15.0",

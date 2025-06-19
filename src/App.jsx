@@ -5,7 +5,7 @@ import {
   Route,
   Outlet,
 } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import AuthProvider from "./contexts/AuthProvider";
 
 // Layouts
 import { Navbar } from "./components/layouts/Navbar";
@@ -20,6 +20,7 @@ import ForgotPassword from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import VerifyPage from "./pages/auth/VerifyPage";
 import NotFoundPage from "./pages/error/404Page";
+import UnauthorizedPage from "./pages/error/UnauthorizedPage";
 
 // Admin Pages
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
@@ -42,12 +43,21 @@ import CommunityPage from "./pages/generic/community/CommunityPage";
 const Layout = ({ children }) => (
   <div className="min-h-screen bg-black text-white mt-20">
     <Navbar />
-    <main>{<Outlet />} </main>
+    <main>{<Outlet />}</main>
     <Footer />
   </div>
 );
 
-// Routes Component for Admin and User Routes
+// Routes Component for Admin and User Routes with role-based protection
+const AdminRoute = ({ element }) => (
+  <PrivateRoute allowedRoles={["admin"]}>{element}</PrivateRoute>
+);
+
+const UserRoute = ({ element }) => (
+  <PrivateRoute allowedRoles={["user"]}>{element}</PrivateRoute>
+);
+
+// Generic protected route without specific role requirements
 const ProtectedRoute = ({ element }) => <PrivateRoute>{element}</PrivateRoute>;
 
 function App() {
@@ -59,63 +69,64 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/login/:token" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="/fogot-password" element={<ForgotPassword />} />
           <Route
-            path="/reset-password/:token"
+            path="/resset-password/:token"
+            element={<ResetPasswordPage />}
+          />
+          {/* Giữ route lỗi cũ cho tương thích ngược */}
+          <Route
+            path="/resset-password/:token"
             element={<ResetPasswordPage />}
           />
           <Route path="/verify" element={<VerifyPage />} />
-
           {/* Layout Routes */}
-
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
             <Route path="/community" element={<CommunityPage />} />
           </Route>
-
           {/* Admin Routes (protected) */}
           <Route
-            element={<ProtectedRoute element={<DashboardAdmin />} />}
+            element={<AdminRoute element={<DashboardAdmin />} />}
             path="/admin/dashboard"
           />
           <Route
-            element={<ProtectedRoute element={<UserManagement />} />}
+            element={<AdminRoute element={<UserManagement />} />}
             path="/admin/dashboard/user-management"
           />
           <Route
-            element={<ProtectedRoute element={<BadgeManagement />} />}
+            element={<AdminRoute element={<BadgeManagement />} />}
             path="/admin/dashboard/badge-management"
           />
           <Route
-            element={<ProtectedRoute element={<FeedbackManagement />} />}
+            element={<AdminRoute element={<FeedbackManagement />} />}
             path="/admin/dashboard/feedback-management"
           />
           <Route
-            element={<ProtectedRoute element={<ProfilePage />} />}
+            element={<AdminRoute element={<ProfilePage />} />}
             path="/admin/profile"
           />
-
           {/* User Routes (protected) */}
           <Route element={<UserLayout />}>
             <Route
-              element={<ProtectedRoute element={<UserDashboard />} />}
+              element={<UserRoute element={<UserDashboard />} />}
               path="user/dashboard"
             />
             <Route
-              element={<ProtectedRoute element={<UserProgress />} />}
+              element={<UserRoute element={<UserProgress />} />}
               path="user/progress"
             />
             <Route
-              element={<ProtectedRoute element={<UserAchievement />} />}
+              element={<UserRoute element={<UserAchievement />} />}
               path="user/achievements"
             />
             <Route
-              element={<ProtectedRoute element={<UserSupport />} />}
+              element={<UserRoute element={<UserSupport />} />}
               path="user/support"
             />
           </Route>
-
-          {/* 404 */}
+          {/* Error pages */}
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Router>

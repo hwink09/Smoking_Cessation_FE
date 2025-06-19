@@ -1,42 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { validatePassword, passwordsMatch } from "~/utils/validations";
-import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isTokenValid, setIsTokenValid] = useState(true); // Assume valid initially
+  const [isTokenValid, setIsTokenValid] = useState(true);
   const [isResetComplete, setIsResetComplete] = useState(false);
 
   const navigate = useNavigate();
-  const { token } = useParams(); // Get token from URL params
-  const dispatch = useDispatch();
+  const { token } = useParams();
 
-  // Validate token when component mounts
   useEffect(() => {
-    if (!token) {
+    if (!token || token.length < 10) {
       setIsTokenValid(false);
-      toast.error("Invalid password reset link");
+      toast.error("Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.");
     }
   }, [token]);
 
   const validateForm = () => {
     const newErrors = {};
 
-    // Validate password
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      newErrors.password = passwordValidation.errors[0];
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.isValid) {
+      newErrors.password = passwordCheck.errors[0];
     }
 
-    // Check if passwords match
     if (!passwordsMatch(password, confirmPassword)) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = "Mật khẩu xác nhận không khớp.";
     }
 
     setErrors(newErrors);
@@ -45,160 +42,126 @@ function ResetPasswordPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
-
     try {
-      // Send reset request to the API with token in the URL path
       const response = await axios.post(
-        `http://localhost:3000/api/auth/reset-password/${token}`,
-        {
-          newPassword: password,
-        }
+        `${API_URL}/auth/resset-password/${token}`,
+        { newPassword: password }
       );
 
-      toast.success("Password reset successful!");
+      toast.success("Đặt lại mật khẩu thành công! Đang chuyển hướng...");
       setIsResetComplete(true);
 
-      // Redirect to login after a short delay
-      setTimeout(() => {
-        navigate("/login");
-      }, 3000);
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        "Failed to reset password. Please try again.";
-      toast.error(errorMessage);
+      setTimeout(() => navigate("/login"), 3000);
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message ||
+          "Đặt lại mật khẩu thất bại. Vui lòng thử lại."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // If token is invalid
   if (!isTokenValid) {
     return (
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950">
-        <div className="max-w-md w-full space-y-8 bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800">
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gray-950">
+        <div className="max-w-md w-full bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800 space-y-6">
+          <h1 className="text-3xl font-extrabold text-center text-red-500">
+            Liên kết không hợp lệ
+          </h1>
+          <p className="text-center text-gray-400">
+            Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.
+          </p>
           <div className="text-center">
-            <h1 className="text-3xl font-extrabold text-red-500">
-              Invalid Link
-            </h1>
-            <p className="mt-2 text-gray-400">
-              The password reset link is invalid or has expired.
-            </p>
-            <div className="mt-6">
-              <Link
-                to="/forgot-password"
-                className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
-              >
-                Request a new reset link
-              </Link>
-            </div>
+            <Link
+              to="/fogot-password"
+              className="text-indigo-500 hover:text-indigo-400"
+            >
+              Yêu cầu liên kết mới
+            </Link>
           </div>
         </div>
       </div>
     );
   }
 
-  // If reset is complete
   if (isResetComplete) {
     return (
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950">
-        <div className="max-w-md w-full space-y-8 bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800">
-          <div className="text-center">
-            <svg
-              className="mx-auto h-12 w-12 text-green-500"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            <h1 className="mt-3 text-3xl font-extrabold text-white">
-              Password Reset Successful
-            </h1>
-            <p className="mt-2 text-gray-400">
-              Your password has been updated. You will be redirected to the
-              login page.
-            </p>
-            <div className="mt-6">
-              <Link
-                to="/login"
-                className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
-              >
-                Go to login
-              </Link>
-            </div>
-          </div>
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gray-950">
+        <div className="max-w-md w-full bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800 space-y-6 text-center">
+          <svg
+            className="mx-auto h-12 w-12 text-green-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          <h1 className="text-3xl font-extrabold text-white">
+            Đặt lại mật khẩu thành công
+          </h1>
+          <p className="text-gray-400">
+            Mật khẩu mới của bạn đã được cập nhật. Đang chuyển hướng về trang
+            đăng nhập.
+          </p>
+          <Link to="/login" className="text-indigo-500 hover:text-indigo-400">
+            Quay lại đăng nhập
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950">
-      <div className="max-w-md w-full space-y-8 bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gray-950">
+      <div className="max-w-md w-full bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800 space-y-8">
         <div>
           <h1 className="text-3xl font-extrabold text-center text-white">
-            Reset Your Password
+            Đặt lại mật khẩu
           </h1>
           <p className="mt-2 text-center text-sm text-gray-400">
-            Please enter your new password
+            Vui lòng nhập mật khẩu mới
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-300"
-              >
-                New Password
+              <label className="block text-sm font-medium text-gray-300">
+                Mật khẩu mới
               </label>
               <input
-                id="password"
-                name="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-700 bg-gray-800 placeholder-gray-500 text-white rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-500">{errors.password}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">
-                Password must be at least 8 characters with uppercase,
-                lowercase, and numbers.
+                Mật khẩu ít nhất 8 ký tự, có chữ hoa, chữ thường và số.
               </p>
             </div>
 
             <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-300"
-              >
-                Confirm Password
+              <label className="block text-sm font-medium text-gray-300">
+                Xác nhận mật khẩu
               </label>
               <input
-                id="confirmPassword"
-                name="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-700 bg-gray-800 placeholder-gray-500 text-white rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-500">
@@ -211,7 +174,7 @@ function ResetPasswordPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
+            className={`w-full flex justify-center py-2.5 px-4 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
               isLoading ? "opacity-70 cursor-not-allowed" : ""
             }`}
           >
@@ -237,16 +200,13 @@ function ResetPasswordPage() {
                 ></path>
               </svg>
             ) : (
-              "Reset Password"
+              "Đặt lại mật khẩu"
             )}
           </button>
 
           <div className="text-sm text-center">
-            <Link
-              to="/login"
-              className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
-            >
-              Back to login
+            <Link to="/login" className="text-indigo-500 hover:text-indigo-400">
+              Quay lại đăng nhập
             </Link>
           </div>
         </form>

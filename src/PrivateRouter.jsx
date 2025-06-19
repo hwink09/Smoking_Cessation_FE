@@ -1,15 +1,43 @@
-import React, { useContext } from "react";
-import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "./hooks/useAuth";
 
-// PrivateRoute component
-const PrivateRoute = ({ children }) => {
-  const { user } = useSelector((state) => state.auth);
-  if (!user || !user.userId) {
-    return <Navigate to="/login" />;
+const PrivateRoute = ({ children, allowedRoles = [] }) => {
+  const { currentUser, loading } = useAuth();
+  const location = useLocation();
+
+  // Hiển thị loading state nếu đang kiểm tra trạng thái đăng nhập
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-900">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+      </div>
+    );
+  } // Check if user is authenticated
+  if (!currentUser || !currentUser.userId) {
+    console.log("User not authenticated, redirecting to login.");
+    // Remove any stale auth data
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // Redirect to login page with return URL
+    return (
+      <Navigate
+        to="/login"
+        state={{
+          from: location,
+          message: "Vui lòng đăng nhập để tiếp tục",
+        }}
+        replace
+      />
+    );
   }
 
-  return children;
+  if (allowedRoles.length === 0 || allowedRoles.includes(currentUser.role)) {
+    return children;
+  }
+
+  return <Navigate to="/unauthorized" replace />;
 };
 
 export default PrivateRoute;

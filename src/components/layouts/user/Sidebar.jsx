@@ -13,11 +13,10 @@ import { MessageCircleHeart, Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import ColourfulText from "~/components/ui/colourful-text";
-import { useDispatch } from "react-redux";
-import { logout } from "~/redux/slices/authSlice";
 import { toast } from "react-toastify";
+import { useAuth } from "~/hooks/useAuth";
 
 const menu = [
   { label: "Dashboard", icon: <DashboardOutlined />, path: "/user/dashboard" },
@@ -28,12 +27,16 @@ const menu = [
   { label: "Support", icon: <MessageCircleHeart />, path: "/user/support" },
 ];
 function Sidebar({ user = {} }) {
-  const dispatch = useDispatch();
+  const { logout, currentUser } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(() => {
     const saved = localStorage.getItem("sidebar-collaped");
     return saved === "true";
   });
+
+  // Sử dụng currentUser nếu user không được truyền vào hoặc rỗng
+  const userData = Object.keys(user).length ? user : currentUser || {};
 
   useEffect(() => {
     localStorage.setItem("sidebar-collaped", collapsed);
@@ -63,12 +66,16 @@ function Sidebar({ user = {} }) {
       key: "4",
       label: "Logout",
       icon: <MdLogout />,
-      onClick: async () => {
-        const result = await dispatch(logout()).unwrap();
-        console.log("result:", result);
-        if (result.message) {
-          toast.success(result.message);
-          Navigate("/login");
+      onClick: () => {
+        try {
+          const result = logout();
+          toast.success(result?.message || "Đăng xuất thành công!");
+          navigate("/");
+        } catch (error) {
+          console.error("Lỗi khi đăng xuất:", error);
+          toast.error("Có lỗi xảy ra khi đăng xuất");
+          // Vẫn chuyển hướng về trang chủ ngay cả khi gặp lỗi
+          navigate("/");
         }
       },
     },
@@ -116,15 +123,20 @@ function Sidebar({ user = {} }) {
         <Dropdown menu={{ items }}>
           <a onClick={(e) => e.preventDefault()}>
             <Space>
+              {" "}
               <Avatar
                 size={collapsed ? 32 : 40}
-                src={user.avatar}
+                src={userData?.avatar_url || userData?.avatar}
                 icon={<UserOutlined />}
               />
               {!collapsed && (
                 <div>
-                  <div className="text-sm font-semibold">{user.name}</div>
-                  <div className="text-xs text-gray-400">{user.role}</div>
+                  <div className="text-sm font-semibold">
+                    {userData?.name || "User"}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {userData?.role || "Member"}
+                  </div>
                 </div>
               )}
             </Space>
