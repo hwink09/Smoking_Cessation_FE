@@ -36,7 +36,7 @@ function Sidebar({ user = {} }) {
   });
 
   // Sử dụng currentUser nếu user không được truyền vào hoặc rỗng
-  const userData = Object.keys(user).length ? user : currentUser || {};
+  const userData = user && Object.keys(user).length ? user : currentUser || {};
 
   useEffect(() => {
     localStorage.setItem("sidebar-collaped", collapsed);
@@ -135,7 +135,7 @@ function Sidebar({ user = {} }) {
                     {userData?.name || "User"}
                   </div>
                   <div className="text-xs text-gray-400">
-                    {userData?.role || "Member"}
+                    {userData?.email || "Member"}
                   </div>
                 </div>
               )}
