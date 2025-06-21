@@ -18,6 +18,9 @@ import Login from "./pages/auth/LoginPage";
 import Register from "./pages/auth/RegisterPage";
 import ForgotPassword from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import CommunityPage from "./pages/generic/community/CommunityPage";
+import RankingPage from "./pages/generic/ranking/RankingPage";
+import PremiumPage from "./pages/generic/premium/PremiumPage";
 import VerifyPage from "./pages/auth/VerifyPage";
 import NotFoundPage from "./pages/error/404Page";
 
@@ -36,9 +39,9 @@ import UserSupport from "./pages/user/UserSupport";
 
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
-import CommunityPage from "./pages/generic/community/CommunityPage";
 
 // Layout Wrapper for common UI elements
+// eslint-disable-next-line no-unused-vars
 const Layout = ({ children }) => (
   <div className="min-h-screen bg-black text-white mt-20">
     <Navbar />
@@ -71,6 +74,8 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
             <Route path="/community" element={<CommunityPage />} />
+            <Route path="/ranking" element={<RankingPage />} />
+            <Route path="/premium" element={<PremiumPage />} />
           </Route>
 
           {/* Admin Routes (protected) */}

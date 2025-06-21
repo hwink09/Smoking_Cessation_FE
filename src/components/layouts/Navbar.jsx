@@ -23,44 +23,37 @@ export function Navbar() {
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
-              className="text-white/80 hover:text-white transition-colors"
-            >
+              className="text-white/80 hover:text-white transition-colors">
               Home
             </Link>
             <Link
               to="*"
-              className="text-white/80 hover:text-white transition-colors"
-            >
+              className="text-white/80 hover:text-white transition-colors">
               Blog
             </Link>
             <Link
               to="*"
-              className="text-white/80 hover:text-white transition-colors"
-            >
+              className="text-white/80 hover:text-white transition-colors">
               Plan
             </Link>
             <Link
               to="/community"
-              className="text-white/80 hover:text-white transition-colors"
-            >
+              className="text-white/80 hover:text-white transition-colors">
               Community
             </Link>
             <Link
-              to="*"
-              className="text-white/80 hover:text-white transition-colors"
-            >
+              to="/ranking"
+              className="text-white/80 hover:text-white transition-colors">
               Ranking
             </Link>
             <Link
-              to="*"
-              className="text-white/80 hover:text-white transition-colors"
-            >
+              to="/premium"
+              className="text-white/80 hover:text-white transition-colors">
               Premium
             </Link>
             <Link
               to="/login"
-              className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 transition-all"
-            >
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 transition-all">
               Join Now
             </Link>
           </nav>
@@ -69,8 +62,7 @@ export function Navbar() {
           <button
             className="md:hidden text-white"
             onClick={toggleMenu}
-            aria-label="Toggle menu"
-          >
+            aria-label="Toggle menu">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -81,36 +73,31 @@ export function Navbar() {
             <Link
               to="/#services"
               className="text-white/80 hover:text-white transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
+              onClick={() => setIsMenuOpen(false)}>
               Services
             </Link>
             <Link
               to="/#process"
               className="text-white/80 hover:text-white transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
+              onClick={() => setIsMenuOpen(false)}>
               Process
             </Link>
             <Link
               to="/#pricing"
               className="text-white/80 hover:text-white transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
+              onClick={() => setIsMenuOpen(false)}>
               Pricing
             </Link>
             <Link
               to="/#testimonials"
               className="text-white/80 hover:text-white transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
+              onClick={() => setIsMenuOpen(false)}>
               Testimonials
             </Link>
             <Link
               to="/login"
               className="px-4 py-2 w-fit rounded-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 transition-all"
-              onClick={() => setIsMenuOpen(false)}
-            >
+              onClick={() => setIsMenuOpen(false)}>
               Join Now
             </Link>
           </nav>
