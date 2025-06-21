@@ -4,13 +4,6 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import EditUserModal from './EditUserModal';
 import userService from "~/services/userService";
 
-// const initialUsers = [
-//     { id: 1, name: "Nguyễn Văn A", email: "a@gmail.com", role: "user", status: "active", subscription: 'basic', },
-//     { id: 2, name: "Trần Thị B", email: "b@gmail.com", role: "admin", status: "inactive", subscription: 'basic', },
-//     { id: 3, name: "Trần Thị B", email: "b@gmail.com", role: "user", status: "inactive", subscription: 'premium', },
-//     { id: 4, name: "Trần Thị B", email: "b@gmail.com", role: "admin", status: "inactive", subscription: 'basic', },
-// ];
-
 export default function UserTable() {
     const [users, setUsers] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
