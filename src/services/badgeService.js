@@ -4,7 +4,7 @@ const badgeService = {
   // POST /api/badge/create
   createBadge: async (badgeData) => {
     try {
-      const response = await api.post("/badge/create", badgeData);
+      const response = await api.post("/badges/create", badgeData);
       return response.data;
     } catch (error) {
       console.error("Lỗi tạo badge:", error);
@@ -26,7 +26,7 @@ const badgeService = {
   // PUT /api/badge/{id}
   updateBadge: async (id, badgeData) => {
     try {
-      const response = await api.put(`/badge/${id}`, badgeData);
+      const response = await api.put(`/badges/${id}`, badgeData);
       return response.data;
     } catch (error) {
       console.error(`Lỗi cập nhật badge id=${id}:`, error);
@@ -37,7 +37,7 @@ const badgeService = {
   // DELETE /api/badge/{id}
   deleteBadge: async (id) => {
     try {
-      const response = await api.delete(`/badge/${id}`);
+      const response = await api.delete(`/badges/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Lỗi xóa badge id=${id}:`, error);
@@ -47,7 +47,7 @@ const badgeService = {
   // GET /api/badge/user/{id} - Gets all badges with user earned status
   getAllBadgesWithUserStatus: async (userId) => {
     try {
-      const response = await api.get(`/badge/user/${userId}`);
+      const response = await api.get(`/badges/user/${userId}`);
       return response.data;
     } catch (error) {
       console.error(
@@ -60,13 +60,23 @@ const badgeService = {
   // GET /api/badge/leaderboard
   getBadgesLeaderBoard: async () => {
     try {
-      const response = await api.get("/badge/leaderboard");
+      const response = await api.get("/badges/leaderboard");
       return response.data;
     } catch (error) {
       console.error("Lỗi lấy bảng xếp hạng badge:", error);
       return []; // Return empty array instead of throwing to improve resilience
     }
   },
+
+  getBadgeUserStats: async () => {
+    try{
+      const response = await api.get("/badges/user-stats");
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi lấy bảng xếp hạng badge:", error);
+      return [];
+    }
+  }
 };
 
 export default badgeService;

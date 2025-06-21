@@ -9,22 +9,22 @@ export function LineChart({ data, categories, index, colors, valueFormatter, sta
                     <XAxis
                         dataKey={index}
                         tickLine={false}
-                        axisLine={{ stroke: 'rgba(255,255,255,0.3)' }}
+                        axisLine={{ stroke: 'rgba(128, 128, 128, 1)' }}
                         padding={{ left: 10, right: 10 }}
                         minTickGap={5}
                         tickFormatter={valueFormatter}
-                        tick={{ fill: '#fff' }}
+                        tick={{ fill: '#808080' }}
                         {...(startEndOnly ? { interval: "preserveStartEnd" } : {})}
                     />
                 )}
                 {showYAxis && (
                     <YAxis
                         tickLine={false}
-                        axisLine={{ stroke: 'rgba(255,255,255,0.3)' }}
+                        axisLine={{ stroke: 'rgba(128, 128, 128, 1)' }}
                         tickFormatter={valueFormatter}
                         width={yAxisWidth}
                         tickMargin={10}
-                        tick={{ fill: '#fff' }}
+                        tick={{ fill: '#808080' }}
                     />
                 )}
                 <Tooltip
