@@ -1,15 +1,10 @@
 import React from "react";
 import { Modal, Table } from "antd";
 
-const mockUsers = [
-    { key: "1", name: "Nguyễn Văn A", achievedAt: "2025-05-01" },
-    { key: "2", name: "Trần Thị B", achievedAt: "2025-05-10" },
-];
-
-export default function BadgeUserListModal({ visible, badge, onClose }) {
+export default function BadgeUserListModal({ visible, badge, users, onClose }) {
     const columns = [
         { title: "Tên người dùng", dataIndex: "name" },
-        { title: "Thời gian đạt", dataIndex: "achievedAt" },
+        { title: "Thời gian đạt", dataIndex: "date_awarded" },
     ];
 
     return (
@@ -19,7 +14,7 @@ export default function BadgeUserListModal({ visible, badge, onClose }) {
             onCancel={onClose}
             footer={null}
         >
-            <Table columns={columns} dataSource={mockUsers} pagination={false} />
+            <Table columns={columns} dataSource={users} rowKey="user_id" pagination={false} />
         </Modal>
     );
 }
