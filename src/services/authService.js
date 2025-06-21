@@ -8,6 +8,7 @@ function storeAuthData(data) {
 }
 
 const authService = {
+  // POST /api/auth/login
   login: async (credentials) => {
     try {
       console.log("Đang gửi yêu cầu đăng nhập với:", credentials.email);
@@ -37,6 +38,7 @@ const authService = {
     }
   },
 
+  // POST /api/auth/google
   loginWithGoogle: async (credential) => {
     if (!credential) throw new Error("Invalid Google credential");
     try {
@@ -75,29 +77,76 @@ const authService = {
     }
   },
 
-  testGoogleConfig: async () => {
+  // POST /api/auth/register
+  register: async (userData) => {
     try {
-      await api.get("/auth/google-config-test");
-      return { success: true, message: "Google configuration is valid" };
+      const response = await api.post("/auth/register", userData);
+      return response.data;
     } catch (error) {
-      return {
-        success: false,
-        message:
-          error.response?.data?.message || "Google configuration test failed",
-      };
+      console.error("Lỗi đăng ký:", error);
+      throw error;
     }
   },
 
-  register: async (userData) => {
-    const response = await api.post("/auth/register", userData);
-    return response.data;
-  },
-  logout: () => {
-    // Có thể gọi API để đăng xuất ở phía server nếu cần
+  // POST /api/auth/fogot-password
+  forgotPassword: async (email) => {
     try {
-      // Có thể gọi API để đăng xuất ở phía server nếu cần (bỏ comment dưới đây nếu backend có API logout)
-      // api.post('/auth/logout');
+      const response = await api.post("/auth/fogot-password", { email });
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi quên mật khẩu:", error);
+      throw error;
+    }
+  },
 
+  // POST /api/auth/resset-password/{token}
+  resetPassword: async (token, newPassword) => {
+    try {
+      const response = await api.post(`/auth/resset-password/${token}`, {
+        newPassword,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi đặt lại mật khẩu:", error);
+      throw error;
+    }
+  },
+
+  // POST /api/auth/resend-verification
+  resendVerification: async (email) => {
+    try {
+      const response = await api.post("/auth/resend-verification", { email });
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi gửi lại xác minh:", error);
+      throw error;
+    }
+  }, // GET /api/auth/verify/:token
+  verifyEmail: (() => {
+    // Sử dụng closure để lưu trữ token đã verify
+    const verifiedTokens = new Set();
+
+    return async (token) => {
+      // Kiểm tra xem token đã được xử lý chưa
+      if (verifiedTokens.has(token)) {
+        console.log("Token đã được xử lý trước đó, không gọi API lại");
+        return { message: "Email đã được xác minh thành công" };
+      }
+
+      try {
+        const response = await api.get(`/auth/verify/${token}`);
+        // Lưu token đã xác minh vào Set để tránh gọi lại API
+        verifiedTokens.add(token);
+        return response.data;
+      } catch (error) {
+        console.error("Lỗi xác minh email:", error);
+        throw error;
+      }
+    };
+  })(),
+
+  logout: () => {
+    try {
       // Xóa dữ liệu local
       localStorage.removeItem("token");
       localStorage.removeItem("user");
@@ -115,59 +164,6 @@ const authService = {
       console.error("Lỗi khi logout:", error);
       throw error;
     }
-  },
-
-  _verificationInProgress: {},
-
-  verifyEmail: async (token) => {
-    // Kiểm tra xem token này đã đang được xác minh chưa
-    if (authService._verificationInProgress[token]) {
-      console.log("Đã có yêu cầu xác minh đang chạy cho token này, bỏ qua");
-      return authService._verificationInProgress[token];
-    }
-
-    // Tạo một promise mới và lưu vào cache
-    const verificationPromise = (async () => {
-      try {
-        console.log(
-          "Gọi API xác minh email với token",
-          token.substring(0, 8) + "..."
-        );
-        const response = await api.get(`/auth/verify/${token}`);
-        console.log("API xác minh phản hồi thành công");
-        return response.data;
-      } catch (error) {
-        console.log(
-          "Lỗi khi xác minh với path params:",
-          error.response?.status
-        );
-        if (
-          error.response &&
-          (error.response.status === 404 || error.response.status === 400)
-        ) {
-          console.log("Thử phương thức xác minh thay thế với query params");
-          const altResponse = await api.get(`/auth/verify`, {
-            params: { token },
-          });
-          return altResponse.data;
-        }
-        throw error;
-      } finally {
-        // Sau 2 giây, xóa khỏi cache để cho phép thử lại nếu cần
-        setTimeout(() => {
-          delete authService._verificationInProgress[token];
-        }, 2000);
-      }
-    })();
-
-    // Lưu promise vào cache và trả về
-    authService._verificationInProgress[token] = verificationPromise;
-    return verificationPromise;
-  },
-
-  resendVerification: async (email) => {
-    const response = await api.post(`/auth/resend-verification`, { email });
-    return response.data;
   },
 
   getCurrentUser: () => {

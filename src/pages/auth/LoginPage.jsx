@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Link,
   useNavigate,
@@ -28,22 +28,24 @@ function Login() {
     clearError,
     currentUser,
   } = useAuth();
-
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [redirectMessage, setRedirectMessage] = useState("");
   // Xử lý xác minh email - dùng cờ để tránh hiển thị thông báo trùng lặp
   const [emailVerified, setEmailVerified] = useState(false);
-  const [verificationAttempted, setVerificationAttempted] = useState(false);
 
+  // Sử dụng useRef để theo dõi việc xác minh đã được thực hiện hay chưa
+  // refs không gây ra re-render và được giữ nguyên giá trị qua các lần render
+  const verificationAttemptedRef = useRef(false);
+  const tokenVerificationAttemptedRef = useRef(false);
   // Chỉ xử lý query params một lần khi component mount
   useEffect(() => {
     // Đã có cố gắng xác minh trước đó, không thực hiện lại
-    if (verificationAttempted) return;
+    if (verificationAttemptedRef.current) return;
 
-    // Đánh dấu đã thử xác minh
-    setVerificationAttempted(true);
+    // Đánh dấu đã thử xác minh (sử dụng ref để bảo toàn giá trị qua các lần render)
+    verificationAttemptedRef.current = true;
 
     // Xử lý khi có query params (được chuyển hướng sau xác minh)
     if (searchParams.get("verified") === "true") {
@@ -63,7 +65,10 @@ function Login() {
     }
 
     // Nếu không có query params nhưng có token trong URL
-    if (token && !emailVerified) {
+    if (token && !emailVerified && !tokenVerificationAttemptedRef.current) {
+      // Đánh dấu là đã cố gắng xác minh với token (sử dụng ref)
+      tokenVerificationAttemptedRef.current = true;
+
       const verifyEmailToken = async () => {
         try {
           console.log("Đang xác minh email với token...");
