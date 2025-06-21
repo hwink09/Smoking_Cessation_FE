@@ -61,20 +61,20 @@ export default function Overview() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card
           title="Tăng trưởng người dùng"
-          className="shadow-lg rounded-xl backdrop-blur-sm bg-opacity-30 bg-gray-800"
+          className="shadow-lg rounded-xl backdrop-blur-sm bg-opacity-30"
         >
           <AreaChart
             data={userGrowthData}
             index="date"
             categories={["users"]}
-            colors={["#1ecbe1"]}
+            colors={["#00e0ff"]}
             valueFormatter={formatNumber}
           />
         </Card>
 
         <Card
           title="Doanh thu theo tháng"
-          className="shadow-lg rounded-xl backdrop-blur-sm bg-opacity-30 bg-gray-800"
+          className="shadow-lg rounded-xl backdrop-blur-sm bg-opacity-30 "
         >
           <BarChart
             data={revenueData}
@@ -99,7 +99,7 @@ export default function Overview() {
 
         <Card
           title="Tiền tiết kiệm theo thời gian"
-          className="shadow-lg rounded-xl backdrop-blur-sm bg-opacity-30 bg-gray-800"
+          className="shadow-lg rounded-xl backdrop-blur-sm bg-opacity-30 "
         >
           <LineChart
             data={revenueData}
@@ -114,7 +114,7 @@ export default function Overview() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card
           title="Tỉ lệ Feedback"
-          className="shadow-lg rounded-xl backdrop-blur-sm bg-opacity-30 bg-gray-800"
+          className="shadow-lg rounded-xl backdrop-blur-sm bg-opacity-30 "
         >
           <PieChart
             data={feedbackData}

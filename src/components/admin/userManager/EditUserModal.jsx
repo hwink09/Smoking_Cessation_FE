@@ -1,6 +1,6 @@
 import { Modal, Form, Input, Select } from 'antd';
 
-const EditUserModal = ({ isVisible, onCancel, onOk, editingUser, form }) => {
+const EditUserModal = ({ isVisible, onCancel, onOk, editingUser, form, confirmLoading = false }) => {
     return (
         <Modal
             title={editingUser ? "Edit User" : "Add New User"}
@@ -8,6 +8,7 @@ const EditUserModal = ({ isVisible, onCancel, onOk, editingUser, form }) => {
             onOk={onOk}
             onCancel={onCancel}
             width={600}
+            confirmLoading={confirmLoading}
         >
             <Form
                 form={form}
@@ -30,7 +31,7 @@ const EditUserModal = ({ isVisible, onCancel, onOk, editingUser, form }) => {
                         { type: 'email', message: 'Please enter a valid email!' }
                     ]}
                 >
-                    <Input />
+                    <Input disabled/>
                 </Form.Item>
 
                 <Form.Item
@@ -43,26 +44,7 @@ const EditUserModal = ({ isVisible, onCancel, onOk, editingUser, form }) => {
                         <Select.Option value="coach">Coach</Select.Option>
                     </Select>
                 </Form.Item>
-
-                <Form.Item
-                    name="status"
-                    label="Status"
-                >
-                    <Select>
-                        <Select.Option value="active">Active</Select.Option>
-                        <Select.Option value="inactive">Inactive</Select.Option>
-                    </Select>
-                </Form.Item>
-
-                <Form.Item
-                    name="subscription"
-                    label="Subscription"
-                >
-                    <Select>
-                        <Select.Option value="basic">Basic</Select.Option>
-                        <Select.Option value="premium">Premium</Select.Option>
-                    </Select>
-                </Form.Item>
+           
             </Form>
         </Modal>
     );
