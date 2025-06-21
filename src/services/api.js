@@ -14,13 +14,19 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((request) => {
-  console.log("Starting Request:", request);
+  // Add token to Authorization header for all requests
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  // Try to get token from different possible locations
+  const token = localStorage.getItem("token") || user.token;
+
+  if (token) {
+    request.headers.Authorization = `Bearer ${token}`;
+  }
   return request;
 });
 
 api.interceptors.response.use(
   (response) => {
-    console.log("Response:", response.status, response.config.url);
     return response;
   },
   (error) => {

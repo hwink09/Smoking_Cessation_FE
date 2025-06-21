@@ -6,7 +6,6 @@ const PrivateRoute = ({ children, allowedRoles = [] }) => {
   const { currentUser, loading } = useAuth();
   const location = useLocation();
 
-  // Hiển thị loading state nếu đang kiểm tra trạng thái đăng nhập
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-900">

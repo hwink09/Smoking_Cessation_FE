@@ -8,7 +8,7 @@ export default function UserLayout() {
   return (
     <div className="flex min-h-screen bg-gray-900">
       <Sidebar user={currentUser} />
-      <main className="flex-1 p-8">
+      <main className="flex-1">
         <Outlet />
       </main>
     </div>
