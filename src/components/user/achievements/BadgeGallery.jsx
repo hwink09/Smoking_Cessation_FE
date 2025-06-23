@@ -1,12 +1,10 @@
-// BadgeGallery.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import { BadgeCheck } from "lucide-react";
-import { Marquee } from "~/components/ui/Marquee"; // giữ lại nếu bạn dùng custom Marquee
+import { Marquee } from "~/components/ui/Marquee"; // Giữ lại nếu bạn dùng custom Marquee
 import BadgeIcon from "../../ui/BadgeIcon";
 
 const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
-  // Make sure badges is an array before filtering
   const badgesArray = Array.isArray(badges) ? badges : [];
 
   const earned = badgesArray.filter((b) => b && b.earned);
@@ -18,16 +16,13 @@ const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
     Platinum: "bg-blue-500 text-white",
     Diamond: "bg-teal-400 text-black",
   };
+
   return (
     <>
       <div className="mb-10">
-        <h3
-          className={`text-xl font-bold ${
-            lightTheme ? "text-slate-800" : "text-white"
-          } mb-4`}
-        >
-          Featured Achievements
-        </h3>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
+          Thành tựu nổi bật
+        </h2>
         <div
           className={`${
             lightTheme ? "bg-slate-100" : "bg-white/5 backdrop-blur-md"
@@ -44,16 +39,14 @@ const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
                 onClick={() => onView(b)}
               >
                 <div
-                  className="flex flex-col items-center justify-center w-24 h-24 rounded-full shadow-lg hover:shadow-2xl mb-2 overflow-hidden"
+                  className="flex flex-col items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:border-blue-300 hover:shadow-xl shadow-md transition-all duration-300 mb-2 overflow-hidden"
                   style={{
                     background: lightTheme
                       ? `radial-gradient(circle, ${b.color}30 0%, ${b.color}05 70%)`
                       : `radial-gradient(circle, ${b.color}40 0%, ${b.color}10 70%)`,
                     border: `2px solid ${b.color}${lightTheme ? "60" : "80"}`,
-                    boxShadow: `0 0 20px ${b.color}${lightTheme ? "50" : "90"}`,
                   }}
                 >
-                  {" "}
                   <div className="flex justify-center items-center h-full w-full p-2">
                     <BadgeIcon
                       icon={b.icon}
@@ -67,16 +60,13 @@ const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
             ))}
           </Marquee>
         </div>
-      </div>{" "}
+      </div>
+
       <div className="mb-10">
         <div className="flex justify-between items-center mb-4">
-          <h3
-            className={`text-xl font-bold ${
-              lightTheme ? "text-slate-800" : "text-white"
-            }`}
-          >
-            All Achievements
-          </h3>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
+            Tất cả thành tựu
+          </h2>
           <div
             className={`text-sm ${
               lightTheme ? "text-slate-500" : "text-gray-300"
@@ -89,15 +79,16 @@ const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
             >
               {earned.length}
             </span>{" "}
-            / {badgesArray.length} earned
+            / {badgesArray.length} đã đạt
           </div>
         </div>
+
         <div
           className={`${
             lightTheme
-              ? "bg-slate-50 border-slate-200"
+              ? "bg-gradient-to-br from-white to-gray-50 border-gray-200"
               : "bg-white/10 backdrop-blur-lg border-white/20"
-          } rounded-2xl p-6 border`}
+          } rounded-2xl p-6 border hover:border-blue-300 hover:shadow-xl transition-all duration-300`}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {badgesArray.map((b) => (
@@ -114,7 +105,6 @@ const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
                     : "bg-white/5 border-white/10 opacity-70"
                 }`}
               >
-                {" "}
                 <div className="flex justify-between mb-2">
                   <span
                     className={`px-2 py-0.5 rounded-full text-xs font-semibold transition-all duration-300 ${
@@ -137,9 +127,9 @@ const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
                     }`}
                     onClick={() => onView(b)}
                   />
-                </div>{" "}
+                </div>
+
                 <div className="flex items-center mb-2">
-                  {" "}
                   <div
                     className={`mr-3 transition-all duration-300 ${
                       b.earned ? "scale-110" : ""
@@ -179,7 +169,8 @@ const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
                       {b.description}
                     </p>
                   </div>
-                </div>{" "}
+                </div>
+
                 {b.earned ? (
                   <button
                     onClick={() => onShare(b)}
@@ -200,7 +191,7 @@ const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
                       <path d="M12 2L12 16"></path>
                       <rect x="2" y="16" width="20" height="6" rx="2"></rect>
                     </svg>
-                    Share Achievement
+                    Chia sẻ thành tựu
                   </button>
                 ) : (
                   <div>
@@ -212,7 +203,7 @@ const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
                           : "bg-gray-700/30 hover:bg-gray-600/50 text-gray-300"
                       } text-xs rounded-md transition-colors duration-200 flex items-center justify-center gap-1 mt-2 w-full`}
                     >
-                      View Achievement Details
+                      Xem chi tiết thành tựu
                     </button>
                   </div>
                 )}

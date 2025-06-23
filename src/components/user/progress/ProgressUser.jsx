@@ -1,350 +1,247 @@
-import React, { useState } from "react";
-import { Button, Tabs, Form, message } from "antd";
+import React, { useState, useEffect, useMemo } from "react";
+import ProgressHeader from "./ProgressHeader";
+import JournalSection from "./JournalSection";
+import { Card } from "antd";
 import {
-  PlusOutlined,
   SmileOutlined,
-  MehOutlined,
-  FrownOutlined,
-  CalendarOutlined,
-  DollarOutlined,
   HeartOutlined,
-  CrownOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
-import { BookOpen, Star, Clock } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import dayjs from "dayjs";
 
-// Import các component con đã tách
-import ProgressHeader from "./ProgressHeader";
-import OverviewCards from "./OverviewCards";
-import AnnualProgressBar from "./AnnualProgressBar";
-import JournalTab from "./JournalTab";
-import MotivationTab from "./MotivationTab";
-import TimelineTab from "./TimelineTab";
-import TabHeader from "./TabHeader";
-import JournalModal from "./JournalModal";
+const getLocalJSON = (key, fallback) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
-const { TabPane } = Tabs;
+function ProgressUser() {
+  // Mock data - sẽ được thay thế bằng API sau này
+  const mockQuitData = {
+    quitDate: "2024-01-15",
+    cigarettesPerDay: 20,
+    pricePerPack: 50000,
+    cigarettesPerPack: 20,
+  };
 
-function Progress() {
-  // State management
-  const [quitDate] = useState(new Date("2024-01-15"));
-  const [cigarettesPerDay] = useState(20);
-  const [pricePerPack] = useState(50000);
-  const [cigarettesPerPack] = useState(20);
-  const [journalEntries, setJournalEntries] = useState([]);
-  const [isJournalModalVisible, setIsJournalModalVisible] = useState(false);
-  const [editingEntry, setEditingEntry] = useState(null);
-  const [form] = Form.useForm();
-  const [motivationalMessages] = useState([
-    "You're doing amazing! Every smoke-free day is a victory! 🎉",
-    "Your lungs are thanking you right now! Keep going! 💪",
-    "Remember why you started - your health is worth it! ❤️",
-    "Each day without smoking is an investment in your future! 🌟",
-    "You're stronger than your cravings! Stay focused! 🎯",
-  ]);
+  const [quitDate] = useState(new Date(mockQuitData.quitDate));
+  const [cigarettesPerDay] = useState(mockQuitData.cigarettesPerDay);
+  const [pricePerPack] = useState(mockQuitData.pricePerPack);
+  const [cigarettesPerPack] = useState(mockQuitData.cigarettesPerPack);
+  const [isLoading, setIsLoading] = useState(false);
+  const [entries, setEntries] = useState(() =>
+    getLocalJSON("smoke-free-journal", [])
+  );
+  const healthMilestones = useMemo(
+    () => [
+      {
+        days: 1,
+        title: "Giảm một nửa nguy cơ bệnh tim",
+        description:
+          "Sau chỉ 1 ngày không hút thuốc, huyết áp của bạn bắt đầu giảm.",
+      },
+      {
+        days: 2,
+        title: "Khí CO bị loại bỏ",
+        description:
+          "Sau 48 giờ không hút thuốc, carbon monoxide được loại bỏ khỏi cơ thể.",
+      },
+      {
+        days: 3,
+        title: "Hô hấp cải thiện",
+        description:
+          "Các ống phế quản bắt đầu thư giãn và hơi thở trở nên dễ dàng hơn.",
+      },
+      {
+        days: 14,
+        title: "Tuần hoàn cải thiện",
+        description:
+          "Tuần hoàn máu được cải thiện và chức năng phổi tăng lên đến 30%.",
+      },
+      {
+        days: 30,
+        title: "Phục hồi lông chuyển",
+        description:
+          "Phổi của bạn hiện đang bắt đầu lành lại và lông chuyển đang phục hồi.",
+      },
+      {
+        days: 90,
+        title: "Giảm nguy cơ đau tim",
+        description: "Nguy cơ bị đau tim của bạn đã giảm đáng kể.",
+      },
+      {
+        days: 180,
+        title: "Chức năng phổi cải thiện",
+        description: "Chức năng phổi của bạn đã được cải thiện đáng kể.",
+      },
+      {
+        days: 270,
+        title: "Giảm nhiễm trùng hô hấp",
+        description: "Bạn đang gặp ít các bệnh nhiễm trùng đường hô hấp hơn.",
+      },
+      {
+        days: 365,
+        title: "Giảm một nửa nguy cơ bệnh tim",
+        description:
+          "Nguy cơ mắc bệnh tim mạch vành của bạn chỉ còn một nửa so với người hút thuốc.",
+      },
+      {
+        days: 1825,
+        title: "Nguy cơ đột quỵ bình thường hóa",
+        description:
+          "Nguy cơ đột quỵ của bạn đã giảm xuống như người không hút thuốc.",
+      },
+      {
+        days: 3650,
+        title: "Giảm một nửa nguy cơ ung thư phổi",
+        description: "Nguy cơ ung thư phổi của bạn đã giảm 50%.",
+      },
+    ],
+    []
+  );
+  useEffect(() => {
+    localStorage.setItem("smoke-free-journal", JSON.stringify(entries));
+  }, [entries]);
 
-  // Mock data for demonstrations
-  const [badges] = useState([
-    {
-      id: 1,
-      name: "7 Days Strong",
-      description: "7 days smoke-free",
-      earned: true,
-      earnedAt: "2024-01-22",
-      icon: "🏆",
-      color: "#52c41a",
-    },
-    {
-      id: 2,
-      name: "Money Saver",
-      description: "Saved $100",
-      earned: true,
-      earnedAt: "2024-01-25",
-      icon: "💰",
-      color: "#1890ff",
-    },
-    {
-      id: 3,
-      name: "Health Warrior",
-      description: "30 days smoke-free",
-      earned: false,
-      progress: 70,
-      icon: "❤️",
-      color: "#f5222d",
-    },
-    {
-      id: 4,
-      name: "Champion",
-      description: "90 days smoke-free",
-      earned: false,
-      progress: 23,
-      icon: "🎖️",
-      color: "#faad14",
-    },
-    {
-      id: 5,
-      name: "Master",
-      description: "365 days smoke-free",
-      earned: false,
-      progress: 6,
-      icon: "🌟",
-      color: "#722ed1",
-    },
-  ]);
+  const handleSubmit = (entry) => {
+    setEntries((prev) => {
+      const filtered = prev.filter((e) => e.date !== entry.date);
+      return [...filtered, entry].sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+      );
+    });
+  };
 
-  const [quitHistory] = useState([
-    {
-      date: "2024-01-15",
-      event: "Quit Date",
-      type: "success",
-      description: "Started your smoke-free journey!",
-    },
-    {
-      date: "2024-01-22",
-      event: "First Week",
-      type: "success",
-      description: "Completed 7 days without smoking",
-    },
-    {
-      date: "2024-01-25",
-      event: "Money Milestone",
-      type: "success",
-      description: "Saved your first $100",
-    },
-    {
-      date: "2024-02-01",
-      event: "Relapse",
-      type: "warning",
-      description: "Had 2 cigarettes but got back on track",
-    },
-    {
-      date: "2024-02-14",
-      event: "30 Days",
-      type: "success",
-      description: "One month smoke-free milestone!",
-    },
-  ]);
-
-  // Calculate progress statistics
-  const calculateStats = () => {
+  const stats = useMemo(() => {
     const now = new Date();
-    const timeDiff = now.getTime() - quitDate.getTime();
-    const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
-
+    const daysDiff = Math.floor((now - quitDate) / (1000 * 3600 * 24));
     const cigarettesAvoided = daysDiff * cigarettesPerDay;
     const packsAvoided = cigarettesAvoided / cigarettesPerPack;
     const moneySaved = packsAvoided * pricePerPack;
     const healthImprovement = Math.min((daysDiff / 365) * 100, 100);
-    const badgesEarned = badges.filter((b) => b.earned).length;
-
     return {
       days: daysDiff,
-      moneySaved: Math.round(moneySaved),
-      healthImprovement: Math.round(healthImprovement * 10) / 10,
-      badgesEarned: badgesEarned,
-      cigarettesAvoided: cigarettesAvoided,
-      progressPercentage: Math.min((daysDiff / 365) * 100, 100),
+      moneySaved,
+      healthImprovement: healthImprovement.toFixed(1),
+      cigarettesAvoided,
     };
-  };
+  }, [quitDate, cigarettesPerDay, cigarettesPerPack, pricePerPack]);
+  const currentMilestone = useMemo(
+    () =>
+      [...healthMilestones]
+        .filter((m) => m.days <= stats.days)
+        .sort((a, b) => b.days - a.days)[0],
+    [stats.days, healthMilestones]
+  );
 
-  const stats = calculateStats();
-
-  const formatMoney = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  };
-
-  // Progress overview cards
-  const overviewCards = [
-    {
-      title: "Smoke-Free Days",
-      value: stats.days,
-      unit: "days",
-      icon: CalendarOutlined, // truyền component class
-      bgColor: "bg-gradient-to-br from-emerald-500 to-teal-600",
-      textColor: "text-emerald-400",
-      emoji: "✅",
-    },
-    {
-      title: "Money Saved",
-      value: formatMoney(stats.moneySaved),
-      unit: "",
-      icon: DollarOutlined,
-      bgColor: "bg-gradient-to-br from-blue-500 to-indigo-600",
-      textColor: "text-blue-400",
-      emoji: "💰",
-    },
-    {
-      title: "Health Progress",
-      value: stats.healthImprovement,
-      unit: "%",
-      icon: HeartOutlined,
-      bgColor: "bg-gradient-to-br from-pink-500 to-rose-600",
-      textColor: "text-pink-400",
-      emoji: "❤️",
-    },
-    {
-      title: "Badges Earned",
-      value: stats.badgesEarned,
-      unit: "badges",
-      icon: CrownOutlined,
-      bgColor: "bg-gradient-to-br from-yellow-500 to-orange-600",
-      textColor: "text-yellow-400",
-      emoji: "🏅",
-    },
-  ];
-
-  // Journal entry handlers
-  const handleAddJournalEntry = () => {
-    setEditingEntry(null);
-    form.resetFields();
-    setIsJournalModalVisible(true);
-  };
-
-  const handleEditJournalEntry = (entry) => {
-    setEditingEntry(entry);
-    form.setFieldsValue({
-      ...entry,
-      date: dayjs(entry.date),
-    });
-    setIsJournalModalVisible(true);
-  };
-
-  const handleDeleteJournalEntry = (entryId) => {
-    setJournalEntries((prev) => prev.filter((entry) => entry.id !== entryId));
-    message.success("Journal entry deleted successfully");
-  };
-
-  const handleJournalSubmit = (values) => {
-    const entryData = {
-      ...values,
-      date: values.date.format("YYYY-MM-DD"),
-      id: editingEntry ? editingEntry.id : Date.now(),
-    };
-
-    if (editingEntry) {
-      setJournalEntries((prev) =>
-        prev.map((entry) => (entry.id === editingEntry.id ? entryData : entry))
-      );
-      message.success("Journal entry updated successfully");
-    } else {
-      setJournalEntries((prev) => [entryData, ...prev]);
-      message.success("Journal entry added successfully");
-    }
-
-    setIsJournalModalVisible(false);
-    form.resetFields();
-  };
-
-  const handleShareProgress = () => {
-    // Mock sharing functionality
-    message.success("Progress shared to community!");
-  };
-
-  const getMoodIcon = (mood) => {
-    if (mood >= 8) return <SmileOutlined style={{ color: "#52c41a" }} />;
-    if (mood >= 5) return <MehOutlined style={{ color: "#faad14" }} />;
-    return <FrownOutlined style={{ color: "#f5222d" }} />;
-  };
-
-  const getHealthStatusColor = (status) => {
-    const colors = {
-      excellent: "#52c41a",
-      good: "#1890ff",
-      fair: "#faad14",
-      poor: "#f5222d",
-    };
-    return colors[status] || "#d9d9d9";
-  };
-
+  const last7DaysEntries = useMemo(
+    () =>
+      entries.filter(
+        (entry) =>
+          dayjs().diff(dayjs(entry.date), "day") >= 0 &&
+          dayjs().diff(dayjs(entry.date), "day") < 7
+      ),
+    [entries]
+  );
   return (
-    <div className="min-h-screen p-2">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <ProgressHeader quitDate={quitDate} />
-
-        {/* Progress Overview Cards */}
-        <OverviewCards overviewCards={overviewCards} />
-
-        {/* Overall Progress Bar */}
-        <AnnualProgressBar
+    <div className="w-full bg-gradient-to-br from-purple-50 via-white to-blue-50 min-h-screen py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        <ProgressHeader
+          quitDate={quitDate}
           stats={stats}
-          handleShareProgress={handleShareProgress}
-        />
-
-        {/* Main Content Tabs */}
-        <Tabs defaultActiveKey="1" type="card" className="achievements-tabs">
-          {/* Daily Journal Tab */}
-          <TabPane
-            tab={
-              <TabHeader
-                icon={<BookOpen className="w-5 h-5" />}
-                label="Daily Journal"
-              />
+          healthMilestone={currentMilestone}
+        />{" "}
+        <JournalSection
+          entries={entries}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />{" "}
+        {stats.days >= 7 && last7DaysEntries.length > 0 && (
+          <Card
+            title={
+              <div className="flex items-center">
+                <TrendingUp className="w-6 h-6 text-purple-600 mr-3" />
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
+                  {" "}
+                  Tóm Tắt 7 Ngày Gần Nhất{" "}
+                </h2>
+              </div>
             }
-            key="1"
+            className="bg-gradient-to-br from-white to-purple-50 border border-purple-200 text-purple-900 mt-12 shadow-md mb-12 rounded-xl overflow-hidden"
+            styles={{
+              header: {
+                borderBottom: "1px solid #e5d8fd",
+                padding: "20px 24px",
+                backgroundColor: "white",
+              },
+            }}
           >
-            <div className="mb-6">
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={handleAddJournalEntry}
-                size="large"
-                className="bg-gradient-to-r from-green-500 to-blue-500 border-none"
-              >
-                Add New Entry
-              </Button>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-2">
+              <div className="text-center p-6 bg-gradient-to-b from-white to-yellow-50 rounded-xl border border-yellow-200 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1 hover:border-yellow-300">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-4">
+                  <SmileOutlined className="text-2xl text-yellow-500" />
+                </div>
+                <h4 className="text-yellow-800 font-medium mb-3 text-lg">
+                  Tâm trạng trung bình
+                </h4>
+                <p className="text-3xl font-bold text-yellow-600">
+                  {last7DaysEntries.length > 0
+                    ? (
+                        last7DaysEntries.reduce((sum, e) => sum + e.mood, 0) /
+                        last7DaysEntries.length
+                      ).toFixed(1)
+                    : "N/A"}
+                  <span className="text-yellow-500 text-lg ml-1">/10</span>
+                </p>
+              </div>
+
+              <div className="text-center p-6 bg-gradient-to-b from-white to-blue-50 rounded-xl border border-blue-200 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1 hover:border-blue-300">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                  <HeartOutlined className="text-2xl text-blue-500" />
+                </div>
+                <h4 className="text-blue-800 font-medium mb-3 text-lg">
+                  Sức khỏe trung bình
+                </h4>
+                <p className="text-3xl font-bold text-blue-600">
+                  {last7DaysEntries.length > 0
+                    ? (
+                        last7DaysEntries.reduce((sum, e) => sum + e.health, 0) /
+                        last7DaysEntries.length
+                      ).toFixed(1)
+                    : "N/A"}
+                  <span className="text-blue-500 text-lg ml-1">/10</span>
+                </p>
+              </div>
+
+              <div className="text-center p-6 bg-gradient-to-b from-white to-green-50 rounded-xl border border-green-200 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1 hover:border-green-300">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <CheckCircleOutlined className="text-2xl text-green-500" />
+                </div>
+                <h4 className="text-green-800 font-medium mb-3 text-lg">
+                  Ngày không thuốc
+                </h4>
+                <p className="text-3xl font-bold text-green-600">
+                  {last7DaysEntries.length > 0
+                    ? (
+                        100 -
+                        (last7DaysEntries.filter((e) => e.smoked).length /
+                          last7DaysEntries.length) *
+                          100
+                      ).toFixed(0)
+                    : "N/A"}
+                  <span className="text-green-500 text-lg ml-1">%</span>
+                </p>
+              </div>
             </div>
-            <JournalTab
-              journalEntries={journalEntries}
-              handleAddJournalEntry={handleAddJournalEntry}
-              handleEditJournalEntry={handleEditJournalEntry}
-              handleDeleteJournalEntry={handleDeleteJournalEntry}
-              getMoodIcon={getMoodIcon}
-              getHealthStatusColor={getHealthStatusColor}
-            />
-          </TabPane>
-
-          {/* Motivational Reminders Tab */}
-          <TabPane
-            tab={
-              <TabHeader
-                icon={<Star className="w-5 h-5" />}
-                label="Motivational Reminders"
-              />
-            }
-            key="2"
-          >
-            <MotivationTab motivationalMessages={motivationalMessages} />
-          </TabPane>
-
-          {/* Quit History Timeline Tab */}
-          <TabPane
-            tab={
-              <TabHeader
-                icon={<Clock className="w-5 h-5" />}
-                label="Timeline"
-              />
-            }
-            key="3"
-          >
-            <TimelineTab quitHistory={quitHistory} />
-          </TabPane>
-        </Tabs>
-
-        {/* Journal Entry Modal */}
-        <JournalModal
-          isJournalModalVisible={isJournalModalVisible}
-          setIsJournalModalVisible={setIsJournalModalVisible}
-          form={form}
-          editingEntry={editingEntry}
-          handleJournalSubmit={handleJournalSubmit}
-        />
+          </Card>
+        )}
       </div>
     </div>
   );
 }
 
-export default Progress;
+export default ProgressUser;

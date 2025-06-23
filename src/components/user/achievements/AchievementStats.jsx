@@ -19,25 +19,22 @@ const AchievementStats = ({ badges = [], stats = {}, onView, lightTheme }) => {
     earned.length && badgesArray.length
       ? Math.round((earned.length / badgesArray.length) * 100)
       : 0;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-      {/* Badge Collection */}
+      {/* Bộ sưu tập huy hiệu */}
       <div
         className={`${
           lightTheme
-            ? "bg-slate-50 border-slate-200"
+            ? "bg-gradient-to-br from-white to-gray-50 border-gray-200"
             : "bg-white/10 border-white/20"
         } p-6 rounded-2xl ${
           !lightTheme && "backdrop-blur-lg"
-        } border shadow-xl`}
+        } border shadow-md hover:shadow-xl hover:border-blue-300 transition-all duration-300`}
       >
         <div className="flex justify-between mb-4">
-          <h3
-            className={`text-xl font-bold ${
-              lightTheme ? "text-slate-800" : "text-white"
-            }`}
-          >
-            Badge Collection
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
+            Bộ sưu tập huy hiệu
           </h3>
           <Trophy className="w-7 h-7 text-yellow-500" />
         </div>
@@ -52,7 +49,7 @@ const AchievementStats = ({ badges = [], stats = {}, onView, lightTheme }) => {
           <span
             className={`${lightTheme ? "text-slate-500" : "text-gray-300"}`}
           >
-            / {badges.length} earned
+            / {badges.length} đã nhận
           </span>
         </div>
         <Progress
@@ -65,36 +62,36 @@ const AchievementStats = ({ badges = [], stats = {}, onView, lightTheme }) => {
             lightTheme ? "text-slate-500" : "text-gray-300"
           } mt-2`}
         >
-          You've earned {completionRate}% of all achievements!
+          Bạn đã đạt được {completionRate}% tổng số huy hiệu!
         </p>
       </div>
 
-      {/* In Progress */}
+      {/* Đang tiến hành */}
       <div
         className={`${
           lightTheme
-            ? "bg-slate-50 border-slate-200"
+            ? "bg-gradient-to-br from-white to-gray-50 border-gray-200"
             : "bg-white/10 border-white/20"
         } p-6 rounded-2xl ${
           !lightTheme && "backdrop-blur-lg"
-        } border shadow-xl`}
+        } border shadow-md hover:shadow-xl hover:border-blue-300 transition-all duration-300`}
       >
         <div className="flex justify-between mb-4">
-          <h3
-            className={`text-xl font-bold ${
-              lightTheme ? "text-slate-800" : "text-white"
-            }`}
-          >
-            In Progress
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
+            Đang tiến hành
           </h3>
           <Timer className="w-7 h-7 text-blue-500" />
         </div>
         {inProgress.length > 0 ? (
           inProgress.map((b) => (
-            <div key={b.id} className="mb-3">
+            <div
+              key={b.id}
+              className="mb-3 cursor-pointer"
+              onClick={() => onView(b)}
+            >
               <div className="flex justify-between items-center mb-1">
                 <div className="flex items-center">
-                  <div className="mr-2">
+                  <div className="mr-2 bg-gradient-to-br from-white to-gray-50 p-1 rounded-full hover:shadow-md hover:border-blue-300 border border-gray-200 transition-all duration-300">
                     <BadgeIcon
                       icon={b.icon}
                       url_image={b.url_image}
@@ -105,110 +102,98 @@ const AchievementStats = ({ badges = [], stats = {}, onView, lightTheme }) => {
                   <span
                     className={`${
                       lightTheme ? "text-slate-700" : "text-gray-200"
-                    }`}
+                    } text-sm font-medium`}
                   >
                     {b.name}
                   </span>
-                </div>{" "}
+                </div>
                 <span
                   className={`${
-                    lightTheme ? "text-blue-600" : "text-cyan-400"
-                  } font-semibold`}
+                    lightTheme ? "text-slate-600" : "text-gray-300"
+                  } text-xs`}
                 >
-                  {b.progress ? `${b.progress}%` : "Not Started"}
+                  {Math.round(b.progress || 0)}%
                 </span>
               </div>
               <Progress
                 percent={b.progress || 0}
+                size="small"
                 showInfo={false}
-                strokeColor={{ "0%": "#722ed1", "100%": b.color }}
+                status="active"
+                strokeColor={b.color || "#1890ff"}
               />
-              <p
-                className={`text-xs ${
-                  lightTheme ? "text-slate-500" : "text-gray-400"
-                }`}
-              >
-                {b.description}
-              </p>
             </div>
           ))
         ) : (
-          <p
-            className={`${
+          <div
+            className={`text-sm ${
               lightTheme ? "text-slate-500" : "text-gray-300"
-            } text-center`}
+            } mt-2`}
           >
-            No achievements in progress
-          </p>
+            Không có huy hiệu nào đang tiến hành.
+          </div>
         )}
       </div>
 
-      {/* Recent */}
+      {/* Thành tựu gần đây */}
       <div
         className={`${
           lightTheme
-            ? "bg-slate-50 border-slate-200"
+            ? "bg-gradient-to-br from-white to-gray-50 border-gray-200"
             : "bg-white/10 border-white/20"
         } p-6 rounded-2xl ${
           !lightTheme && "backdrop-blur-lg"
-        } border shadow-xl`}
+        } border shadow-md hover:shadow-xl hover:border-blue-300 transition-all duration-300`}
       >
         <div className="flex justify-between mb-4">
-          <h3
-            className={`text-xl font-bold ${
-              lightTheme ? "text-slate-800" : "text-white"
-            }`}
-          >
-            Recent Achievements
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
+            Thành tựu gần đây
           </h3>
-          <Zap className="w-7 h-7 text-yellow-500" />
+          <Zap className="w-7 h-7 text-purple-500" />
         </div>
         {recent.length > 0 ? (
           recent.map((b) => (
             <div
               key={b.id}
-              className={`flex items-center p-2 mb-2 rounded-lg ${
-                lightTheme
-                  ? "bg-white hover:bg-slate-100 border border-slate-100"
-                  : "bg-white/5 hover:bg-white/10"
-              } cursor-pointer transition-all`}
+              className="flex items-center mb-3 p-2 cursor-pointer hover:bg-gradient-to-br hover:from-white hover:to-gray-50 hover:border-blue-300 rounded-md border border-transparent transition-all duration-300"
               onClick={() => onView(b)}
             >
-              {" "}
-              <div className="mr-3">
+              <div className="mr-3 bg-gradient-to-br from-white to-gray-50 p-1 rounded-full hover:shadow-md border border-gray-200 transition-all duration-300">
                 <BadgeIcon
                   icon={b.icon}
                   url_image={b.url_image}
-                  size="lg"
+                  size="md"
                   earned={true}
                 />
               </div>
-              <div>
-                <h4
+              <div className="flex-1">
+                <div
                   className={`${
-                    lightTheme ? "text-slate-800" : "text-gray-200"
-                  }`}
+                    lightTheme ? "text-slate-700" : "text-gray-200"
+                  } text-sm font-medium`}
                 >
                   {b.name}
-                </h4>
-                <p
-                  className={`text-xs ${
-                    lightTheme ? "text-slate-500" : "text-gray-400"
-                  }`}
-                >
-                  Earned on {new Date(b.earnedAt).toLocaleDateString()}
-                </p>
+                </div>
+                {b.earnedAt && (
+                  <div
+                    className={`${
+                      lightTheme ? "text-slate-500" : "text-gray-400"
+                    } text-xs`}
+                  >
+                    {new Date(b.earnedAt).toLocaleDateString()}
+                  </div>
+                )}
               </div>
             </div>
           ))
         ) : (
-          <p
-            className={`${
+          <div
+            className={`text-sm ${
               lightTheme ? "text-slate-500" : "text-gray-300"
-            } text-center`}
+            } mt-2`}
           >
-            No achievements yet
-          </p>
+            Bạn chưa có thành tựu nào.
+          </div>
         )}
       </div>
     </div>
