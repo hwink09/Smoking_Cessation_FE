@@ -41,7 +41,7 @@ const BadgeIcon = ({
         alt="Badge icon"
         className={`${getSizeClass(
           size
-        )} ${className} rounded-full object-cover border-2 shadow-md transition-all duration-300 ${
+        )} ${className} rounded-full object-cover border-2 shadow-md hover:shadow-lg transition-all duration-300 badge-icon-container ${
           earned ? "" : "filter grayscale-[40%]"
         }`}
         style={{
@@ -102,9 +102,9 @@ const BadgeIcon = ({
   // Render icon with circular background
   return (
     <div
-      className={`flex items-center justify-center rounded-full transition-all duration-300 ${
+      className={`flex items-center justify-center rounded-full transition-all duration-300 badge-icon-container hover:shadow-lg ${
         earned
-          ? "bg-gradient-to-br from-blue-50 to-blue-200"
+          ? "bg-gradient-to-br from-blue-50 to-blue-200 hover:from-blue-100 hover:to-blue-300"
           : "bg-gradient-to-br from-gray-100 to-blue-100/50"
       } ${combinedClassName}`}
       style={{

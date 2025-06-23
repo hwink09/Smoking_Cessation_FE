@@ -2,13 +2,13 @@ import api from "./api";
 
 const userBadgeService = {
   assignBadge: async (assignData) => {
-    const response = await api.post("/user-badge/create", assignData);
+    const response = await api.post("/user-badges/create", assignData);
     return response.data;
   },
 
   getUserBadges: async (userId) => {
     if (!userId) return [];
-    const response = await api.get(`/user-badge/user/${userId}`);
+    const response = await api.get(`/user-badges/user/${userId}`);
     return response.data;
   },
 
