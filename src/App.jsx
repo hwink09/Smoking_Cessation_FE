@@ -19,10 +19,15 @@ import Login from "./pages/auth/LoginPage";
 import Register from "./pages/auth/RegisterPage";
 import ForgotPassword from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import CommunityPage from "./pages/generic/community/CommunityPage";
+import RankingPage from "./pages/generic/ranking/RankingPage";
+import PremiumPage from "./pages/generic/premium/PremiumPage";
 import VerifyPage from "./pages/auth/VerifyPage";
 import NotFoundPage from "./pages/error/404Page";
 import UnauthorizedPage from "./pages/error/UnauthorizedPage";
 import BlogPage from "./pages/generic/BlogPage";
+import QuitPlanPage from "./pages/generic/QuitPlanPage";
+import QuitPlanDetailPage from "./pages/generic/QuitPlanDetailPage";
 
 // Admin Pages
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
@@ -41,16 +46,11 @@ import UserBlogPage from "./pages/user/UserBlogPage";
 
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
-import CommunityPage from "./pages/generic/community/CommunityPage";
 import { useAuth } from "./hooks/useAuth";
-import QuitPlanPage from "./pages/generic/QuitPlanPage";
-import QuitPlanDetailPage from "./pages/generic/QuitPlanDetailPage";
 
-// Layout Wrapper for common UI elements
+// Layout Wrapper
 const Layout = () => {
-  console.log("Layout render");
   const { currentUser } = useAuth();
-
   return (
     <div className="min-h-screen bg-black text-white">
       {currentUser ? <UserHeader /> : <Navbar />}
@@ -62,7 +62,6 @@ const Layout = () => {
   );
 };
 
-// Routes Component for Admin and User Routes with role-based protection
 const AdminRoute = ({ element }) => (
   <PrivateRoute allowedRoles={["admin"]}>{element}</PrivateRoute>
 );
@@ -71,11 +70,9 @@ const UserRoute = ({ element }) => (
   <PrivateRoute allowedRoles={["user"]}>{element}</PrivateRoute>
 );
 
-// Generic protected route without specific role requirements
 const ProtectedRoute = ({ element }) => <PrivateRoute>{element}</PrivateRoute>;
 
 function App() {
-  console.log("App render");
   return (
     <AuthProvider>
       <Router>
@@ -84,82 +81,38 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/login/:token" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/fogot-password" element={<ForgotPassword />} />
-
-          <Route
-            path="/resset-password/:token"
-            element={<ResetPasswordPage />}
-          />
-          {/* Giữ route lỗi cũ cho tương thích ngược */}
-          <Route
-            path="/resset-password/:token"
-            element={<ResetPasswordPage />}
-          />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
           <Route path="/verify" element={<VerifyPage />} />
 
           {/* Layout Routes */}
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
             <Route path="/community" element={<CommunityPage />} />
+            <Route path="/ranking" element={<RankingPage />} />
+            <Route path="/premium" element={<PremiumPage />} />
             <Route path="/blog" element={<BlogPage />} />
-            <Route
-              path="/quit-plan"
-              element={<QuitPlanPage />} 
-            />
-            <Route
-              path="/quit-plan-detail/:id"
-            element={<QuitPlanDetailPage />} 
-            />
+            <Route path="/quit-plan" element={<QuitPlanPage />} />
+            <Route path="/quit-plan-detail/:id" element={<QuitPlanDetailPage />} />
           </Route>
 
-          {/* Admin Routes (protected) */}
-          <Route
-            element={<AdminRoute element={<DashboardAdmin />} />}
-            path="/admin/dashboard"
-          />
-          <Route
-            element={<AdminRoute element={<UserManagement />} />}
-            path="/admin/dashboard/user-management"
-          />
-          <Route
-            element={<AdminRoute element={<BadgeManagement />} />}
-            path="/admin/dashboard/badge-management"
-          />
-          <Route
-            element={<AdminRoute element={<FeedbackManagement />} />}
-            path="/admin/dashboard/feedback-management"
-          />
-          <Route
-            element={<AdminRoute element={<ProfilePage />} />}
-            path="/admin/profile"
-          />
-          {/* User Routes (protected) */}
+          {/* Admin Routes */}
+          <Route element={<AdminRoute element={<DashboardAdmin />} />} path="/admin/dashboard" />
+          <Route element={<AdminRoute element={<UserManagement />} />} path="/admin/dashboard/user-management" />
+          <Route element={<AdminRoute element={<BadgeManagement />} />} path="/admin/dashboard/badge-management" />
+          <Route element={<AdminRoute element={<FeedbackManagement />} />} path="/admin/dashboard/feedback-management" />
+          <Route element={<AdminRoute element={<ProfilePage />} />} path="/admin/profile" />
+
+          {/* User Routes */}
           <Route element={<UserLayout />}>
-            <Route
-              element={<UserRoute element={<UserDashboard />} />}
-              path="user/dashboard"
-            />
-            <Route
-              element={<UserRoute element={<UserProgress />} />}
-              path="user/progress"
-            />
-            <Route
-              element={<UserRoute element={<UserAchievement />} />}
-              path="user/achievements"
-            />
-            <Route
-              element={<UserRoute element={<UserSupport />} />}
-              path="user/support"
-            />
-            <Route
-              path="user/profile/:id"
-              element={<UserRoute element={<UserProfilePage />} />}
-            />
-            <Route
-              path="user/blog"
-              element={<UserRoute element={<UserBlogPage />} />}
-            />
+            <Route element={<UserRoute element={<UserDashboard />} />} path="user/dashboard" />
+            <Route element={<UserRoute element={<UserProgress />} />} path="user/progress" />
+            <Route element={<UserRoute element={<UserAchievement />} />} path="user/achievements" />
+            <Route element={<UserRoute element={<UserSupport />} />} path="user/support" />
+            <Route path="user/profile/:id" element={<UserRoute element={<UserProfilePage />} />} />
+            <Route path="user/blog" element={<UserRoute element={<UserBlogPage />} />} />
           </Route>
+
           {/* Error pages */}
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="*" element={<NotFoundPage />} />
