@@ -1,220 +1,117 @@
 /**
- * Email validation using regex
- * @param {string} email - Email to validate
- * @returns {boolean} - Whether email is valid
+ * Validate email format
  */
-export const validateEmail = (email) => {
-  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  return regex.test(email);
-};
+export const validateEmail = (email) =>
+  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 
 /**
- * Password validation - Requires:
- * - At least 6 characters
- * - At least 1 uppercase letter
- * - At least 1 lowercase letter
- * - At least 1 number
- * @param {string} password - Password to validate
- * @returns {object} - Validation result and error message
+ * Validate strong password: min 6, uppercase, lowercase, number
  */
 export const validatePassword = (password) => {
   const errors = [];
-
-  if (!password || password.length < 6) {
+  if (!password || password.length < 6)
     errors.push("Password must be at least 6 characters");
-  }
-  if (!/[A-Z]/.test(password)) {
-    errors.push("Password must contain at least one uppercase letter");
-  }
-  if (!/[a-z]/.test(password)) {
-    errors.push("Password must contain at least one lowercase letter");
-  }
-  if (!/[0-9]/.test(password)) {
-    errors.push("Password must contain at least one number");
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-  };
+  if (!/[A-Z]/.test(password))
+    errors.push("Password must have at least 1 uppercase letter");
+  if (!/[a-z]/.test(password))
+    errors.push("Password must have at least 1 lowercase letter");
+  if (!/[0-9]/.test(password))
+    errors.push("Password must have at least 1 number");
+  return { isValid: errors.length === 0, errors };
 };
 
 /**
- * Simple password validation for login (only check if exists and minimum length)
- * @param {string} password - Password to validate
- * @returns {object} - Validation result and error message
+ * Validate login password (len >= 6)
  */
 export const validateLoginPassword = (password) => {
   const errors = [];
-
-  if (!password) {
-    errors.push("Password is required");
-  } else if (password.length < 6) {
+  if (!password) errors.push("Password is required");
+  else if (password.length < 6)
     errors.push("Password must be at least 6 characters");
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-  };
+  return { isValid: errors.length === 0, errors };
 };
 
 /**
- * Validate login form data
- * @param {object} data - Form data with email and password
- * @returns {object} - Validation errors object
+ * Validate login form
  */
-export const validateLoginForm = (data) => {
+export const validateLoginForm = ({ email, password }) => {
   const errors = {};
-
-  // Validate email
-  if (!data.email) {
-    errors.email = "Email is required";
-  } else if (!data.email.trim()) {
-    errors.email = "Email is required";
-  } else if (!validateEmail(data.email.trim())) {
-    errors.email = "Please enter a valid email address";
-  }
-
-  // Validate password for login (simpler validation)
-  const passwordValidation = validateLoginPassword(data.password);
-  if (!passwordValidation.isValid) {
-    errors.password = passwordValidation.errors[0];
-  }
-
+  if (!email?.trim()) errors.email = "Email is required";
+  else if (!validateEmail(email.trim())) errors.email = "Invalid email address";
+  const passCheck = validateLoginPassword(password);
+  if (!passCheck.isValid) errors.password = passCheck.errors[0];
   return errors;
 };
 
 /**
- * Validate registration form data
- * @param {object} data - Form data
- * @returns {object} - Validation errors object
+ * Validate registration form
  */
-export const validateRegisterForm = (data) => {
+export const validateRegisterForm = ({
+  name,
+  email,
+  password,
+  confirmPassword,
+}) => {
   const errors = {};
-
-  // Validate name
-  if (!data.name || !data.name.trim()) {
-    errors.name = "Name is required";
-  } else if (data.name.trim().length < 2) {
+  if (!name?.trim()) errors.name = "Name is required";
+  else if (name.trim().length < 2)
     errors.name = "Name must be at least 2 characters";
-  }
-
-  // Validate email
-  if (!data.email) {
-    errors.email = "Email is required";
-  } else if (!validateEmail(data.email)) {
-    errors.email = "Please enter a valid email address";
-  }
-
-  // Validate password (strict validation for registration)
-  const passwordValidation = validatePassword(data.password);
-  if (!passwordValidation.isValid) {
-    errors.password = passwordValidation.errors[0];
-  }
-
-  // Validate confirm password
-  if (!data.confirmPassword) {
-    errors.confirmPassword = "Please confirm your password";
-  } else if (data.password !== data.confirmPassword) {
+  if (!validateEmail(email)) errors.email = "Invalid email address";
+  const passCheck = validatePassword(password);
+  if (!passCheck.isValid) errors.password = passCheck.errors[0];
+  if (password !== confirmPassword)
     errors.confirmPassword = "Passwords do not match";
-  }
-
   return errors;
 };
 
 /**
- * Name validation
- * @param {string} name - Name to validate
- * @returns {boolean} - Whether name is valid
+ * Simple name check
  */
-export const validateName = (name) => {
-  return name && name.trim().length >= 2;
+export const validateName = (name) => name?.trim().length >= 2;
+
+/**
+ * Password match check
+ */
+export const passwordsMatch = (password, confirmPassword) =>
+  password === confirmPassword;
+
+/**
+ * Phone number check
+ */
+export const validatePhone = (phone) => /^[+]?[1-9][\d]{0,15}$/.test(phone);
+
+/**
+ * Age check (13-120)
+ */
+export const validateAge = (age) => age >= 13 && age <= 120;
+
+/**
+ * Firebase/auth error formatter
+ */
+export const formatAuthError = (code) => {
+  const map = {
+    "auth/email-already-in-use": "Email already in use",
+    "auth/invalid-email": "Invalid email address",
+    "auth/weak-password": "Weak password",
+    "auth/user-disabled": "Account disabled",
+    "auth/user-not-found": "No user found",
+    "auth/wrong-password": "Wrong password",
+    "auth/too-many-requests": "Too many attempts. Try again later",
+    "auth/network-request-failed": "Network error",
+    "auth/email-not-verified": "Please verify your email",
+    "auth/invalid-credentials": "Invalid email or password",
+  };
+  if (typeof code !== "string") return "An error occurred";
+  return map[code] || (code.includes("auth/") ? "An error occurred" : code);
 };
 
 /**
- * Check if passwords match
- * @param {string} password - Password
- * @param {string} confirmPassword - Confirm password
- * @returns {boolean} - Whether passwords match
+ * Sanitize string input
  */
-export const passwordsMatch = (password, confirmPassword) => {
-  return password === confirmPassword;
-};
+export const sanitizeInput = (input) =>
+  typeof input === "string" ? input.trim().replace(/[<>]/g, "") : "";
 
 /**
- * Validate phone number
- * @param {string} phone - Phone number to validate
- * @returns {boolean} - Whether phone is valid
+ * Check if form is valid
  */
-export const validatePhone = (phone) => {
-  const regex = /^[+]?[1-9][\d]{0,15}$/;
-  return regex.test(phone);
-};
-
-/**
- * Validate age
- * @param {number} age - Age to validate
- * @returns {boolean} - Whether age is valid
- */
-export const validateAge = (age) => {
-  return age >= 13 && age <= 120;
-};
-
-/**
- * Format error message from Firebase or API
- * @param {string} errorCode - Error code or message
- * @returns {string} - User-friendly error message
- */
-export const formatAuthError = (errorCode) => {
-  // Handle both error codes and direct messages
-  if (typeof errorCode === "string") {
-    switch (errorCode) {
-      case "auth/email-already-in-use":
-        return "This email address is already in use";
-      case "auth/invalid-email":
-        return "The email address is not valid";
-      case "auth/weak-password":
-        return "The password is too weak";
-      case "auth/user-disabled":
-        return "This account has been disabled";
-      case "auth/user-not-found":
-        return "No account found with this email";
-      case "auth/wrong-password":
-        return "Incorrect password";
-      case "auth/too-many-requests":
-        return "Too many unsuccessful login attempts. Please try again later";
-      case "auth/network-request-failed":
-        return "Network error. Please check your connection";
-      case "auth/email-not-verified":
-        return "Please verify your email address before signing in";
-      case "auth/invalid-credentials":
-        return "Invalid email or password";
-      default:
-        // Return the original message if it's already user-friendly
-        return errorCode.includes("auth/")
-          ? "An error occurred. Please try again"
-          : errorCode;
-    }
-  }
-  return "An error occurred. Please try again";
-};
-
-/**
- * Sanitize input string
- * @param {string} input - Input to sanitize
- * @returns {string} - Sanitized input
- */
-export const sanitizeInput = (input) => {
-  if (typeof input !== "string") return "";
-  return input.trim().replace(/[<>]/g, "");
-};
-
-/**
- * Check if form data is valid
- * @param {object} errors - Errors object
- * @returns {boolean} - Whether form is valid
- */
-export const isFormValid = (errors) => {
-  return Object.keys(errors).length === 0;
-};
+export const isFormValid = (errors) => Object.keys(errors).length === 0;

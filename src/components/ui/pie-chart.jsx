@@ -22,7 +22,7 @@ export function PieChart({ data, colors }) {
                 <Tooltip
                     formatter={(value, name) => [`${value}%`, name]}
                     contentStyle={{
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        backgroundColor: 'rgba(128, 128, 128, 1)',
                         border: 'none',
                         borderRadius: '4px',
                         color: '#fff'
@@ -32,7 +32,7 @@ export function PieChart({ data, colors }) {
                     verticalAlign="bottom"
                     height={36}
                     formatter={(value, entry) => (
-                        <span style={{ color: '#fff' }}>{value}</span>
+                        <span style={{ color: '#808080' }}>{value}</span>
                     )}
                 />
             </RechartsPieChart>

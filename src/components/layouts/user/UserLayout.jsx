@@ -1,14 +1,14 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import { useSelector } from "react-redux";
+import { useAuth } from "~/hooks/useAuth";
 
 export default function UserLayout() {
-  const { user } = useSelector((state) => state.auth);
+  const { currentUser } = useAuth();
 
   return (
     <div className="flex min-h-screen bg-gray-900">
-      <Sidebar user={user} />
-      <main className="flex-1 p-8">
+      <Sidebar user={currentUser} />
+      <main className="flex-1">
         <Outlet />
       </main>
     </div>

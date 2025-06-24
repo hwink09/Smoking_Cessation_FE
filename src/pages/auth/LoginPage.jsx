@@ -1,74 +1,122 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc"; // Biểu tượng Google
-import { useDispatch, useSelector } from "react-redux";
-import { login, verifyEmail } from "~/redux/slices/authSlice";
-import { selectAuthLoading, selectAuthError } from "~/redux/selectors/authSelectors";
-import { validateLoginForm, formatAuthError, sanitizeInput, isFormValid } from "~/utils/validations";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+  useParams,
+  useLocation,
+} from "react-router-dom";
+import { useAuth } from "~/hooks/useAuth";
+import { sanitizeInput } from "~/utils/validations";
 import { toast } from "react-toastify";
-import { GoogleLogin } from '@react-oauth/google'; // Import GoogleLogin component
+import { GoogleLogin } from "@react-oauth/google";
+import authService from "~/services/authService";
 
 function Login() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const loading = useSelector(selectAuthLoading);
-  const authError = useSelector(selectAuthError);
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const { token } = useParams();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const {
+    login,
+    loginWithGoogle,
+    loading,
+    error,
+    validateLoginForm,
+    isFormValid,
+    formatAuthError,
+    clearError,
+    currentUser,
+  } = useAuth();
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [redirectMessage, setRedirectMessage] = useState("");
+  // Xử lý xác minh email - dùng cờ để tránh hiển thị thông báo trùng lặp
+  const [emailVerified, setEmailVerified] = useState(false);
 
-  const { token } = useParams();
-  const hasVerified = useRef(false);
-  const { user } = useSelector((state) => state.auth);
-
+  // Sử dụng useRef để theo dõi việc xác minh đã được thực hiện hay chưa
+  // refs không gây ra re-render và được giữ nguyên giá trị qua các lần render
+  const verificationAttemptedRef = useRef(false);
+  const tokenVerificationAttemptedRef = useRef(false);
+  // Chỉ xử lý query params một lần khi component mount
   useEffect(() => {
-    if (user && user.userId) {
-      navigate("/admin/dashboard");
+    // Đã có cố gắng xác minh trước đó, không thực hiện lại
+    if (verificationAttemptedRef.current) return;
+
+    // Đánh dấu đã thử xác minh (sử dụng ref để bảo toàn giá trị qua các lần render)
+    verificationAttemptedRef.current = true;
+
+    // Xử lý khi có query params (được chuyển hướng sau xác minh)
+    if (searchParams.get("verified") === "true") {
+      toast.success("Xác minh email thành công.");
+      setEmailVerified(true);
+      return;
     }
-  }, [user, navigate]);
+
+    if (searchParams.get("error") === "invalid_token") {
+      toast.error("Liên kết xác minh không hợp lệ hoặc đã hết hạn.");
+      return;
+    }
+
+    if (searchParams.get("error") === "server_error") {
+      toast.error("Lỗi máy chủ khi xác minh email.");
+      return;
+    }
+
+    // Nếu không có query params nhưng có token trong URL
+    if (token && !emailVerified && !tokenVerificationAttemptedRef.current) {
+      // Đánh dấu là đã cố gắng xác minh với token (sử dụng ref)
+      tokenVerificationAttemptedRef.current = true;
+
+      const verifyEmailToken = async () => {
+        try {
+          console.log("Đang xác minh email với token...");
+          const result = await authService.verifyEmail(token);
+          console.log("Kết quả xác minh:", result);
+          toast.success(result.message || "Xác minh email thành công.");
+          setEmailVerified(true);
+        } catch (error) {
+          console.error("Lỗi xác minh email:", error);
+          const errorMsg =
+            error.response?.data?.message ||
+            "Liên kết xác minh không hợp lệ hoặc đã hết hạn.";
+          toast.error(errorMsg);
+        }
+      };
+
+      verifyEmailToken();
+    }
+    clearError();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    const verifyEmailToken = async () => {
-      if (token && !hasVerified.current) {
-        hasVerified.current = true;
-        try {
-          const result = await dispatch(verifyEmail(token)).unwrap();
-          toast.success("Email verified successfully. Please login.");
-          navigate("/login");
-        } catch (error) {
-          toast.error(error.message || "Verification failed");
-          navigate("/login");
-        }
-      }
-    };
+    if (currentUser && currentUser.userId) {
+      const targetPath =
+        currentUser.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+      navigate(targetPath);
+    }
+  }, [currentUser, navigate]);
 
-    verifyEmailToken();
-  }, [token, navigate, dispatch]);
+  useEffect(() => {
+    if (location.state?.message) {
+      setRedirectMessage(location.state.message);
+    }
+  }, [location]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const sanitizedValue = sanitizeInput(value);
-
     setFormData((prev) => ({
       ...prev,
-      [name]: sanitizedValue,
+      [name]: sanitizeInput(value),
     }));
-
     if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (isSubmitting) return;
 
     const validationErrors = validateLoginForm(formData);
@@ -78,67 +126,134 @@ function Login() {
     }
 
     setIsSubmitting(true);
-
     try {
-      const result = await dispatch(login(formData)).unwrap();
-      if (result.message) {
-        toast.success(result.message);
-        navigate("/admin/dashboard");
+      console.log(
+        "LoginPage: Gửi yêu cầu đăng nhập với email:",
+        formData.email
+      );
+      const result = await login({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+      console.log("LoginPage: Kết quả đăng nhập:", result);
+
+      if (result.success && result.user?.userId) {
+        toast.success(result.message || "Đăng nhập thành công!");
+
+        const role = result.user.role || "user";
+        console.log("LoginPage: Đã đăng nhập với vai trò:", role);
+
+        const targetPath =
+          role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+        console.log("LoginPage: Điều hướng đến:", targetPath);
+
+        navigate(targetPath);
       } else {
-        toast.error(formatAuthError(result.error));
+        console.error("LoginPage: Đăng nhập thất bại:", result);
+        toast.error(
+          formatAuthError(
+            result.error || "Đăng nhập thất bại vì lý do không xác định"
+          )
+        );
+        setFormData((prev) => ({ ...prev, password: "" }));
       }
     } catch (error) {
-      toast.error(formatAuthError(error.message || error));
-
+      console.error("LoginPage: Lỗi ngoại lệ khi đăng nhập:", error);
+      toast.error(
+        formatAuthError(error.message || "Lỗi đăng nhập không xác định")
+      );
       setFormData((prev) => ({ ...prev, password: "" }));
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleGoogleLogin = async (response) => {
-    const { credential } = response;
-
+    if (!response?.credential) {
+      toast.error("Đăng nhập Google thất bại: Thiếu thông tin xác thực.");
+      return;
+    }
+    setIsSubmitting(true);
     try {
-      const result = await dispatch(googleAuth({ credential })).unwrap();
-      toast.success("Google login successful");
-      navigate("/admin/dashboard");
+      console.log("Xử lý đăng nhập Google với credential...");
+      const result = await loginWithGoogle(response.credential);
+
+      if (result.success && result.user?.role) {
+        toast.success("Đăng nhập Google thành công!");
+        const targetPath =
+          result.user.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+        navigate(targetPath);
+      } else {
+        const errorMessage = formatAuthError(
+          result.error || "Không thể xác thực với Google"
+        );
+        console.error("Lỗi đăng nhập Google:", errorMessage);
+        toast.error(errorMessage);
+      }
     } catch (error) {
-      toast.error(formatAuthError(error.message || error));
+      console.error("Exception trong Google login:", error);
+      const errorMessage = formatAuthError(
+        error?.message || "Đăng nhập Google thất bại"
+      );
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const formIsValid = isFormValid(errors) && formData.email && formData.password;
+  const formIsValid =
+    isFormValid(errors) && formData.email && formData.password;
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950">
-      <div className="max-w-md w-full space-y-8 bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gray-950">
+      <div className="max-w-md w-full bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800 space-y-8">
         <div>
           <h1 className="text-3xl font-extrabold text-center text-white">
-            Welcome Back
+            Chào mừng quay lại
           </h1>
           <p className="mt-3 text-center text-sm text-gray-400">
-            Sign in to your account to continue your journey
+            Đăng nhập để tiếp tục hành trình bỏ thuốc lá
           </p>
         </div>
 
-        {authError && (
+        {error && (
           <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-md text-sm">
-            {formatAuthError(authError)}
+            {formatAuthError(error)}
+          </div>
+        )}
+        {redirectMessage && (
+          <div className="bg-green-900/50 border border-green-700 text-green-200 px-4 py-3 rounded-md text-sm">
+            {redirectMessage}
           </div>
         )}
 
         <div className="flex flex-col gap-4 mt-8 w-full">
-          {/* Google Login Button */}
+          {" "}
           <div className="flex justify-center">
-          <GoogleLogin
-            onSuccess={handleGoogleLogin}
-            onError={(error) => toast.error('Google login failed')}
-            useOneTap
-            size="large"
-            text="Continue with Google"
-            theme="outline"
-          />
+            {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+              <GoogleLogin
+                onSuccess={handleGoogleLogin}
+                onError={(error) => {
+                  console.error("Google login error:", error);
+                  if (
+                    error?.type === "popup_failed_to_open" ||
+                    error?.error === "idpiframe_initialization_failed"
+                  ) {
+                    toast.error(
+                      "Đăng nhập Google thất bại: Domain hiện tại không được phép. Vui lòng liên hệ quản trị viên."
+                    );
+                  } else {
+                    toast.error("Đăng nhập Google thất bại. Vui lòng thử lại.");
+                  }
+                }}
+                useOneTap={false}
+                shape="rectangular"
+                theme="filled_blue"
+              />
+            ) : (
+              <div className="p-2 bg-red-900/20 border border-red-800 rounded-md text-center text-red-300 text-sm">
+                Chưa cấu hình Client ID Google
+              </div>
+            )}
           </div>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -146,7 +261,7 @@ function Login() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-gray-900 text-gray-400">
-                Or continue with email
+                Hoặc đăng nhập bằng email
               </span>
             </div>
           </div>
@@ -155,82 +270,68 @@ function Login() {
         <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email-address" className="block text-sm font-medium text-gray-300">
-                Email address
+              <label className="block text-sm font-medium text-gray-300">
+                Email
               </label>
               <input
-                id="email-address"
                 name="email"
                 type="email"
-                autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`mt-1 appearance-none block w-full px-3 py-2 border ${
+                className={`mt-1 block w-full px-3 py-2 border ${
                   errors.email ? "border-red-500" : "border-gray-700"
-                } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
-                placeholder="you@example.com"
+                } bg-gray-800 text-white rounded-md`}
+                placeholder="email@example.com"
               />
-              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+              )}
             </div>
-
             <div>
               <div className="flex justify-between">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                  Password
+                <label className="block text-sm font-medium text-gray-300">
+                  Mật khẩu
                 </label>
-                <div className="text-sm">
-                  <Link to="/forgot-password" className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors">
-                    Forgot password?
-                  </Link>
-                </div>
+                <Link
+                  to="/fogot-password"
+                  className="text-sm text-indigo-500 hover:text-indigo-400"
+                >
+                  Quên mật khẩu?
+                </Link>
               </div>
               <input
-                id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
                 value={formData.password}
                 onChange={handleChange}
-                className={`mt-1 appearance-none block w-full px-3 py-2 border ${
+                className={`mt-1 block w-full px-3 py-2 border ${
                   errors.password ? "border-red-500" : "border-gray-700"
-                } bg-gray-800 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                } bg-gray-800 text-white rounded-md`}
                 placeholder="••••••••"
               />
-              {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+              )}
             </div>
           </div>
-
           <button
             type="submit"
             disabled={loading || isSubmitting || !formIsValid}
-            className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-all duration-200 ${
+            className={`w-full py-2.5 px-4 text-sm font-medium rounded-md text-white ${
               formIsValid && !loading && !isSubmitting
-                ? "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500"
+                ? "bg-indigo-600 hover:bg-indigo-700"
                 : "bg-gray-700 cursor-not-allowed"
-            } focus:outline-none focus:ring-2 focus:ring-offset-2`}
+            }`}
           >
-            {loading || isSubmitting ? (
-              <>
-                <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Signing in...
-              </>
-            ) : (
-              "Sign in"
-            )}
+            {loading || isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
-
           <div className="text-sm text-center pt-2">
-            <span className="text-gray-400">Don't have an account?</span>{" "}
-            <Link to="/register" className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors">
-              Create an account
+            <span className="text-gray-400">Chưa có tài khoản?</span>{" "}
+            <Link
+              to="/register"
+              className="text-indigo-500 hover:text-indigo-400"
+            >
+              Tạo tài khoản mới
             </Link>
           </div>
         </form>
