@@ -39,12 +39,12 @@ import UserSupport from "./pages/user/UserSupport";
 import UserProfilePage from "./pages/user/UserProfilePage";
 import UserBlogPage from "./pages/user/UserBlogPage";
 
-
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import CommunityPage from "./pages/generic/community/CommunityPage";
 import { useAuth } from "./hooks/useAuth";
-import { User } from "lucide-react";
+import QuitPlanPage from "./pages/generic/QuitPlanPage";
+import QuitPlanDetailPage from "./pages/generic/QuitPlanDetailPage";
 
 // Layout Wrapper for common UI elements
 const Layout = () => {
@@ -96,12 +96,22 @@ function App() {
             element={<ResetPasswordPage />}
           />
           <Route path="/verify" element={<VerifyPage />} />
+
           {/* Layout Routes */}
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
             <Route path="/community" element={<CommunityPage />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route
+              path="/quit-plan"
+              element={<QuitPlanPage />} 
+            />
+            <Route
+              path="/quit-plan-detail/:id"
+            element={<QuitPlanDetailPage />} 
+            />
           </Route>
+
           {/* Admin Routes (protected) */}
           <Route
             element={<AdminRoute element={<DashboardAdmin />} />}
