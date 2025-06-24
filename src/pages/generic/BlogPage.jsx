@@ -20,19 +20,6 @@ function BlogPage() {
     };
   }, [refetchPosts]);
 
-  // Kiểm tra và reload khi có thay đổi like
-  // useEffect(() => {
-  //   const checkForUpdates = () => {
-  //     const shouldReload = localStorage.getItem("should_reload_blog_list");
-  //     if (shouldReload === "true") {
-  //       refetchPosts();
-  //       localStorage.removeItem("should_reload_blog_list");
-  //     }
-  //   };
-  //   checkForUpdates();
-  //   const interval = setInterval(checkForUpdates, 2000);
-  //   return () => clearInterval(interval);
-  // }, [refetchPosts]);
 
   const filteredPosts = (posts || []).filter((post) => {
     const matchesSearch =
