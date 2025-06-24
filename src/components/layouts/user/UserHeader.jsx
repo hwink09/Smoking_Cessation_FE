@@ -25,7 +25,7 @@ const UserHeader = () => {
         key: "profile",
         icon: <FaUser className="text-purple-400" />,
         label: <span className="text-white">Profile</span>,
-        onClick: () => navigate(`/user/profile/${currentUser?.id}`),
+        onClick: () => navigate(`/user/profile/${currentUser?.userId || currentUser?._id || currentUser?.id}`),
       },
       {
         key: "logout",

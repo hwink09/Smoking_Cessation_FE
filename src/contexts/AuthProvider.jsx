@@ -140,6 +140,8 @@ export const AuthProvider = ({ children }) => {
       const userToStore = {
         ...user,
         userId: user.userId || user.id || user._id,
+        _id: user._id || user.userId || user.id,
+        id: user.id || user.userId || user._id,
       };
 
       console.log("AuthProvider: Lưu thông tin user:", userToStore);

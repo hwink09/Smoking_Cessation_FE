@@ -40,6 +40,7 @@ import UserSupport from "./pages/user/UserSupport";
 import PrivateRoute from "./PrivateRouter";
 import CommunityPage from "./pages/generic/community/CommunityPage";
 import { useAuth } from "./hooks/useAuth";
+import UserProfilePage from "./pages/user/UserProfilePage";
 
 // Layout Wrapper for common UI elements
 const Layout = () => {
@@ -55,7 +56,6 @@ const Layout = () => {
     </div>
   );
 };
-
 
 // Routes Component for Admin and User Routes with role-based protection
 const AdminRoute = ({ element }) => (
@@ -133,6 +133,7 @@ function App() {
               element={<UserRoute element={<UserSupport />} />}
               path="user/support"
             />
+            <Route path="user/profile/:id" element={<UserRoute element={<UserProfilePage />} />} />
           </Route>
           {/* Error pages */}
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
