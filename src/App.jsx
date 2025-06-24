@@ -11,6 +11,7 @@ import AuthProvider from "./contexts/AuthProvider";
 import { Navbar } from "./components/layouts/Navbar";
 import { Footer } from "./components/layouts/Footer";
 import UserLayout from "./components/layouts/user/UserLayout";
+import UserHeader from "./components/layouts/user/UserHeader";
 
 // Pages
 import HomePages from "./pages/generic/home/HomePages";
@@ -38,15 +39,23 @@ import UserSupport from "./pages/user/UserSupport";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import CommunityPage from "./pages/generic/community/CommunityPage";
+import { useAuth } from "./hooks/useAuth";
 
 // Layout Wrapper for common UI elements
-const Layout = ({ children }) => (
-  <div className="min-h-screen bg-black text-white mt-20">
-    <Navbar />
-    <main>{<Outlet />}</main>
-    <Footer />
-  </div>
-);
+const Layout = () => {
+  const { currentUser } = useAuth();
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      {currentUser ? <UserHeader /> : <Navbar />}
+      <main className="mt-16">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
 
 // Routes Component for Admin and User Routes with role-based protection
 const AdminRoute = ({ element }) => (
