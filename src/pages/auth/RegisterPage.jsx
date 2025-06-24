@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { formatAuthError } from "~/utils/validations";
-import { useAuth } from "~/hooks/useAuth";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "~/hooks/useAuth";
 
 function Register() {
   const navigate = useNavigate();
-  const { register, validateRegistrationForm, isFormValid } = useAuth();
+  const {
+    register,
+    validateRegistrationForm,
+    isFormValid,
+    formatAuthError,
+    clearError,
+  } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -44,12 +49,14 @@ function Register() {
       const result = await register(formData);
       if (result.success) {
         toast.success("Đăng ký thành công! Vui lòng xác minh email.");
-        navigate("/verify", { state: { email: formData.email.trim() } });
+        navigate("/verify", {
+          state: { email: formData.email.trim() },
+        });
       } else {
         toast.error(formatAuthError(result.error));
       }
     } catch (error) {
-      toast.error(formatAuthError(error.message || "Đăng ký thất bại"));
+      toast.error(formatAuthError(error?.message || "Đăng ký thất bại"));
     } finally {
       setIsLoading(false);
     }

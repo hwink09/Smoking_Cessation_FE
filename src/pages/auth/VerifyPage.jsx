@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Link,
   useNavigate,
@@ -6,8 +6,8 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { useAuth } from "~/hooks/useAuth";
-import authService from "~/services/authService";
 import { toast } from "react-toastify";
+import authService from "~/services/authService";
 
 function VerifyPage() {
   const navigate = useNavigate();
@@ -15,13 +15,15 @@ function VerifyPage() {
   const [searchParams] = useSearchParams();
   const { resendVerification } = useAuth();
 
-  // Lấy token từ URL nếu có
   const token = searchParams.get("token");
+  const emailFromQuery = searchParams.get("email");
+  const emailFromState = location.state?.email;
+  const email = emailFromState || emailFromQuery || "";
 
-  // Lấy email từ state điều hướng
-  const email = location.state?.email || "";
+  const COOLDOWN_PERIOD = 60000; // 1 minute
+  const COOLDOWN_KEY = "emailVerificationLastResendTime";
+  const cooldownTimerRef = useRef(null);
 
-  // UI states
   const [isResending, setIsResending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState({
@@ -31,46 +33,71 @@ function VerifyPage() {
   });
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendError, setResendError] = useState("");
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
-  // Xử lý xác thực email khi có token trong URL
+  // Load cooldown from localStorage
+  useEffect(() => {
+    const savedTime = localStorage.getItem(COOLDOWN_KEY);
+    if (savedTime) {
+      const lastTime = parseInt(savedTime, 10);
+      const now = Date.now();
+      const elapsed = now - lastTime;
+      if (elapsed < COOLDOWN_PERIOD) {
+        setCooldownRemaining(Math.ceil((COOLDOWN_PERIOD - elapsed) / 1000));
+      }
+    }
+
+    return () => {
+      if (cooldownTimerRef.current) {
+        clearInterval(cooldownTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Countdown effect
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return;
+
+    cooldownTimerRef.current = setInterval(() => {
+      setCooldownRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(cooldownTimerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (cooldownTimerRef.current) {
+        clearInterval(cooldownTimerRef.current);
+      }
+    };
+  }, [cooldownRemaining]);
+
+  // Verify email token
   useEffect(() => {
     const verifyEmailToken = async () => {
       if (!token) return;
-
       setIsVerifying(true);
 
       try {
-        const result = await authService.verifyEmail(token);
-
+        const { data } = await authService.verifyEmail(token);
         setVerificationStatus({
           isVerified: true,
-          message: result.message || "Email đã được xác thực thành công!",
+          message: data.message || "Email đã được xác thực thành công!",
           error: "",
         });
-
         toast.success(
           "Xác thực email thành công! Bạn có thể đăng nhập ngay bây giờ."
         );
-
-        // Sau 3 giây sẽ chuyển hướng về trang đăng nhập
-        setTimeout(() => {
-          navigate("/login");
-        }, 3000);
+        setTimeout(() => navigate("/login"), 3000);
       } catch (error) {
-        console.error("Lỗi xác thực email:", error);
-
-        setVerificationStatus({
-          isVerified: false,
-          message: "",
-          error:
-            error.response?.data?.message ||
-            "Liên kết xác thực không hợp lệ hoặc đã hết hạn",
-        });
-
-        toast.error(
+        const msg =
           error.response?.data?.message ||
-            "Liên kết xác thực không hợp lệ hoặc đã hết hạn"
-        );
+          "Liên kết xác thực không hợp lệ hoặc đã hết hạn";
+        setVerificationStatus({ isVerified: false, message: "", error: msg });
+        toast.error(msg);
       } finally {
         setIsVerifying(false);
       }
@@ -79,16 +106,21 @@ function VerifyPage() {
     verifyEmailToken();
   }, [token, navigate]);
 
-  // Quay lại trang đăng nhập
-  const handleBackToLogin = () => {
-    navigate("/login");
-  };
+  const handleBackToLogin = () => navigate("/login");
 
-  // Gửi lại email xác thực
   const handleResendVerification = async () => {
     if (!email) {
       toast.error("Không tìm thấy email để gửi lại xác thực.");
-      setTimeout(() => setResendError(""), 3000);
+      return;
+    }
+
+    const now = Date.now();
+    const lastResend = parseInt(localStorage.getItem(COOLDOWN_KEY) || 0);
+    const elapsed = now - lastResend;
+
+    if (elapsed < COOLDOWN_PERIOD) {
+      const remaining = Math.ceil((COOLDOWN_PERIOD - elapsed) / 1000);
+      toast.error(`Vui lòng đợi ${remaining} giây trước khi gửi lại.`);
       return;
     }
 
@@ -97,21 +129,21 @@ function VerifyPage() {
 
     try {
       const result = await resendVerification(email);
-
-      if (result.success) {
-        setResendSuccess(true);
+      if (result?.success) {
         toast.success("Gửi lại email xác thực thành công!");
-        setTimeout(() => {
-          setResendSuccess(false);
-        }, 5000);
+        setResendSuccess(true);
+        localStorage.setItem(COOLDOWN_KEY, now.toString());
+        setCooldownRemaining(60);
+        setTimeout(() => setResendSuccess(false), 5000);
       } else {
-        setResendError(result.error || "Không thể gửi lại email xác thực.");
-        toast.error(result.error || "Không thể gửi lại email xác thực.");
+        const errorMsg = result?.error || "Không thể gửi lại email xác thực.";
+        setResendError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (error) {
-      console.error("Lỗi gửi lại email:", error);
-      setResendError(error.message || "Đã xảy ra lỗi. Vui lòng thử lại sau.");
-      toast.error(error.message || "Đã xảy ra lỗi. Vui lòng thử lại sau.");
+      const errorMsg = error.message || "Đã xảy ra lỗi. Vui lòng thử lại sau.";
+      setResendError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsResending(false);
     }
@@ -120,105 +152,38 @@ function VerifyPage() {
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950">
       <div className="max-w-md w-full space-y-8 bg-gray-900 p-10 rounded-xl shadow-lg border border-gray-800">
-        {/* Hiển thị trạng thái xác thực nếu đang xác thực token */}
-        {token && (
+        {token ? (
           <div className="text-center">
             {isVerifying ? (
               <div className="flex flex-col items-center">
-                <svg
-                  className="animate-spin h-10 w-10 text-indigo-500 mb-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
+                <div className="animate-spin h-10 w-10 text-indigo-500 mb-4">
+                  🔄
+                </div>
                 <p className="text-white">Đang xác thực email...</p>
               </div>
             ) : verificationStatus.isVerified ? (
-              <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                  <svg
-                    className="h-8 w-8 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-extrabold text-white mb-2">
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">
                   Xác thực thành công!
                 </h2>
                 <p className="text-green-400">{verificationStatus.message}</p>
                 <p className="text-gray-400 mt-2">
-                  Bạn sẽ được chuyển hướng đến trang đăng nhập...
+                  Bạn sẽ được chuyển đến trang đăng nhập...
                 </p>
               </div>
             ) : (
-              <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                  <svg
-                    className="h-8 w-8 text-red-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-extrabold text-white mb-2">
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">
                   Xác thực thất bại
                 </h2>
                 <p className="text-red-400">{verificationStatus.error}</p>
               </div>
             )}
           </div>
-        )}
-
-        {/* Hiển thị thông tin xác thực email ban đầu khi không có token */}
-        {!token && (
+        ) : (
           <>
-            {/* Biểu tượng thành công */}
             <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                <svg
-                  className="h-8 w-8 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-extrabold text-white mb-2">
+              <h2 className="text-2xl font-bold text-white mb-2">
                 Xác thực email của bạn
               </h2>
               <p className="text-gray-400 text-sm">
@@ -231,119 +196,56 @@ function VerifyPage() {
               )}
             </div>
 
-            {/* Hướng dẫn */}
-            <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-blue-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-blue-200">
-                    Các bước tiếp theo:
-                  </h3>
-                  <div className="mt-2 text-sm text-blue-300">
-                    <ol className="list-decimal list-inside space-y-1">
-                      <li>Kiểm tra hộp thư của bạn</li>
-                      <li>Nhấn vào liên kết xác thực trong email</li>
-                      <li>Quay lại đăng nhập với tài khoản của bạn</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
+            <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 text-sm text-blue-300">
+              <ol className="list-decimal list-inside space-y-1">
+                <li>Kiểm tra hộp thư của bạn</li>
+                <li>Nhấn vào liên kết xác thực trong email</li>
+                <li>Quay lại đăng nhập với tài khoản của bạn</li>
+              </ol>
             </div>
 
-            {/* Thông báo phản hồi */}
             {resendSuccess && (
               <div className="bg-green-900/30 border border-green-700 rounded-lg p-4 text-green-300 text-sm">
-                Đã gửi lại email xác thực! Vui lòng kiểm tra hộp thư.
+                Đã gửi lại email xác thực!
               </div>
             )}
-
             {resendError && (
               <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 text-red-300 text-sm">
                 {resendError}
               </div>
             )}
 
-            {/* Thông tin bổ sung */}
-            <div className="text-center text-sm text-gray-400">
-              <p>Không nhận được email? Kiểm tra thư rác hoặc spam.</p>
-              <p className="mt-2">
-                Cần hỗ trợ?{" "}
-                <a href="#" className="text-indigo-400 hover:text-indigo-300">
-                  Liên hệ hỗ trợ
-                </a>
-              </p>
-            </div>
-
-            {/* Nút hành động */}
             <div className="space-y-3">
               <button
                 onClick={handleBackToLogin}
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+                className="w-full py-2.5 px-4 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 Quay lại đăng nhập
               </button>
-
               <button
                 onClick={handleResendVerification}
-                disabled={isResending}
-                className={`w-full flex justify-center py-2.5 px-4 border border-gray-600 text-sm font-medium rounded-md text-gray-300 
+                disabled={isResending || cooldownRemaining > 0}
+                className={`w-full py-2.5 px-4 text-sm font-medium rounded-md text-gray-300 border 
                   ${
                     isResending
                       ? "bg-gray-700 cursor-wait"
-                      : "bg-transparent hover:bg-gray-800"
-                  } 
-                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200`}
+                      : "hover:bg-gray-800"
+                  }
+                `}
               >
-                {isResending ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Đang gửi...
-                  </>
-                ) : (
-                  "Gửi lại email xác thực"
-                )}
+                {isResending
+                  ? "Đang gửi..."
+                  : cooldownRemaining > 0
+                  ? `Gửi lại email xác thực (${cooldownRemaining}s)`
+                  : "Gửi lại email xác thực"}
               </button>
             </div>
 
-            {/* Liên kết quay lại đăng ký */}
-            <div className="text-sm text-center">
-              <span className="text-gray-400">Nhập sai email?</span>{" "}
+            <div className="text-sm text-center text-gray-400">
+              Nhập sai email?{" "}
               <Link
                 to="/register"
-                className="font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
+                className="text-indigo-400 hover:text-indigo-300"
               >
                 Đăng ký lại
               </Link>

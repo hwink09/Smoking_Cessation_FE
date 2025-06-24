@@ -69,9 +69,6 @@ const AdminRoute = ({ element }) => (
 const UserRoute = ({ element }) => (
   <PrivateRoute allowedRoles={["user"]}>{element}</PrivateRoute>
 );
-
-const ProtectedRoute = ({ element }) => <PrivateRoute>{element}</PrivateRoute>;
-
 function App() {
   return (
     <AuthProvider>
@@ -81,8 +78,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/login/:token" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+          <Route path="/fogot-password" element={<ForgotPassword />} />
+          <Route
+            path="/resset-password/:token"
+            element={<ResetPasswordPage />}
+          />
           <Route path="/verify" element={<VerifyPage />} />
 
           {/* Layout Routes */}
@@ -93,24 +93,60 @@ function App() {
             <Route path="/premium" element={<PremiumPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/quit-plan" element={<QuitPlanPage />} />
-            <Route path="/quit-plan-detail/:id" element={<QuitPlanDetailPage />} />
+            <Route
+              path="/quit-plan-detail/:id"
+              element={<QuitPlanDetailPage />}
+            />
           </Route>
 
           {/* Admin Routes */}
-          <Route element={<AdminRoute element={<DashboardAdmin />} />} path="/admin/dashboard" />
-          <Route element={<AdminRoute element={<UserManagement />} />} path="/admin/dashboard/user-management" />
-          <Route element={<AdminRoute element={<BadgeManagement />} />} path="/admin/dashboard/badge-management" />
-          <Route element={<AdminRoute element={<FeedbackManagement />} />} path="/admin/dashboard/feedback-management" />
-          <Route element={<AdminRoute element={<ProfilePage />} />} path="/admin/profile" />
+          <Route
+            element={<AdminRoute element={<DashboardAdmin />} />}
+            path="/admin/dashboard"
+          />
+          <Route
+            element={<AdminRoute element={<UserManagement />} />}
+            path="/admin/dashboard/user-management"
+          />
+          <Route
+            element={<AdminRoute element={<BadgeManagement />} />}
+            path="/admin/dashboard/badge-management"
+          />
+          <Route
+            element={<AdminRoute element={<FeedbackManagement />} />}
+            path="/admin/dashboard/feedback-management"
+          />
+          <Route
+            element={<AdminRoute element={<ProfilePage />} />}
+            path="/admin/profile"
+          />
 
           {/* User Routes */}
           <Route element={<UserLayout />}>
-            <Route element={<UserRoute element={<UserDashboard />} />} path="user/dashboard" />
-            <Route element={<UserRoute element={<UserProgress />} />} path="user/progress" />
-            <Route element={<UserRoute element={<UserAchievement />} />} path="user/achievements" />
-            <Route element={<UserRoute element={<UserSupport />} />} path="user/support" />
-            <Route path="user/profile/:id" element={<UserRoute element={<UserProfilePage />} />} />
-            <Route path="user/blog" element={<UserRoute element={<UserBlogPage />} />} />
+            <Route
+              element={<UserRoute element={<UserDashboard />} />}
+              path="user/dashboard"
+            />
+            <Route
+              element={<UserRoute element={<UserProgress />} />}
+              path="user/progress"
+            />
+            <Route
+              element={<UserRoute element={<UserAchievement />} />}
+              path="user/achievements"
+            />
+            <Route
+              element={<UserRoute element={<UserSupport />} />}
+              path="user/support"
+            />
+            <Route
+              path="user/profile/:id"
+              element={<UserRoute element={<UserProfilePage />} />}
+            />
+            <Route
+              path="user/blog"
+              element={<UserRoute element={<UserBlogPage />} />}
+            />
           </Route>
 
           {/* Error pages */}

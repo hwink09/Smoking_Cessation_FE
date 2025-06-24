@@ -10,16 +10,17 @@ import { useAuth } from "~/hooks/useAuth";
 import { sanitizeInput } from "~/utils/validations";
 import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
-import authService from "~/services/authService";
 
 function Login() {
   const navigate = useNavigate();
   const { token } = useParams();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+
   const {
     login,
     loginWithGoogle,
+    verifyEmail,
     loading,
     error,
     validateLoginForm,
@@ -28,26 +29,21 @@ function Login() {
     clearError,
     currentUser,
   } = useAuth();
+
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [redirectMessage, setRedirectMessage] = useState("");
-  // Xử lý xác minh email - dùng cờ để tránh hiển thị thông báo trùng lặp
   const [emailVerified, setEmailVerified] = useState(false);
 
-  // Sử dụng useRef để theo dõi việc xác minh đã được thực hiện hay chưa
-  // refs không gây ra re-render và được giữ nguyên giá trị qua các lần render
   const verificationAttemptedRef = useRef(false);
   const tokenVerificationAttemptedRef = useRef(false);
-  // Chỉ xử lý query params một lần khi component mount
-  useEffect(() => {
-    // Đã có cố gắng xác minh trước đó, không thực hiện lại
-    if (verificationAttemptedRef.current) return;
 
-    // Đánh dấu đã thử xác minh (sử dụng ref để bảo toàn giá trị qua các lần render)
+  // Xác minh email (qua query param hoặc token URL)
+  useEffect(() => {
+    if (verificationAttemptedRef.current) return;
     verificationAttemptedRef.current = true;
 
-    // Xử lý khi có query params (được chuyển hướng sau xác minh)
     if (searchParams.get("verified") === "true") {
       toast.success("Xác minh email thành công.");
       setEmailVerified(true);
@@ -64,22 +60,21 @@ function Login() {
       return;
     }
 
-    // Nếu không có query params nhưng có token trong URL
     if (token && !emailVerified && !tokenVerificationAttemptedRef.current) {
-      // Đánh dấu là đã cố gắng xác minh với token (sử dụng ref)
       tokenVerificationAttemptedRef.current = true;
 
       const verifyEmailToken = async () => {
         try {
           console.log("Đang xác minh email với token...");
-          const result = await authService.verifyEmail(token);
+          const result = await verifyEmail(token); // ✅ dùng context API
           console.log("Kết quả xác minh:", result);
           toast.success(result.message || "Xác minh email thành công.");
           setEmailVerified(true);
         } catch (error) {
           console.error("Lỗi xác minh email:", error);
           const errorMsg =
-            error.response?.data?.message ||
+            error?.error ||
+            error?.message ||
             "Liên kết xác minh không hợp lệ hoặc đã hết hạn.";
           toast.error(errorMsg);
         }
@@ -87,24 +82,28 @@ function Login() {
 
       verifyEmailToken();
     }
+
     clearError();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Điều hướng nếu đã đăng nhập
   useEffect(() => {
-    if (currentUser && currentUser.userId) {
+    if (currentUser?.userId) {
       const targetPath =
         currentUser.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
       navigate(targetPath);
     }
   }, [currentUser, navigate]);
 
+  // Hiển thị message chuyển hướng (nếu có)
   useEffect(() => {
     if (location.state?.message) {
       setRedirectMessage(location.state.message);
     }
   }, [location]);
 
+  // Xử lý thay đổi input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -115,6 +114,8 @@ function Login() {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
+
+  // Submit login form
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -127,28 +128,50 @@ function Login() {
 
     setIsSubmitting(true);
     try {
-      console.log(
-        "LoginPage: Gửi yêu cầu đăng nhập với email:",
-        formData.email
-      );
+      console.log("LoginPage: Gửi yêu cầu đăng nhập với:", formData.email);
       const result = await login({
         email: formData.email.trim(),
         password: formData.password,
       });
-      console.log("LoginPage: Kết quả đăng nhập:", result);
 
+      console.log("LoginPage: Kết quả:", result); // Check for success with valid user object
       if (result.success && result.user?.userId) {
         toast.success(result.message || "Đăng nhập thành công!");
-
-        const role = result.user.role || "user";
-        console.log("LoginPage: Đã đăng nhập với vai trò:", role);
-
         const targetPath =
-          role === "admin" ? "/admin/dashboard" : "/user/dashboard";
-        console.log("LoginPage: Điều hướng đến:", targetPath);
-
+          result.user.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
         navigate(targetPath);
-      } else {
+      }
+      // Handle case where success is true but user is null/invalid
+      else if (result.success && !result.user?.userId) {
+        // The login was technically successful but we couldn't get a valid user object
+        console.error(
+          "LoginPage: Đăng nhập thành công nhưng không có thông tin người dùng:",
+          result
+        );
+
+        // Try getting the user from localStorage as a last resort
+        const localUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+        if (localUser && localUser.userId) {
+          // We found a user in localStorage, try to use it
+          console.log(
+            "LoginPage: Sử dụng thông tin người dùng từ localStorage:",
+            localUser
+          );
+          toast.success("Đăng nhập thành công!");
+          const targetPath =
+            localUser.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+          navigate(targetPath);
+        } else {
+          // No valid user anywhere - show error and clear password
+          toast.error(
+            "Đăng nhập thành công nhưng không thể lấy thông tin người dùng. Vui lòng thử lại."
+          );
+          setFormData((prev) => ({ ...prev, password: "" }));
+        }
+      }
+      // Handle general failure
+      else {
         console.error("LoginPage: Đăng nhập thất bại:", result);
         toast.error(
           formatAuthError(
@@ -158,15 +181,17 @@ function Login() {
         setFormData((prev) => ({ ...prev, password: "" }));
       }
     } catch (error) {
-      console.error("LoginPage: Lỗi ngoại lệ khi đăng nhập:", error);
+      console.error("LoginPage: Lỗi ngoại lệ:", error);
       toast.error(
-        formatAuthError(error.message || "Lỗi đăng nhập không xác định")
+        formatAuthError(error?.message || "Lỗi đăng nhập không xác định")
       );
       setFormData((prev) => ({ ...prev, password: "" }));
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Google login handler
   const handleGoogleLogin = async (response) => {
     if (!response?.credential) {
       toast.error("Đăng nhập Google thất bại: Thiếu thông tin xác thực.");
@@ -174,23 +199,23 @@ function Login() {
     }
     setIsSubmitting(true);
     try {
-      console.log("Xử lý đăng nhập Google với credential...");
+      console.log("Xử lý đăng nhập Google...");
       const result = await loginWithGoogle(response.credential);
 
       if (result.success && result.user?.role) {
         toast.success("Đăng nhập Google thành công!");
         const targetPath =
-          result.user.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+          result.user.role === "admin" ? "/admin/dashboard" : "/";
         navigate(targetPath);
       } else {
         const errorMessage = formatAuthError(
           result.error || "Không thể xác thực với Google"
         );
-        console.error("Lỗi đăng nhập Google:", errorMessage);
+        console.error("Lỗi Google login:", errorMessage);
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.error("Exception trong Google login:", error);
+      console.error("Exception Google login:", error);
       const errorMessage = formatAuthError(
         error?.message || "Đăng nhập Google thất bại"
       );
@@ -227,23 +252,13 @@ function Login() {
         )}
 
         <div className="flex flex-col gap-4 mt-8 w-full">
-          {" "}
           <div className="flex justify-center">
             {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
               <GoogleLogin
                 onSuccess={handleGoogleLogin}
                 onError={(error) => {
                   console.error("Google login error:", error);
-                  if (
-                    error?.type === "popup_failed_to_open" ||
-                    error?.error === "idpiframe_initialization_failed"
-                  ) {
-                    toast.error(
-                      "Đăng nhập Google thất bại: Domain hiện tại không được phép. Vui lòng liên hệ quản trị viên."
-                    );
-                  } else {
-                    toast.error("Đăng nhập Google thất bại. Vui lòng thử lại.");
-                  }
+                  toast.error("Đăng nhập Google thất bại. Vui lòng thử lại.");
                 }}
                 useOneTap={false}
                 shape="rectangular"
