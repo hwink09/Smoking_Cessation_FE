@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { validatePassword, passwordsMatch } from "~/utils/validations";
 import { toast } from "react-toastify";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+import api from "~/services/api";
 
 function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -46,10 +44,9 @@ function ResetPasswordPage() {
 
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        `${API_URL}/auth/resset-password/${token}`,
-        { newPassword: password }
-      );
+      const response = await api.post(`/auth/resset-password/${token}`, {
+        newPassword: password,
+      });
 
       toast.success("Đặt lại mật khẩu thành công! Đang chuyển hướng...");
       setIsResetComplete(true);
@@ -149,7 +146,7 @@ function ResetPasswordPage() {
                 <p className="mt-1 text-sm text-red-500">{errors.password}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">
-                Mật khẩu ít nhất 8 ký tự, có chữ hoa, chữ thường và số.
+                Mật khẩu ít nhất 6 ký tự, có chữ hoa, chữ thường và số.
               </p>
             </div>
 

@@ -1,143 +1,250 @@
 import api from "./api";
 import { jwtDecode } from "jwt-decode";
 
-// Helper to store token and user
+// Helper: Lưu thông tin xác thực
 function storeAuthData(data) {
-  if (data.token) localStorage.setItem("token", data.token);
-  if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+  // Store token
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+  } else if (data.user?.token) {
+    localStorage.setItem("token", data.user.token);
+  }
+
+  // Store user data
+  if (data.user) {
+    // Make sure user object has the required fields
+    const userToStore = {
+      userId: data.user.userId || data.user.id || data.user._id,
+      email: data.user.email,
+      name: data.user.name,
+      role: data.user.role,
+      avatar_url: data.user.avatar_url,
+    };
+
+    // Verify we have the minimal required data
+    if (!userToStore.userId) {
+      console.error("Missing userId in user object:", data.user);
+    }
+
+    localStorage.setItem("user", JSON.stringify(userToStore));
+    console.log("User data stored successfully:", userToStore);
+  } else {
+    console.error("No user data available to store");
+  }
+}
+
+// Helper: Xóa toàn bộ thông tin xác thực
+function clearAuthData() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  // Xóa cookie nếu có
+  document.cookie.split(";").forEach((c) => {
+    document.cookie = c
+      .replace(/^ +/, "")
+      .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+  });
 }
 
 const authService = {
-  // POST /api/auth/login
-  login: async (credentials) => {
+  /**
+   * POST /api/auth/login
+   */ async login(credentials) {
     try {
-      console.log("Đang gửi yêu cầu đăng nhập với:", credentials.email);
-      const response = await api.post("/auth/login", credentials);
-      console.log("Response đăng nhập:", response.data);
+      const { data } = await api.post("/auth/login", credentials);
 
-      // Kiểm tra dữ liệu trả về
-      if (!response.data.token && !response.data.user?.token) {
-        console.error(
-          "Đăng nhập thành công nhưng không có token:",
-          response.data
-        );
-        throw new Error("Đăng nhập thành công nhưng thiếu thông tin xác thực");
+      // Debug the response to understand what's coming from the server
+      console.log("Login API response:", data);
+
+      // Check if we have at least a token
+      if (!data.token && !data.user?.token) {
+        console.error("Login response missing token:", data);
+        throw new Error("Đăng nhập thành công nhưng thiếu token.");
       }
 
-      storeAuthData(response.data);
-      return response.data;
+      // Store whatever data we have first (token is important)
+      storeAuthData(data);
+
+      // Enhanced login response handling
+      if (!data.user || !data.user.userId) {
+        console.warn(
+          "Login response missing user data, attempting recovery:",
+          data
+        );
+
+        try {
+          // Try to construct a user object from token
+          if (data.token) {
+            const token = data.token;
+            localStorage.setItem("token", token);
+
+            // Get existing user if available
+            let storedUser;
+            try {
+              storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+            } catch (e) {
+              storedUser = {};
+            }
+
+            // Try to decode token
+            try {
+              const decoded = jwtDecode(token);
+              console.log("Token decoded successfully:", decoded);
+
+              // Create user object from token
+              const userId = decoded.id || decoded.userId || decoded.sub;
+
+              if (userId) {
+                const userFromToken = {
+                  userId,
+                  email: decoded.email || storedUser.email || credentials.email,
+                  name: decoded.name || storedUser.name,
+                  role: decoded.role || storedUser.role || "user",
+                  avatar_url:
+                    decoded.avatar_url ||
+                    decoded.picture ||
+                    storedUser.avatar_url,
+                  token: token,
+                };
+
+                console.log("Created user from token:", userFromToken);
+
+                // Store the constructed user
+                localStorage.setItem("user", JSON.stringify(userFromToken));
+
+                // Update the response data
+                data.user = userFromToken;
+                console.log(
+                  "Updated login response with user from token:",
+                  data
+                );
+              }
+            } catch (decodeError) {
+              console.error("Failed to decode token:", decodeError);
+            }
+          }
+        } catch (recoveryError) {
+          console.error("Failed to recover user data:", recoveryError);
+        }
+      }
+
+      return data;
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
-      if (error.response?.status === 200 && !error.response.data.token) {
-        console.error(
-          "Backend trả về 200 nhưng thiếu dữ liệu:",
-          error.response.data
-        );
-      }
       throw error;
     }
   },
 
-  // POST /api/auth/google
-  loginWithGoogle: async (credential) => {
-    if (!credential) throw new Error("Invalid Google credential");
+  /**
+   * POST /api/auth/google
+   */
+  async loginWithGoogle(credential) {
+    if (!credential) throw new Error("Thông tin Google không hợp lệ.");
+
     try {
-      const endpoint = "/auth/google";
-      const existingToken = localStorage.getItem("token");
-      const headers = existingToken
-        ? { Authorization: `Bearer ${existingToken}` }
-        : {};
-      const response = await api.post(
-        endpoint,
+      const headers = {};
+      const token = localStorage.getItem("token");
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const { data } = await api.post(
+        "/auth/google",
         { credential },
         { headers, timeout: 10000 }
       );
-      storeAuthData(response.data);
-      return response.data;
+
+      storeAuthData(data);
+      return data;
     } catch (error) {
-      if (error.response) {
-        if (error.response.status === 403) {
-          const originError = error.response.headers?.["x-permitted-origin"]
-            ? ` Origin mismatch. Expected: ${error.response.headers["x-permitted-origin"]}, Got: ${window.location.origin}`
+      const { response } = error;
+      if (response) {
+        if (response.status === 403) {
+          const originError = response.headers?.["x-permitted-origin"]
+            ? ` Origin mismatch: ${response.headers["x-permitted-origin"]} <> ${window.location.origin}`
             : "";
           throw new Error(
-            `Máy chủ từ chối quyền truy cập (403): Vui lòng kiểm tra cấu hình tài khoản Google hoặc liên hệ quản trị viên.${originError}`
+            `Máy chủ từ chối quyền truy cập (403).${originError}`
           );
-        } else if (error.response.status === 401) {
+        }
+        if (response.status === 401) {
           throw new Error(
             "Xác thực Google thất bại (401): Token không hợp lệ hoặc đã hết hạn."
           );
-        } else if (error.response.status >= 500) {
-          throw new Error("Lỗi máy chủ: Vui lòng thử lại sau.");
+        }
+        if (response.status >= 500) {
+          throw new Error("Lỗi máy chủ, vui lòng thử lại sau.");
         }
       }
-      throw error.message
-        ? error
-        : new Error("Đăng nhập Google thất bại. Vui lòng thử lại.");
+      throw error.message || new Error("Đăng nhập Google thất bại.");
     }
   },
 
-  // POST /api/auth/register
-  register: async (userData) => {
+  /**
+   * POST /api/auth/register
+   */
+  async register(userData) {
     try {
-      const response = await api.post("/auth/register", userData);
-      return response.data;
+      const { data } = await api.post("/auth/register", userData);
+      return data;
     } catch (error) {
       console.error("Lỗi đăng ký:", error);
       throw error;
     }
   },
 
-  // POST /api/auth/fogot-password
-  forgotPassword: async (email) => {
+  /**
+   * POST /api/auth/forgot-password
+   */
+  async forgotPassword(email) {
     try {
-      const response = await api.post("/auth/fogot-password", { email });
-      return response.data;
+      const { data } = await api.post("/auth/fogot-password", { email });
+      return data;
     } catch (error) {
       console.error("Lỗi quên mật khẩu:", error);
       throw error;
     }
   },
 
-  // POST /api/auth/resset-password/{token}
-  resetPassword: async (token, newPassword) => {
+  /**
+   * POST /api/auth/reset-password/{token}
+   */
+  async resetPassword(token, newPassword) {
     try {
-      const response = await api.post(`/auth/resset-password/${token}`, {
+      const { data } = await api.post(`/auth/resset-password/${token}`, {
         newPassword,
       });
-      return response.data;
+      return data;
     } catch (error) {
       console.error("Lỗi đặt lại mật khẩu:", error);
       throw error;
     }
   },
 
-  // POST /api/auth/resend-verification
-  resendVerification: async (email) => {
+  /**
+   * POST /api/auth/resend-verification
+   */
+  async resendVerification(email) {
     try {
-      const response = await api.post("/auth/resend-verification", { email });
-      return response.data;
+      const { data } = await api.post("/auth/resend-verification", { email });
+      return data;
     } catch (error) {
       console.error("Lỗi gửi lại xác minh:", error);
       throw error;
     }
-  }, // GET /api/auth/verify/:token
+  },
+
+  /**
+   * GET /api/auth/verify/:token
+   * Đảm bảo không verify lại cùng token nhiều lần.
+   */
   verifyEmail: (() => {
-    // Sử dụng closure để lưu trữ token đã verify
     const verifiedTokens = new Set();
-
     return async (token) => {
-      // Kiểm tra xem token đã được xử lý chưa
       if (verifiedTokens.has(token)) {
-        console.log("Token đã được xử lý trước đó, không gọi API lại");
-        return { message: "Email đã được xác minh thành công" };
+        return { message: "Email đã được xác minh trước đó." };
       }
-
       try {
-        const response = await api.get(`/auth/verify/${token}`);
-        // Lưu token đã xác minh vào Set để tránh gọi lại API
+        const { data } = await api.get(`/auth/verify/${token}`);
         verifiedTokens.add(token);
-        return response.data;
+        return data;
       } catch (error) {
         console.error("Lỗi xác minh email:", error);
         throw error;
@@ -145,20 +252,12 @@ const authService = {
     };
   })(),
 
-  logout: () => {
+  /**
+   * Xoá token, user & cookies
+   */
+  logout() {
     try {
-      // Xóa dữ liệu local
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-
-      // Xóa cookies nếu có
-      document.cookie.split(";").forEach((c) => {
-        document.cookie = c
-          .replace(/^ +/, "")
-          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
-
-      console.log("Đã xóa thông tin đăng nhập");
+      clearAuthData();
       return true;
     } catch (error) {
       console.error("Lỗi khi logout:", error);
@@ -166,31 +265,70 @@ const authService = {
     }
   },
 
-  getCurrentUser: () => {
+  /**
+   * Trích xuất user hiện tại từ token & localStorage
+   */
+  getCurrentUser() {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return null;
-      const decoded = jwtDecode(token);
-      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const userId =
-        decoded.id || decoded.userId || decoded.sub || storedUser.userId;
-      if (!userId) return null;
-      return {
-        userId,
-        name: decoded.name || storedUser.name,
-        email: decoded.email || storedUser.email,
-        role: decoded.role || storedUser.role,
-        avatar_url:
-          decoded.avatar_url || decoded.avatarUrl || storedUser.avatar_url,
-      };
-    } catch (error) {
-      try {
-        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-        if (storedUser && storedUser.userId) return storedUser;
-      } catch (parseError) {
-        // Lỗi khi parse dữ liệu user từ localStorage
-        console.error("Error parsing user data:", parseError);
+      // First check if we have a stored user object
+      const storedUserJson = localStorage.getItem("user");
+      if (storedUserJson) {
+        const storedUser = JSON.parse(storedUserJson);
+        // If we have a complete user object with userId, return it
+        if (storedUser && storedUser.userId) {
+          console.log("Using stored user:", storedUser);
+          return storedUser;
+        }
       }
+
+      // If no complete user in localStorage, try to get from token
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return null;
+      }
+
+      try {
+        const decoded = jwtDecode(token);
+        console.log("Token decoded:", decoded);
+
+        // Try to get stored user again as a fallback for missing fields
+        const storedUser = storedUserJson ? JSON.parse(storedUserJson) : {};
+
+        // Get userId from various possible properties
+        const userId =
+          decoded.id || decoded.userId || decoded.sub || storedUser.userId;
+
+        if (!userId) {
+          console.error("No userId found in token or stored user");
+          return null;
+        }
+
+        // Construct user object from token and fallbacks
+        const user = {
+          userId,
+          name: decoded.name || storedUser.name,
+          email: decoded.email || storedUser.email,
+          role: decoded.role || storedUser.role,
+          avatar_url:
+            decoded.avatar_url || decoded.avatarUrl || storedUser.avatar_url,
+        };
+
+        // Make sure we have required fields
+        if (!user.email || !user.name || !user.role) {
+          console.warn("Incomplete user data from token:", user);
+        }
+
+        // Update stored user with more complete info if needed
+        localStorage.setItem("user", JSON.stringify(user));
+
+        return user;
+      } catch (tokenError) {
+        console.error("Error decoding token:", tokenError);
+        // If token decode fails, try stored user again
+        return storedUserJson ? JSON.parse(storedUserJson) : null;
+      }
+    } catch (err) {
+      console.error("Error in getCurrentUser:", err);
       return null;
     }
   },

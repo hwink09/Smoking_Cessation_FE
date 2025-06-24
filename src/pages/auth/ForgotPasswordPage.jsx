@@ -4,7 +4,9 @@ import { useAuth } from "~/hooks/useAuth";
 import { toast } from "react-toastify";
 
 function ForgotPassword() {
-  const { validateForgotPasswordForm, forgotPassword } = useAuth();
+  const { validateForgotPasswordForm, forgotPassword, formatAuthError } =
+    useAuth();
+
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -14,33 +16,31 @@ function ForgotPassword() {
     setEmail(e.target.value);
     if (error) setError("");
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Reset previous errors
     setError("");
 
-    // Validate email
+    const validationError = validateForgotPasswordForm(email);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      const validationError = validateForgotPasswordForm(email);
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
-
-      setIsLoading(true);
       const result = await forgotPassword(email);
-
       if (result.success) {
         toast.success("Đã gửi liên kết đặt lại mật khẩu đến email của bạn.");
         setIsSubmitted(true);
       } else {
-        setError(result.error || "Yêu cầu thất bại, vui lòng thử lại.");
+        setError(formatAuthError(result.error || "Yêu cầu thất bại."));
       }
     } catch (err) {
       toast.error(
-        err?.message ||
-          "Gửi liên kết đặt lại mật khẩu thất bại. Vui lòng thử lại."
+        formatAuthError(
+          err?.message || "Gửi liên kết đặt lại mật khẩu thất bại."
+        )
       );
     } finally {
       setIsLoading(false);
