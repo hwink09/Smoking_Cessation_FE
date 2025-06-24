@@ -8,7 +8,6 @@ export function usePostData() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  console.log("usePostData hook run");
 
   const fetchTags = useCallback(async () => {
     try {

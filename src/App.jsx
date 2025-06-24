@@ -24,7 +24,6 @@ import NotFoundPage from "./pages/error/404Page";
 import UnauthorizedPage from "./pages/error/UnauthorizedPage";
 import BlogPage from "./pages/generic/BlogPage";
 
-
 // Admin Pages
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
@@ -38,12 +37,14 @@ import UserProgress from "./pages/user/UserProgress";
 import UserAchievement from "./pages/user/UserAchievement";
 import UserSupport from "./pages/user/UserSupport";
 import UserProfilePage from "./pages/user/UserProfilePage";
+import UserBlogPage from "./pages/user/UserBlogPage";
 
 
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import CommunityPage from "./pages/generic/community/CommunityPage";
 import { useAuth } from "./hooks/useAuth";
+import { User } from "lucide-react";
 
 // Layout Wrapper for common UI elements
 const Layout = () => {
@@ -99,8 +100,7 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
             <Route path="/community" element={<CommunityPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-
+            <Route path="/blog" element={<BlogPage />} />
           </Route>
           {/* Admin Routes (protected) */}
           <Route
@@ -144,6 +144,10 @@ function App() {
             <Route
               path="user/profile/:id"
               element={<UserRoute element={<UserProfilePage />} />}
+            />
+            <Route
+              path="user/blog"
+              element={<UserRoute element={<UserBlogPage />} />}
             />
           </Route>
           {/* Error pages */}
