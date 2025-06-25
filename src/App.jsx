@@ -48,6 +48,8 @@ import UserBlogPage from "./pages/user/UserBlogPage";
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
 import SmokingStatusPage from "./pages/user/SmokingStatusPage";
+import { User } from "lucide-react";
+import UserQuitPlanPage from "./pages/user/UserQuitPlanPage";
 
 // Layout Wrapper
 const Layout = () => {
@@ -148,8 +150,14 @@ function App() {
               path="user/blog"
               element={<UserRoute element={<UserBlogPage />} />}
             />
-            <Route path="user/smoking-status" element={<UserRoute element={<SmokingStatusPage />} />}/>
-
+            <Route
+              path="user/smoking-status"
+              element={<UserRoute element={<SmokingStatusPage />} />}
+            />
+            <Route
+              path="user/quitplan"
+              element={<UserRoute element={<UserQuitPlanPage />} />}
+            />
           </Route>
 
           {/* Error pages */}
