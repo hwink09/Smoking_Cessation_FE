@@ -47,6 +47,7 @@ import UserBlogPage from "./pages/user/UserBlogPage";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
+import SmokingStatusPage from "./pages/user/SmokingStatusPage";
 
 // Layout Wrapper
 const Layout = () => {
@@ -147,6 +148,8 @@ function App() {
               path="user/blog"
               element={<UserRoute element={<UserBlogPage />} />}
             />
+            <Route path="user/smoking-status" element={<UserRoute element={<SmokingStatusPage />} />}/>
+
           </Route>
 
           {/* Error pages */}
