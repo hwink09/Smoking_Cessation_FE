@@ -1,5 +1,5 @@
-// src/hooks/useSmokingStatus.jsx
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { message } from "antd";
 import SmokingStatusService from "../services/SmokingStatusService";
 
 const useSmokingStatus = () => {
@@ -8,68 +8,66 @@ const useSmokingStatus = () => {
   const [error, setError] = useState(null);
 
   // Lấy dữ liệu
-  const fetchSmokingStatus = async (id) => {
-    setLoading(true);
-    setError(null);
+  const fetchSmokingStatus = useCallback(async (userId) => {
     try {
-      const data = await SmokingStatusService.getStatus(id);
+      setLoading(true);
+      const data = await SmokingStatusService.getStatus(userId);
       setStatusData(data);
+      return data;
     } catch (err) {
       setError(err);
+      message.error("Lấy thông tin thất bại. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Tạo mới
-  const createSmokingStatus = async (id, payload) => {
-    setLoading(true);
-    setError(null);
+  const createSmokingStatus = useCallback(async (userId, payload) => {
     try {
-      const data = await SmokingStatusService.createStatus(id, payload);
-      if (data.smokingStatus) {
-        setStatusData(data.smokingStatus);
-      } else {
-        await fetchSmokingStatus(id);
-      }
+      setLoading(true);
+      const data = await SmokingStatusService.createStatus(userId, payload);
+      setStatusData(data?.smokingStatus || null);
+      message.success("Thêm thông tin hút thuốc thành công!");
+      return data;
     } catch (err) {
       setError(err);
+      message.error("Thêm thông tin thất bại. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Cập nhật
-  const updateSmokingStatus = async (userId, payload) => {
-    setLoading(true);
-    setError(null);
+  const updateSmokingStatus = useCallback(async (userId, payload) => {
     try {
+      setLoading(true);
       const data = await SmokingStatusService.updateStatus(userId, payload);
-      if (data.updatedSmokingStatus) {
-        setStatusData(data.updatedSmokingStatus);
-      } else {
-        await fetchSmokingStatus(userId);
-      }
+      setStatusData(data?.updatedSmokingStatus || null);
+      message.success("Cập nhật thông tin thành công!");
+      return data;
     } catch (err) {
       setError(err);
+      message.error("Cập nhật thông tin thất bại. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Xóa
-  const deleteSmokingStatus = async (recordId) => {
-    setLoading(true);
-    setError(null);
+  const deleteSmokingStatus = useCallback(async (recordId) => {
     try {
+      setLoading(true);
       await SmokingStatusService.deleteStatus(recordId);
       setStatusData(null);
+      message.success("Xóa thông tin thành công!");
     } catch (err) {
       setError(err);
+      message.error("Xóa thông tin thất bại. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return {
     statusData,

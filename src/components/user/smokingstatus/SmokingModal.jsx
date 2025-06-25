@@ -1,36 +1,48 @@
-import { useEffect } from "react"
-import { Modal, Form, Input, InputNumber, Select, Button, Space, Typography, DatePicker } from "antd"
-import { Plus, Cigarette, DollarSign, Calendar, BarChart3 } from "lucide-react"
-import dayjs from "dayjs"
+import { useEffect } from "react";
+import {
+  Modal,
+  Form,
+  InputNumber,
+  Button,
+  Space,
+  Typography,
+  DatePicker,
+} from "antd";
+import { Plus, Cigarette, DollarSign, Calendar } from "lucide-react";
+import dayjs from "dayjs";
 
-const { Paragraph } = Typography
-const { Option } = Select
+const { Paragraph } = Typography;
+const iconColor = "#d9d9d9";
 
-export default function SmokingModal({ visible, editingRecord, onSubmit, onCancel }) {
-  const [form] = Form.useForm()
+export default function SmokingModal({
+  visible,
+  editingRecord,
+  onSubmit,
+  onCancel,
+}) {
+  const [form] = Form.useForm();
 
   useEffect(() => {
     if (visible && editingRecord) {
       form.setFieldsValue({
-        frequency: editingRecord.frequency,
         cigarettes_per_day: editingRecord.cigarettes_per_day,
         cost_per_pack: editingRecord.cost_per_pack,
         start_date: dayjs(editingRecord.start_date),
-      })
+      });
     } else if (visible) {
-      form.resetFields()
+      form.resetFields();
     }
-  }, [visible, editingRecord, form])
+  }, [visible, editingRecord, form]);
 
   const handleCancel = () => {
-    form.resetFields()
-    onCancel()
-  }
+    form.resetFields();
+    onCancel();
+  };
 
   const handleSubmit = (values) => {
-    onSubmit(values)
-    form.resetFields()
-  }
+    onSubmit(values);
+    form.resetFields();
+  };
 
   return (
     <Modal
@@ -45,88 +57,44 @@ export default function SmokingModal({ visible, editingRecord, onSubmit, onCance
       footer={null}
       width={500}
     >
-      <Paragraph style={{ color: "#666", marginBottom: "24px" }}>
+      <Paragraph style={{ color: "#666", marginBottom: 24 }}>
         Vui lòng điền đầy đủ thông tin về thói quen hút thuốc của bạn
       </Paragraph>
 
-      <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
-        <Form.Item
-          label={
-            <Space>
-              <BarChart3 size={14} />
-              Tần suất hút thuốc
-            </Space>
-          }
-          name="frequency"
-          rules={[{ required: true, message: "Vui lòng chọn tần suất hút thuốc!" }]}
-        >
-          <Select placeholder="Chọn tần suất" size="large">
-            <Option value="daily">
-              <Space>
-                <div style={{ 
-                  width: "8px", 
-                  height: "8px", 
-                  borderRadius: "50%", 
-                  backgroundColor: "#f5222d" 
-                }}></div>
-                Hàng ngày
-              </Space>
-            </Option>
-            <Option value="weekly">
-              <Space>
-                <div style={{ 
-                  width: "8px", 
-                  height: "8px", 
-                  borderRadius: "50%", 
-                  backgroundColor: "#fa8c16" 
-                }}></div>
-                Hàng tuần
-              </Space>
-            </Option>
-            <Option value="occasionally">
-              <Space>
-                <div style={{ 
-                  width: "8px", 
-                  height: "8px", 
-                  borderRadius: "50%", 
-                  backgroundColor: "#fadb14" 
-                }}></div>
-                Thỉnh thoảng
-              </Space>
-            </Option>
-            <Option value="social">
-              <Space>
-                <div style={{ 
-                  width: "8px", 
-                  height: "8px", 
-                  borderRadius: "50%", 
-                  backgroundColor: "#52c41a" 
-                }}></div>
-                Chỉ khi giao tiếp
-              </Space>
-            </Option>
-          </Select>
-        </Form.Item>
-
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        requiredMark={false}
+      >
         <Form.Item
           label={
             <Space>
               <Cigarette size={14} />
-              Số điếu/ngày
+              Số điếu trung bình / ngày
             </Space>
           }
           name="cigarettes_per_day"
           rules={[
-            { required: true, message: "Vui lòng nhập số điếu mỗi ngày!" },
-            { type: "number", min: 1, message: "Phải lớn hơn hoặc bằng 1!" },
+            {
+              required: true,
+              message: "Vui lòng nhập số điếu trung bình mỗi ngày!",
+            },
+            {
+              type: "number",
+              min: 1,
+              max: 1000,
+              message: "Từ 1 đến 1000 điếu mỗi ngày!",
+            },
           ]}
         >
           <InputNumber
             placeholder="VD: 10"
             size="large"
             min={1}
+            max={1000}
             style={{ width: "100%" }}
-            prefix={<Cigarette size={14} style={{ color: "#d9d9d9" }} />}
+            prefix={<Cigarette size={14} style={{ color: iconColor }} />}
           />
         </Form.Item>
 
@@ -134,22 +102,28 @@ export default function SmokingModal({ visible, editingRecord, onSubmit, onCance
           label={
             <Space>
               <DollarSign size={14} />
-              Giá/vỉ (VNĐ)
+              Giá tiền / bao thuốc (VND)
             </Space>
           }
           name="cost_per_pack"
           rules={[
-            { required: true, message: "Vui lòng nhập giá mỗi vỉ!" },
-            { type: "number", min: 0, message: "Phải là số dương!" },
+            { required: true, message: "Vui lòng nhập giá mỗi bao!" },
+            {
+              type: "number",
+              min: 0,
+              max: 100000,
+              message: "Giá tối đa 100,000 VND!",
+            },
           ]}
         >
           <InputNumber
             placeholder="VD: 25000"
             size="large"
             min={0}
+            max={100000}
             step={1000}
             style={{ width: "100%" }}
-            prefix={<DollarSign size={14} style={{ color: "#d9d9d9" }} />}
+            prefix={<DollarSign size={14} style={{ color: iconColor }} />}
           />
         </Form.Item>
 
@@ -157,7 +131,7 @@ export default function SmokingModal({ visible, editingRecord, onSubmit, onCance
           label={
             <Space>
               <Calendar size={14} />
-              Ngày bắt đầu
+              Ngày bắt đầu cai thuốc
             </Space>
           }
           name="start_date"
@@ -168,12 +142,12 @@ export default function SmokingModal({ visible, editingRecord, onSubmit, onCance
             size="large"
             format="YYYY-MM-DD"
             placeholder="Chọn ngày bắt đầu"
-            suffixIcon={<Calendar size={14} style={{ color: "#d9d9d9" }} />}
+            suffixIcon={<Calendar size={14} style={{ color: iconColor }} />}
           />
         </Form.Item>
 
-        <Form.Item style={{ marginBottom: 0, marginTop: "24px" }}>
-          <Space style={{ width: "100%", justifyContent: "flex-end" }}>
+        <Form.Item style={{ marginTop: 24 }}>
+          <Space style={{ justifyContent: "flex-end", width: "100%" }}>
             <Button onClick={handleCancel}>Hủy</Button>
             <Button type="primary" htmlType="submit" icon={<Plus size={14} />}>
               {editingRecord ? "Cập nhật" : "Thêm mới"}
@@ -182,5 +156,5 @@ export default function SmokingModal({ visible, editingRecord, onSubmit, onCance
         </Form.Item>
       </Form>
     </Modal>
-  )
+  );
 }
