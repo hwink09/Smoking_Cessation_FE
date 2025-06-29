@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import ProgressHeader from "./ProgressHeader";
 import JournalSection from "./JournalSection";
+import useProgress from "~/hooks/useProgress";
 import { Card } from "antd";
 import {
   SmileOutlined,
@@ -10,32 +11,33 @@ import {
 import { TrendingUp } from "lucide-react";
 import dayjs from "dayjs";
 
-const getLocalJSON = (key, fallback) => {
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-
 function ProgressUser() {
-  // Mock data - sẽ được thay thế bằng API sau này
   const mockQuitData = {
     quitDate: "2024-01-15",
     cigarettesPerDay: 20,
     pricePerPack: 50000,
     cigarettesPerPack: 20,
+    userId: localStorage.getItem("user")?.id, 
+    stageId: "684a8fe73a565ab924db5bd8", // TODO: lấy state id ở đâu ?? 
   };
 
   const [quitDate] = useState(new Date(mockQuitData.quitDate));
   const [cigarettesPerDay] = useState(mockQuitData.cigarettesPerDay);
   const [pricePerPack] = useState(mockQuitData.pricePerPack);
   const [cigarettesPerPack] = useState(mockQuitData.cigarettesPerPack);
-  const [isLoading, setIsLoading] = useState(false);
-  const [entries, setEntries] = useState(() =>
-    getLocalJSON("smoke-free-journal", [])
-  );
+
+  const {
+    progress: entries,
+    recentEntries: last7DaysEntries,
+    recentStats,
+    loading,
+    submitting,
+    error,
+    createProgressEntry,
+    calculateStats,
+    clearError,
+  } = useProgress(mockQuitData.userId, mockQuitData.stageId);
+
   const healthMilestones = useMemo(
     () => [
       {
@@ -103,33 +105,11 @@ function ProgressUser() {
     ],
     []
   );
-  useEffect(() => {
-    localStorage.setItem("smoke-free-journal", JSON.stringify(entries));
-  }, [entries]);
-
-  const handleSubmit = (entry) => {
-    setEntries((prev) => {
-      const filtered = prev.filter((e) => e.date !== entry.date);
-      return [...filtered, entry].sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
-    });
-  };
 
   const stats = useMemo(() => {
-    const now = new Date();
-    const daysDiff = Math.floor((now - quitDate) / (1000 * 3600 * 24));
-    const cigarettesAvoided = daysDiff * cigarettesPerDay;
-    const packsAvoided = cigarettesAvoided / cigarettesPerPack;
-    const moneySaved = packsAvoided * pricePerPack;
-    const healthImprovement = Math.min((daysDiff / 365) * 100, 100);
-    return {
-      days: daysDiff,
-      moneySaved,
-      healthImprovement: healthImprovement.toFixed(1),
-      cigarettesAvoided,
-    };
-  }, [quitDate, cigarettesPerDay, cigarettesPerPack, pricePerPack]);
+    return calculateStats(quitDate, cigarettesPerDay, pricePerPack, cigarettesPerPack);
+  }, [quitDate, cigarettesPerDay, pricePerPack, cigarettesPerPack, calculateStats]);
+
   const currentMilestone = useMemo(
     () =>
       [...healthMilestones]
@@ -138,15 +118,43 @@ function ProgressUser() {
     [stats.days, healthMilestones]
   );
 
-  const last7DaysEntries = useMemo(
-    () =>
-      entries.filter(
-        (entry) =>
-          dayjs().diff(dayjs(entry.date), "day") >= 0 &&
-          dayjs().diff(dayjs(entry.date), "day") < 7
-      ),
-    [entries]
-  );
+  const handleSubmit = async (entry) => {
+    try {
+      clearError();
+
+      const dailySavings = (pricePerPack / cigarettesPerPack) * cigarettesPerDay;
+      const actualMoneySaved = entry.smoked 
+        ? Math.max(0, dailySavings - (entry.cigarettes * (pricePerPack / cigarettesPerPack)))
+        : dailySavings;
+
+      const progressData = {
+        date: entry.date,
+        cigarettesSmoked: entry.smoked ? entry.cigarettes : 0,
+        healthStat: entry.symptoms || "",
+        moneySaved: Math.round(actualMoneySaved),
+        stageId: mockQuitData.stageId,
+        userId: mockQuitData.userId,
+        mood: entry.mood,
+        health: entry.health,
+        smoked: entry.smoked,
+      };
+
+      await createProgressEntry(progressData);
+    } catch (error) {
+      console.error("Error submitting journal entry:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        clearError();
+      }, 5000); 
+
+      return () => clearTimeout(timer);
+    }
+  }, [error, clearError]);
+
   return (
     <div className="w-full bg-gradient-to-br from-purple-50 via-white to-blue-50 min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4">
@@ -154,20 +162,21 @@ function ProgressUser() {
           quitDate={quitDate}
           stats={stats}
           healthMilestone={currentMilestone}
-        />{" "}
+        />
+
         <JournalSection
           entries={entries}
           onSubmit={handleSubmit}
-          isLoading={isLoading}
-        />{" "}
+          isLoading={loading || submitting}
+        />
+
         {stats.days >= 7 && last7DaysEntries.length > 0 && (
           <Card
             title={
               <div className="flex items-center">
                 <TrendingUp className="w-6 h-6 text-purple-600 mr-3" />
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
-                  {" "}
-                  Tóm Tắt 7 Ngày Gần Nhất{" "}
+                  Tóm Tắt 7 Ngày Gần Nhất
                 </h2>
               </div>
             }
@@ -189,12 +198,7 @@ function ProgressUser() {
                   Tâm trạng trung bình
                 </h4>
                 <p className="text-3xl font-bold text-yellow-600">
-                  {last7DaysEntries.length > 0
-                    ? (
-                        last7DaysEntries.reduce((sum, e) => sum + e.mood, 0) /
-                        last7DaysEntries.length
-                      ).toFixed(1)
-                    : "N/A"}
+                  {recentStats.averageMood}
                   <span className="text-yellow-500 text-lg ml-1">/10</span>
                 </p>
               </div>
@@ -207,12 +211,7 @@ function ProgressUser() {
                   Sức khỏe trung bình
                 </h4>
                 <p className="text-3xl font-bold text-blue-600">
-                  {last7DaysEntries.length > 0
-                    ? (
-                        last7DaysEntries.reduce((sum, e) => sum + e.health, 0) /
-                        last7DaysEntries.length
-                      ).toFixed(1)
-                    : "N/A"}
+                  {recentStats.averageHealth}
                   <span className="text-blue-500 text-lg ml-1">/10</span>
                 </p>
               </div>
@@ -225,19 +224,24 @@ function ProgressUser() {
                   Ngày không thuốc
                 </h4>
                 <p className="text-3xl font-bold text-green-600">
-                  {last7DaysEntries.length > 0
-                    ? (
-                        100 -
-                        (last7DaysEntries.filter((e) => e.smoked).length /
-                          last7DaysEntries.length) *
-                          100
-                      ).toFixed(0)
-                    : "N/A"}
+                  {recentStats.smokeFreePercentage}
                   <span className="text-green-500 text-lg ml-1">%</span>
                 </p>
               </div>
             </div>
           </Card>
+        )}
+
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600">{error}</p>
+            <button
+              onClick={clearError}
+              className="mt-2 text-sm text-red-500 underline hover:text-red-700"
+            >
+              Đóng
+            </button>
+          </div>
         )}
       </div>
     </div>
