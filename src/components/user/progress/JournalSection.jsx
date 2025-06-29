@@ -73,6 +73,24 @@ function JournalSection({ entries, onSubmit, isLoading }) {
       form.setFieldValue("cigarettes", 0);
     }
   };
+
+  const getSmokingStatus = (entry) => {
+    const hasSmoked = entry.smoked || (entry.cigarettes_smoked && entry.cigarettes_smoked > 0);
+    return hasSmoked;
+  };
+
+  const getCigaretteCount = (entry) => {
+    return entry.cigarettes_smoked || entry.cigarettes || 0;
+  };
+
+  const getHealthRating = (entry) => {
+    return entry.health_rating || entry.health || 0;
+  };
+
+  const getHealthStatus = (entry) => {
+    return entry.health_stat || entry.symptoms || "";
+  };
+
   return (
     <>
       {" "}
@@ -256,119 +274,145 @@ function JournalSection({ entries, onSubmit, isLoading }) {
               hideOnSinglePage: true,
               className: "mt-6",
             }}
-            renderItem={(item) => (
-              <List.Item>
-                <Card
-                  title={
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center text-gray-800 font-medium">
-                        <CalendarOutlined className="mr-2 text-blue-500" />
-                        {dayjs(item.date).format("DD/MM/YYYY")}
-                      </span>
-                      {item.smoked ? (
-                        <Badge.Ribbon text="Đã hút" color="red">
-                          <div className="w-6"></div>
-                        </Badge.Ribbon>
-                      ) : (
-                        <Badge.Ribbon text="Không hút" color="green">
-                          <div className="w-6"></div>
-                        </Badge.Ribbon>
-                      )}
-                    </div>
-                  }
-                  className="bg-white border border-gray-200 text-gray-800 w-full mb-4 hover:shadow-lg transition-all rounded-lg overflow-hidden transform hover:-translate-y-1 hover:border-blue-300"
-                  styles={{
-                    header: {
-                      borderBottom: "1px solid #e6e6e6",
-                      padding: "12px 16px",
-                      backgroundColor: item.smoked ? "#FFF5F5" : "#F0FFF4",
-                    },
-                  }}
-                >
-                  {" "}
-                  <div className="p-2">
-                    <div className="grid grid-cols-2 gap-4 mb-3">
-                      <div
-                        className={`p-3 rounded-lg ${
-                          item.smoked
-                            ? "bg-red-50 border border-red-200"
-                            : "bg-green-50 border border-green-200"
-                        }`}
-                      >
-                        <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                          Trạng thái
-                        </p>
-                        <p
-                          className={`font-semibold text-base ${
-                            item.smoked ? "text-red-600" : "text-green-600"
+            renderItem={(item) => {
+              const hasSmoked = getSmokingStatus(item);
+              const cigaretteCount = getCigaretteCount(item);
+              const healthRating = getHealthRating(item);
+              const healthStatus = getHealthStatus(item);
+
+              return (
+                <List.Item>
+                  <Card
+                    title={
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center text-gray-800 font-medium">
+                          <CalendarOutlined className="mr-2 text-blue-500" />
+                          {dayjs(item.date).format("DD/MM/YYYY")}
+                        </span>
+                        {hasSmoked ? (
+                          <Badge.Ribbon text="Đã hút" color="red">
+                            <div className="w-6"></div>
+                          </Badge.Ribbon>
+                        ) : (
+                          <Badge.Ribbon text="Không hút" color="green">
+                            <div className="w-6"></div>
+                          </Badge.Ribbon>
+                        )}
+                      </div>
+                    }
+                    className="bg-white border border-gray-200 text-gray-800 w-full mb-4 hover:shadow-lg transition-all rounded-lg overflow-hidden transform hover:-translate-y-1 hover:border-blue-300"
+                    styles={{
+                      header: {
+                        borderBottom: "1px solid #e6e6e6",
+                        padding: "12px 16px",
+                        backgroundColor: hasSmoked ? "#FFF5F5" : "#F0FFF4",
+                      },
+                    }}
+                  >
+                    <div className="p-2">
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        <div
+                          className={`p-3 rounded-lg ${
+                            hasSmoked
+                              ? "bg-red-50 border border-red-200"
+                              : "bg-green-50 border border-green-200"
                           }`}
                         >
-                          {item.smoked ? "Đã hút thuốc" : "Không hút thuốc"}
-                        </p>
-                      </div>
-
-                      <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200">
-                        <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                          Tâm trạng
-                        </p>
-                        <div className="flex items-center">
-                          <span className="font-semibold text-base text-yellow-600 mr-1">
-                            {item.mood}
-                          </span>
-                          <span className="text-yellow-500 text-xs">/10</span>
-                          <Rate
-                            count={1}
-                            value={1}
-                            disabled
-                            className="ml-1 text-yellow-500 text-xs"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      {item.smoked && (
-                        <div className="p-3 rounded-lg bg-orange-50 border border-orange-200">
                           <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                            Số điếu
+                            Trạng thái
                           </p>
-                          <p className="font-semibold text-base text-orange-600">
-                            {item.cigarettes}{" "}
-                            <span className="text-xs">điếu</span>
+                          <p
+                            className={`font-semibold text-base ${
+                              hasSmoked ? "text-red-600" : "text-green-600"
+                            }`}
+                          >
+                            {hasSmoked ? "Đã hút thuốc" : "Không hút thuốc"}
                           </p>
+                        </div>
+
+                        {item.mood && (
+                          <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+                            <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
+                              Tâm trạng
+                            </p>
+                            <div className="flex items-center">
+                              <span className="font-semibold text-base text-yellow-600 mr-1">
+                                {item.mood}
+                              </span>
+                              <span className="text-yellow-500 text-xs">/10</span>
+                              <Rate
+                                count={1}
+                                value={1}
+                                disabled
+                                className="ml-1 text-yellow-500 text-xs"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        {hasSmoked && cigaretteCount > 0 && (
+                          <div className="p-3 rounded-lg bg-orange-50 border border-orange-200">
+                            <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
+                              Số điếu
+                            </p>
+                            <p className="font-semibold text-base text-orange-600">
+                              {cigaretteCount}{" "}
+                              <span className="text-xs">điếu</span>
+                            </p>
+                          </div>
+                        )}
+
+                        {healthRating > 0 && (
+                          <div
+                            className={`p-3 rounded-lg bg-blue-50 border border-blue-200 ${
+                              !hasSmoked || cigaretteCount === 0 ? "col-span-2" : ""
+                            }`}
+                          >
+                            <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
+                              Sức khỏe
+                            </p>
+                            <div className="flex items-center">
+                              <span className="font-semibold text-base text-blue-600 mr-1">
+                                {healthRating}
+                              </span>
+                              <span className="text-blue-500 text-xs">/10</span>
+                              <HeartOutlined className="ml-1 text-red-500" />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Display money saved if available */}
+                        {item.money_saved && item.money_saved > 0 && (
+                          <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                            <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
+                              Tiết kiệm
+                            </p>
+                            <p className="font-semibold text-base text-emerald-600">
+                              {new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                                maximumFractionDigits: 0,
+                              }).format(item.money_saved)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {healthStatus && (
+                        <div className="mt-4 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                          <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
+                          Ghi chú
+                          </p>
+                          <p className="text-sm text-gray-700">{healthStatus}</p>
                         </div>
                       )}
-
-                      <div
-                        className={`p-3 rounded-lg bg-blue-50 border border-blue-200 ${
-                          !item.smoked ? "col-span-2" : ""
-                        }`}
-                      >
-                        <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                          Sức khỏe
-                        </p>
-                        <div className="flex items-center">
-                          <span className="font-semibold text-base text-blue-600 mr-1">
-                            {item.health}
-                          </span>
-                          <span className="text-blue-500 text-xs">/10</span>
-                          <HeartOutlined className="ml-1 text-red-500" />
-                        </div>
-                      </div>
                     </div>
-
-                    {item.symptoms && (
-                      <div className="mt-4 p-3 rounded-lg bg-gray-50 border border-gray-200">
-                        <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                          Ghi chú
-                        </p>
-                        <p className="text-sm text-gray-700">{item.symptoms}</p>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              </List.Item>
-            )}
+                  </Card>
+                </List.Item>
+              );
+            }}
           />
         )}
       </div>
