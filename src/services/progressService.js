@@ -44,3 +44,8 @@ export const getProgressByStageUserAPI = async (stageId) => {
   const response = await api.get(`/progress/stage/${stageId}/user`);
   return response.data;
 };
+
+export const getUserConsecutiveNoSmokeAPI = async (userId) => {
+  const response = await api.get(`/progress/consecutive-no-smoke/${userId}`);
+  return response.data;
+};

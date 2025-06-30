@@ -6,7 +6,6 @@ import { MdLogout } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { useAuth } from "~/hooks/useAuth";
 
-
 const UserHeader = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
@@ -25,7 +24,12 @@ const UserHeader = () => {
         key: "profile",
         icon: <FaUser className="text-purple-400" />,
         label: <span className="text-white">Profile</span>,
-        onClick: () => navigate(`/user/profile/${currentUser?.userId || currentUser?._id || currentUser?.id}`),
+        onClick: () =>
+          navigate(
+            `/user/profile/${
+              currentUser?.userId || currentUser?._id || currentUser?.id
+            }`
+          ),
       },
       {
         key: "logout",
@@ -39,7 +43,15 @@ const UserHeader = () => {
       key: "dashboard",
       icon: <DashboardOutlined className="text-blue-400" />,
       label: (
-        <Link to={role === "admin" ? "/admin/dashboard" : "/user/dashboard"}>
+        <Link
+          to={
+            role === "admin"
+              ? "/admin/dashboard"
+              : role === "coach"
+              ? "/coach/dashboard"
+              : "/user/dashboard"
+          }
+        >
           <span className="text-white">Dashboard</span>
         </Link>
       ),

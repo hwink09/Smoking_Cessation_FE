@@ -2,8 +2,8 @@ import React from "react";
 import AchievementStats from "./AchievementStats";
 import BadgeGallery from "./BadgeGallery";
 import AchievementModals from "./AchievementModals";
-import useBadgeAchievementsManager from "../../../hooks/useBadgeAchievementsManager";
-import BadgeIcon from "../../ui/BadgeIcon";
+import useBadgeAchievementsManager from "~/hooks/useBadge";
+import BadgeIcon from "~/components/ui/BadgeIcon";
 import ColourfulText from "~/components/ui/colourful-text";
 
 const styles = {

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { message } from "antd";
-import SmokingStatusService from "../services/SmokingStatusService";
+import SmokingStatusService from "../services/smokingStatusService";
 
 const useSmokingStatus = () => {
   const [statusData, setStatusData] = useState(null);
