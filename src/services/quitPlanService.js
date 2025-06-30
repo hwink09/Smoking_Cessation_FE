@@ -1,6 +1,5 @@
 import api from "./api";
 
-
 // Lấy danh sách tất cả kế hoạch bỏ thuốc
 export const fetchQuitPlansAPI = async () => {
   const response = await api.get("/quitPlan");
@@ -55,4 +54,78 @@ export const getMyQuitPlanRequestsAPI = async () => {
   return Array.isArray(response.data?.data)
     ? response.data.data
     : response.data;
+};
+
+// PUT /api/quitPlan/{id} - Update Quit Plan By Id
+export const updateQuitPlanAPI = async (id, planData) => {
+  const response = await api.put(`/quitPlan/${id}`, planData);
+  return response.data;
+};
+
+// DELETE /api/quitPlan/{id} - Delete Quit Plan By Id
+export const deleteQuitPlanAPI = async (id) => {
+  const response = await api.delete(`/quitPlan/${id}`);
+  return response.data;
+};
+
+// GET /api/quitPlan/user/{id} - Get Quit Plan By User Id
+export const getQuitPlanByUserIdAPI = async (userId) => {
+  const response = await api.get(`/quitPlan/user/${userId}`);
+  return Array.isArray(response.data?.data)
+    ? response.data.data
+    : response.data;
+};
+
+// GET /api/quitPlan/public - Get Quit Plan Public
+export const getPublicQuitPlansAPI = async () => {
+  const response = await api.get("/quitPlan/public");
+  return Array.isArray(response.data?.data)
+    ? response.data.data
+    : response.data;
+};
+
+// POST /api/quitPlan/user/use/{id} - Use QuitPlan Public to Private
+export const usePublicQuitPlanAPI = async (planId, userData) => {
+  const response = await api.post(`/quitPlan/user/use/${planId}`, userData);
+  return response.data;
+};
+
+// GET /api/quitPlan/my-users - Get My Users by Coach
+export const getMyUsersAPI = async () => {
+  const response = await api.get("/quitPlan/my-users");
+  return Array.isArray(response.data?.data)
+    ? response.data.data
+    : response.data;
+};
+
+// GET /api/quitPlan/requests - Get all Request Quit Plan
+export const getAllQuitPlanRequestsAPI = async () => {
+  const response = await api.get("/quitPlan/requests");
+  return Array.isArray(response.data?.data)
+    ? response.data.data
+    : response.data;
+};
+
+// DELETE /api/quitPlan/request/{id} - Cancel Quitplan Request
+export const cancelQuitPlanRequestAPI = async (requestId) => {
+  const response = await api.delete(`/quitPlan/request/${requestId}`);
+  return response.data;
+};
+
+// PUT /api/quitPlan/{id}/approve - Approved Quit Plan Request
+export const approveQuitPlanRequestAPI = async (requestId, approvalData) => {
+  const response = await api.put(
+    `/quitPlan/${requestId}/approve`,
+    approvalData
+  );
+  return response.data;
+};
+
+// PUT /api/quitPlan/{id}/reject - Reject Quit Plan Request
+export const rejectQuitPlanRequestAPI = async (requestId, rejectionData) => {
+  const response = await api.put(
+    `/quitPlan/${requestId}/reject`,
+    rejectionData
+  );
+  return response.data;
 };

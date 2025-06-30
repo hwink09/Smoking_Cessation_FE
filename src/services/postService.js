@@ -1,6 +1,5 @@
 import api from "./api";
 
-
 // -------- Posts --------
 export const fetchPostsAPI = async () => {
   return await api.get("/posts");
@@ -12,6 +11,10 @@ export const getPostByIdAPI = async (postId) => {
 
 export const getPostsByUserIdAPI = async (userId) => {
   return await api.get(`/posts/user/${userId}`);
+};
+
+export const getPostsByTagIdAPI = async (tagId) => {
+  return await api.get(`/posts/tag/${tagId}`);
 };
 
 export const createPostAPI = async (postData) => {

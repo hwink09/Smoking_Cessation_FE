@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import CoachService from '~/services/CoachService';
-
+import { useState, useEffect } from "react";
+import CoachService from "~/services/coachProfileService";
 
 export function useCoachData() {
   const [coaches, setCoaches] = useState([]);
