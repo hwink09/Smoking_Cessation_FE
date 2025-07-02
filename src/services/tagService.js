@@ -1,7 +1,7 @@
 import api from "./api";
 
 const tagService = {
-  // GET /api/tags - Get Tags
+  // GET /api/tags
   getAllTags: async () => {
     try {
       const response = await api.get("/tags");
@@ -12,7 +12,7 @@ const tagService = {
     }
   },
 
-  // POST /api/tags/create - New Request (Create Tag)
+  // POST /api/tags/create
   createTag: async (tagData) => {
     try {
       const response = await api.post("/tags/create", tagData);

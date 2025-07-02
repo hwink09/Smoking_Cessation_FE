@@ -1,56 +1,93 @@
 import api from "./api";
 
-// -------- Posts --------
-export const fetchPostsAPI = async () => {
-  return await api.get("/posts");
+const postService = {
+  // GET /api/posts
+  getAllPosts: async () => {
+    try {
+      const response = await api.get("/posts");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      throw error;
+    }
+  },
+
+  // GET /api/posts/{id}
+  getPostById: async (postId) => {
+    try {
+      const response = await api.get(`/posts/${postId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching post ${postId}:`, error);
+      throw error;
+    }
+  },
+
+  // GET /api/posts/user/{userId}
+  getPostsByUserId: async (userId) => {
+    try {
+      const response = await api.get(`/posts/user/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching posts for user ${userId}:`, error);
+      throw error;
+    }
+  },
+
+  // GET /api/posts/tag/{tagId}
+  getPostsByTagId: async (tagId) => {
+    try {
+      const response = await api.get(`/posts/tag/${tagId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching posts by tag ${tagId}:`, error);
+      throw error;
+    }
+  },
+
+  // POST /api/posts/create
+  createPost: async (postData) => {
+    try {
+      const response = await api.post("/posts/create", postData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating post:", error);
+      throw error;
+    }
+  },
+
+  // PUT /api/posts/{id}
+  updatePost: async (postId, postData) => {
+    try {
+      const response = await api.put(`/posts/${postId}`, postData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating post ${postId}:`, error);
+      throw error;
+    }
+  },
+
+  // DELETE /api/posts/{id}
+  deletePost: async (postId) => {
+    try {
+      const response = await api.delete(`/posts/${postId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting post ${postId}:`, error);
+      throw error;
+    }
+  },
+
+  // POST /api/posts/like/{id}
+  likePost: async (postId) => {
+    try {
+      const response = await api.post(`/posts/like/${postId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error liking post ${postId}:`, error);
+      throw error;
+    }
+  },
 };
 
-export const getPostByIdAPI = async (postId) => {
-  return await api.get(`/posts/${postId}`);
-};
-
-export const getPostsByUserIdAPI = async (userId) => {
-  return await api.get(`/posts/user/${userId}`);
-};
-
-export const getPostsByTagIdAPI = async (tagId) => {
-  return await api.get(`/posts/tag/${tagId}`);
-};
-
-export const createPostAPI = async (postData) => {
-  return await api.post("/posts/create", postData);
-};
-
-export const updatePostAPI = async (postId, postData) => {
-  return await api.put(`/posts/${postId}`, postData);
-};
-
-export const deletePostAPI = async (postId) => {
-  return await api.delete(`/posts/${postId}`);
-};
-
-export const likePostAPI = async (postId) => {
-  return await api.post(`/posts/like/${postId}`);
-};
-
-// -------- Tags --------
-export const fetchTagsAPI = async () => {
-  return await api.get("/tags");
-};
-
-// -------- Comments --------
-export const createCommentAPI = async (commentData) => {
-  return await api.post(`/comments/create`, commentData);
-};
-
-export const getCommentsByPostIdAPI = async (postId) => {
-  return await api.get(`/comments/post/${postId}`);
-};
-
-export const updateCommentAPI = async (commentId, commentData) => {
-  return await api.put(`/comments/${commentId}`, commentData);
-};
-
-export const deleteCommentAPI = async (commentId) => {
-  return await api.delete(`/comments/${commentId}`);
-};
+export default postService;

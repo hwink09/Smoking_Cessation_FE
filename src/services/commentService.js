@@ -1,7 +1,7 @@
 import api from "./api";
 
 const commentService = {
-  // POST /api/comments/create - Comment Post
+  // POST /api/comments/create
   createComment: async (commentData) => {
     try {
       const response = await api.post("/comments/create", commentData);
@@ -12,7 +12,7 @@ const commentService = {
     }
   },
 
-  // GET /api/comments/post/{id} - Get Comment By Post Id
+  // GET /api/comments/post/{id}
   getCommentsByPostId: async (postId) => {
     try {
       const response = await api.get(`/comments/post/${postId}`);
@@ -23,7 +23,7 @@ const commentService = {
     }
   },
 
-  // PUT /api/comments/{id} - Edit Comment
+  // PUT /api/comments/{id}
   updateComment: async (commentId, commentData) => {
     try {
       const response = await api.put(`/comments/${commentId}`, commentData);
@@ -34,7 +34,7 @@ const commentService = {
     }
   },
 
-  // DELETE /api/comments/{id} - Delete Comment
+  // DELETE /api/comments/{id}
   deleteComment: async (commentId) => {
     try {
       const response = await api.delete(`/comments/${commentId}`);
