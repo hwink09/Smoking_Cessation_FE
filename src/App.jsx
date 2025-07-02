@@ -50,8 +50,8 @@ import UserQuitPlanPage from "./pages/user/UserQuitPlanPage";
 // Coach Pages
 import CoachLayout from "./components/layouts/coach/CoachLayout";
 import CoachQuitPlan from "./pages/coach/CoachDashBoard";
-import RequestQuitPlan from "./pages/coach/RequestQuitPlan";
-import StagesCoach from "./pages/coach/StagesCoach";
+import RequestQuitPlan from "./pages/coach/RequestQuitPlanPage";
+import StagesCoach from "./pages/coach/StagesCoachPage";
 import CoachProfilePage from "./pages/coach/CoachProfilePage";
 
 // PrivateRoute component
