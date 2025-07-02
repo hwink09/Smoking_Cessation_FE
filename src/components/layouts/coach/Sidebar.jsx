@@ -1,26 +1,26 @@
 import {
-  SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  DashboardOutlined,
   UserOutlined,
   CheckCircleOutlined,
   FieldTimeOutlined,
   BarChartOutlined,
   MessageOutlined,
-  FileTextOutlined,
-  TrophyOutlined,
   BellOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Dropdown, Space } from "antd";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useAuth } from "~/hooks/useAuth";
+import ColourfulText from "~/components/ui/colourful-text";
 
-function SidebarCoach({ user = {} }) {
+function SidebarCoach() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, currentUser: user } = useAuth();
   const [collapsed, setCollapsed] = useState(() => {
-    const saved = localStorage.getItem("coach-sidebar-collapsed");
-    return saved === "true";
+    return localStorage.getItem("coach-sidebar-collapsed") === "true";
   });
 
   useEffect(() => {
@@ -33,36 +33,51 @@ function SidebarCoach({ user = {} }) {
       icon: <CheckCircleOutlined />,
       path: "/coach/dashboard",
     },
-
     {
       label: "Duyệt Yêu Cầu",
       icon: <CheckCircleOutlined />,
       path: "/coach/quit-plans-request",
     },
-    { label: "Giai Đoạn", icon: <BarChartOutlined />, path: "/coach/stages" }, // Xem các giai đoạn cai thuốc
-    { label: "Progress", icon: <FieldTimeOutlined />, path: "/coach/progress" }, // Theo dõi tiến độ người dùng
-
-    { label: "Feedbacks", icon: <MessageOutlined />, path: "/coach/feedbacks" }, // Đọc phản hồi từ user
-    { label: "Blog Posts", icon: <FileTextOutlined />, path: "/coach/blogs" }, // Đăng bài chia sẻ
     {
-      label: "Notifications",
+      label: "Giai Đoạn",
+      icon: <BarChartOutlined />,
+      path: "/coach/stages",
+    },
+    {
+      label: "Tiến độ",
+      icon: <FieldTimeOutlined />,
+      path: "/coach/progress",
+    },
+    {
+      label: "Phản hồi",
+      icon: <MessageOutlined />,
+      path: "/coach/feedbacks",
+    },
+    {
+      label: "Thông báo",
       icon: <BellOutlined />,
       path: "/coach/notifications",
-    }, // Gửi/nhận thông báo
+    },
   ];
 
   const dropdownItems = [
-    { key: "1", label: "My Account", disabled: true },
-    { type: "divider" },
-    { key: "2", label: "Profile", icon: <UserOutlined /> },
-    { key: "3", label: "Settings", icon: <SettingOutlined /> },
     {
-      key: "4",
-      label: "Logout",
-      icon: <SettingOutlined />,
-      onClick: () => {
-        console.log("Logout clicked");
-      },
+      key: "1",
+      label: <span className="text-gray-400">Tài khoản của tôi</span>,
+      disabled: true,
+    },
+    { type: "divider" },
+    {
+      key: "2",
+      label: "Hồ sơ cá nhân",
+      icon: <UserOutlined />,
+      onClick: () => navigate("/coach/profile"),
+    },
+    {
+      key: "3",
+      label: "Đăng xuất",
+      icon: <LogoutOutlined />,
+      onClick: logout,
     },
   ];
 
@@ -72,22 +87,19 @@ function SidebarCoach({ user = {} }) {
         collapsed ? "w-20" : "w-64"
       } bg-gradient-to-b from-[#1a1333] via-[#2b2256] to-[#1a2a3a] flex flex-col transition-all duration-300`}
     >
-      {/* Collapse Button & Logo */}
-      <div
-        className={`${
-          !collapsed
-            ? "flex justify-between items-center border-b border-[#1f1f1f]"
-            : "flex items-center justify-center"
-        }`}
-      >
+      {/* Header: Logo + Collapse Button */}
+      <div className="relative h-16 border-b border-[#1f1f1f] flex items-center">
         {!collapsed && (
-          <Link to="/coach">
-            <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500 px-4 py-3">
-              COACH PANEL
+          <Link
+            to="/coach/dashboard"
+            className="absolute left-1/2 transform -translate-x-1/2"
+          >
+            <div className="text-xl font-semibold whitespace-nowrap">
+              <ColourfulText text="COACH PANEL" />
             </div>
           </Link>
         )}
-        <div className="p-2">
+        <div className="ml-auto p-2">
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -97,30 +109,26 @@ function SidebarCoach({ user = {} }) {
         </div>
       </div>
 
-      {/* Profile */}
+      {/* Profile Section */}
       <div
-        className={`${
+        className={`px-4 py-3 border-b border-[#1f1f1f] ${
           collapsed
-            ? "px-4 py-3 border-b border-[#1f1f1f] flex flex-col items-center gap-2 hover:bg-[#232042] hover:cursor-pointer transition-colors duration-200"
-            : "px-4 py-3 border-b border-[#1f1f1f] flex items-center gap-3 hover:bg-[#232042] hover:cursor-pointer transition-colors duration-200"
-        }`}
+            ? "flex flex-col items-center gap-2"
+            : "flex items-center gap-3"
+        } hover:bg-[#232042] hover:cursor-pointer transition-colors duration-200`}
       >
-        <Dropdown menu={{ items: dropdownItems }}>
+        <Dropdown menu={{ items: dropdownItems }} trigger={["click"]}>
           <a onClick={(e) => e.preventDefault()}>
             <Space direction={collapsed ? "vertical" : "horizontal"}>
               <Avatar
                 size={collapsed ? 32 : 40}
-                src={user.avatar}
+                src={user?.avatar_url}
                 icon={<UserOutlined />}
               />
               {!collapsed && (
                 <div>
-                  <div className="text-sm font-semibold">
-                    {user.name || "Coach Name"}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {user.role || "Coach"}
-                  </div>
+                  <div className="text-sm font-semibold">{user?.name}</div>
+                  <div className="text-xs text-gray-400">{user?.role}</div>
                 </div>
               )}
             </Space>
@@ -128,7 +136,7 @@ function SidebarCoach({ user = {} }) {
         </Dropdown>
       </div>
 
-      {/* Menu */}
+      {/* Sidebar Menu */}
       <nav className="flex-1 mt-4 flex flex-col items-center">
         {menu.map((item) => {
           const isActive = location.pathname === item.path;
@@ -143,13 +151,9 @@ function SidebarCoach({ user = {} }) {
                   ? "bg-gray-200 text-[#232042] rounded-2xl"
                   : "text-white hover:bg-[#232042] hover:text-[#1ecbe1] rounded-2xl"
               }`}
-              style={{
-                minHeight: collapsed ? 48 : undefined,
-              }}
+              style={{ minHeight: collapsed ? 48 : undefined }}
             >
-              <span className={`text-lg ${isActive ? "text-[#232042]" : ""}`}>
-                {item.icon}
-              </span>
+              <span className="text-lg">{item.icon}</span>
               {!collapsed && (
                 <span className="font-medium ml-3">{item.label}</span>
               )}

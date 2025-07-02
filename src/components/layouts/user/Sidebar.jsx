@@ -16,8 +16,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import ColourfulText from "~/components/ui/colourful-text";
 import { useAuth } from "~/hooks/useAuth";
 
-
-
 const menu = [
   { label: "Dashboard", icon: <DashboardOutlined />, path: "/user/dashboard" },
   {
@@ -95,8 +93,8 @@ function Sidebar() {
         }`}
       >
         {!collapsed && (
-          <Link to="/">
-            <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500">
+          <Link to="/" className="absolute left-1/2 transform -translate-x-1/2">
+            <div className="text-xl font-semibold whitespace-nowrap">
               <ColourfulText text="EXHELA" />
             </div>
           </Link>
@@ -122,7 +120,10 @@ function Sidebar() {
             <Space>
               <Avatar
                 size={collapsed ? 32 : 40}
-                src={user?.avatar_url || "https://cdn-media.sforum.vn/storage/app/media/ve-capybara-2.jpg"}
+                src={
+                  user?.avatar_url ||
+                  "https://cdn-media.sforum.vn/storage/app/media/ve-capybara-2.jpg"
+                }
               />
               {!collapsed && (
                 <div>
@@ -147,11 +148,7 @@ function Sidebar() {
               to={item.path}
               className={`
                 flex items-center transition-all duration-200 mt-1
-                ${
-                  collapsed
-                    ? "justify-center w-12 h-12"
-                    : "px-6 py-2 w-11/12"
-                }
+                ${collapsed ? "justify-center w-12 h-12" : "px-6 py-2 w-11/12"}
                 ${
                   isActive
                     ? "bg-gray-200 text-[#232042] rounded-2xl"

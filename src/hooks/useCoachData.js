@@ -1,32 +1,70 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import CoachService from "~/services/coachProfileService";
 
-export function useCoachData() {
-  const [coaches, setCoaches] = useState([]);
-  const [loading, setLoading] = useState(true);
+const useCoachData = () => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchCoaches = async () => {
+  const handleRequest = async (requestFn) => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      const data = await CoachService.getAllCoaches();
-      setCoaches(data);
+      return await requestFn();
     } catch (err) {
-      console.error(err);
       setError(err);
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchCoaches();
+  const createCoachProfile = useCallback(
+    async (coachData) =>
+      handleRequest(() => CoachService.createCoachProfile(coachData)),
+    []
+  );
+
+  const getAllCoaches = useCallback(
+    async () => handleRequest(() => CoachService.getAllCoaches()),
+    []
+  );
+
+  const getCoachById = useCallback(async (id) => {
+    if (!id) return null;
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await CoachService.getCoachById(id);
+      return data;
+    } catch (err) {
+      setError(err);
+      if (err?.response?.status === 404) return null;
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  const updateCoachProfile = useCallback(
+    async (id, coachData) =>
+      handleRequest(() => CoachService.updateCoachProfile(id, coachData)),
+    []
+  );
+
+  const deleteCoachProfile = useCallback(
+    async (id) => handleRequest(() => CoachService.deleteCoachProfile(id)),
+    []
+  );
+
   return {
-    coaches,
     loading,
     error,
-    refetch: fetchCoaches,
+    createCoachProfile,
+    getAllCoaches,
+    getCoachById,
+    updateCoachProfile,
+    deleteCoachProfile,
   };
-}
+};
+
+export default useCoachData;
