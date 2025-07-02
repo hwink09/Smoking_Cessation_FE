@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Avatar, Typography, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 import api from "~/services/api";
 
 const { Title } = Typography;
@@ -11,10 +12,14 @@ const CoachQuitPlanTable = () => {
 
   useEffect(() => {
     const fetchQuitPlans = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
         const response = await api.get("/quitPlan/my-users");
-        setQuitPlans(response.data || []);
+        const plansWithKeys = (response.data || []).map((plan, index) => ({
+          ...plan,
+          key: plan._id || `plan-${index}`,
+        }));
+        setQuitPlans(plansWithKeys);
       } catch (err) {
         console.error("Lỗi khi lấy danh sách kế hoạch:", err);
         message.error("Không thể lấy dữ liệu kế hoạch bỏ thuốc");
@@ -31,11 +36,13 @@ const CoachQuitPlanTable = () => {
       title: "Họ và tên",
       dataIndex: "name",
       key: "name",
+      render: (name) => name || "Không có",
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      render: (email) => email || "Không có",
     },
     {
       title: "Ảnh đại diện",
@@ -44,8 +51,8 @@ const CoachQuitPlanTable = () => {
       render: (avatar) => (
         <Avatar
           src={avatar}
-          icon={!avatar ? <UserOutlined /> : null}
-          style={{ backgroundColor: "#87d068" }}
+          icon={!avatar && <UserOutlined />}
+          style={{ backgroundColor: avatar ? undefined : "#87d068" }}
         />
       ),
     },
@@ -53,18 +60,19 @@ const CoachQuitPlanTable = () => {
       title: "Tên kế hoạch",
       dataIndex: "plan_name",
       key: "plan_name",
+      render: (name) => name || "Không có",
     },
     {
       title: "Ngày bắt đầu",
       dataIndex: "start_date",
       key: "start_date",
-      render: (date) => new Date(date).toLocaleDateString("vi-VN"),
+      render: (date) => dayjs(date).format("DD/MM/YYYY"),
     },
     {
       title: "Ngày dự kiến bỏ thuốc",
       dataIndex: "target_quit_date",
       key: "target_quit_date",
-      render: (date) => new Date(date).toLocaleDateString("vi-VN"),
+      render: (date) => dayjs(date).format("DD/MM/YYYY"),
     },
   ];
 
@@ -78,7 +86,7 @@ const CoachQuitPlanTable = () => {
         <Table
           columns={columns}
           dataSource={quitPlans}
-          rowKey="_id"
+          rowKey="key"
           loading={loading}
           pagination={{ pageSize: 8 }}
           scroll={{ x: "max-content" }}
