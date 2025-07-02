@@ -87,11 +87,18 @@ function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Điều hướng nếu đã đăng nhập
   useEffect(() => {
     if (currentUser?.userId) {
-      const targetPath =
-        currentUser.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+      let targetPath = "/";
+
+      if (currentUser.role === "admin") {
+        targetPath = "/admin/dashboard";
+      } else if (currentUser.role === "coach") {
+        targetPath = "/coach/dashboard";
+      } else {
+        targetPath = "/user/dashboard";
+      }
+
       navigate(targetPath);
     }
   }, [currentUser, navigate]);

@@ -1,8 +1,8 @@
 import React from "react";
-import CoachQuitPlan from "~/components/coach/CoachQuitPlan";
+import CoachQuitPlanTable from "~/components/coach/myUser/CoachQuitPlanTable";
 
 const CoachDashBoard = () => {
-  return <CoachQuitPlan />;
+  return <CoachQuitPlanTable />;
 };
 
 export default CoachDashBoard;

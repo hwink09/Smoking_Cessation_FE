@@ -1,14 +1,16 @@
 import { Outlet } from "react-router-dom";
-import SidebarCoach from "./SidebarCoach";
-const CoachLayout = () => {
+import { useAuth } from "~/hooks/useAuth";
+import SidebarCoach from "./Sidebar";
+
+export default function UserLayout() {
+  const { currentUser } = useAuth();
+
   return (
-    <div className="flex min-h-screen w-full text-white">
-      <SidebarCoach />
-      <main className="flex-1 p-8 overflow-y-auto bg-gradient-to-b from-black to-gray-900">
+    <div className="flex min-h-screen bg-gray-900">
+      <SidebarCoach user={currentUser} />
+      <main className="flex-1">
         <Outlet />
       </main>
     </div>
   );
-};
-
-export default CoachLayout;
+}

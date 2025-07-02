@@ -150,7 +150,6 @@ export default function Sidebar({ admin }) {
         <Dropdown menu={{ items }}>
           <a onClick={(e) => e.preventDefault()}>
             <Space>
-              {" "}
               <Avatar
                 size={collapsed ? 32 : 40}
                 src={userData?.avatar_url || userData?.avatar}

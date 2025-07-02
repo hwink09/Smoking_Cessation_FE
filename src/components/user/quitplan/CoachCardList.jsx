@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 
 import {
   Card,
@@ -25,7 +25,7 @@ import QuitPlanModal from "./QuitPlanModal";
 
 import { message } from "antd";
 import { useQuitPlanData } from "~/hooks/useQuitPlanData";
-import { useCoachData } from "~/hooks/useCoachData";
+import useCoachData from "~/hooks/useCoachData";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -152,7 +152,10 @@ const CoachCardList = () => {
 
   const handleSubmit = async (formData) => {
     try {
-      const coachId = selectedCoach?.coach_id?._id || selectedCoach?.coach_id || selectedCoach?._id;
+      const coachId =
+        selectedCoach?.coach_id?._id ||
+        selectedCoach?.coach_id ||
+        selectedCoach?._id;
       if (!coachId) {
         message.error("Không xác định được coach!");
         return;

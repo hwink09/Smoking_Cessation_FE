@@ -18,18 +18,12 @@ export function useTaskData() {
   const [completedTasks, setCompletedTasks] = useState([]);
 
   const fetchAllTasks = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await fetchAllTasksAPI();
-
-      const taskList = Array.isArray(response.data)
-        ? response.data
-        : response.data.data || [];
-
-      setTasks(taskList);
+      const taskList = await fetchAllTasksAPI();
+      setTasks(Array.isArray(taskList) ? taskList : []);
     } catch (err) {
-      console.error("Lỗi khi lấy tất cả tasks:", err);
-      setError(err.message || "Lỗi không xác định khi gọi tasks");
+      setError(err.message || "Lỗi khi tải tất cả nhiệm vụ.");
     } finally {
       setLoading(false);
     }
@@ -40,158 +34,141 @@ export function useTaskData() {
   };
 
   const fetchTasksByStageId = async (stageId) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await fetchTasksByStageIdAPI(stageId);
-
-      const taskList = Array.isArray(response.data)
-        ? response.data
-        : response.data.data || [];
-
-      return taskList;
-    } catch (err) {
-      console.error("Lỗi khi fetch task theo stage:", err);
-      throw err;
+      const taskList = await fetchTasksByStageIdAPI(stageId);
+      return Array.isArray(taskList) ? taskList : [];
+    } catch {
+      return [];
     } finally {
       setLoading(false);
     }
   };
 
-  // Lấy task theo ID
   const fetchTaskById = async (taskId) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await fetchTaskByIdAPI(taskId);
-      const task = response.data;
+      const task = await fetchTaskByIdAPI(taskId);
       setSelectedTask(task);
       return task;
     } catch (err) {
-      console.error("Lỗi khi lấy task theo ID:", err);
-      setError(err.message || "Lỗi không xác định khi lấy task");
+      setError(err.message || "Lỗi khi lấy nhiệm vụ theo ID.");
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Tạo task mới
   const createTask = async (taskData) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await createTaskAPI(taskData);
-      const newTask = response.data;
-
-      // Cập nhật danh sách tasks local
-      setTasks((prevTasks) => [...prevTasks, newTask]);
+      const newTask = await createTaskAPI(taskData);
+      setTasks((prev) => [...prev, newTask]);
       return newTask;
     } catch (err) {
-      console.error("Lỗi khi tạo task:", err);
-      setError(err.message || "Lỗi không xác định khi tạo task");
+      setError(err.message || "Lỗi khi tạo nhiệm vụ.");
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Cập nhật task
   const updateTask = async (taskId, taskData) => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await updateTaskAPI(taskId, taskData);
-      const updatedTask = response.data;
 
-      // Cập nhật danh sách tasks local
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => (task._id === taskId ? updatedTask : task))
+      if (response?.permissionDenied) {
+        setError(response.message);
+        return {
+          success: false,
+          permissionDenied: true,
+          message: response.message,
+          originalTask: taskData,
+        };
+      }
+
+      const updatedTask = response?.data || response;
+      setTasks((prev) =>
+        prev.map((task) => (task._id === taskId ? updatedTask : task))
       );
 
-      // Cập nhật selectedTask nếu đang được chọn
-      if (selectedTask && selectedTask._id === taskId) {
-        setSelectedTask(updatedTask);
-      }
+      if (selectedTask?._id === taskId) setSelectedTask(updatedTask);
 
       return updatedTask;
     } catch (err) {
-      console.error("Lỗi khi cập nhật task:", err);
-      setError(err.message || "Lỗi không xác định khi cập nhật task");
+      const msg =
+        err.response?.status === 403
+          ? "Không có quyền cập nhật nhiệm vụ này."
+          : err.message || "Lỗi khi cập nhật nhiệm vụ.";
+
+      setError(msg);
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Xóa task
   const deleteTask = async (taskId) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      await deleteTaskAPI(taskId);
+      const response = await deleteTaskAPI(taskId);
 
-      // Xóa task khỏi danh sách local
-      setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
-
-      // Clear selectedTask nếu đang được chọn
-      if (selectedTask && selectedTask._id === taskId) {
-        setSelectedTask(null);
+      if (response?.permissionDenied) {
+        return { success: true, message: response.message };
       }
 
-      return true;
+      setTasks((prev) => prev.filter((task) => task._id !== taskId));
+      if (selectedTask?._id === taskId) setSelectedTask(null);
+
+      return { success: true };
     } catch (err) {
-      console.error("Lỗi khi xóa task:", err);
-      setError(err.message || "Lỗi không xác định khi xóa task");
-      throw err;
+      const msg =
+        err.response?.status === 403
+          ? "Không có quyền xóa nhiệm vụ này."
+          : err.message || "Lỗi khi xóa nhiệm vụ.";
+      setError(msg);
+
+      return {
+        success: false,
+        permissionDenied: err.response?.status === 403,
+        message: msg,
+      };
     } finally {
       setLoading(false);
     }
   };
 
-  // Hoàn thành task
   const completeTask = async (taskId) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await completeTaskAPI(taskId);
-      const result = response.data;
-
-      // Có thể cập nhật UI để hiển thị task đã completed
+      const result = await completeTaskAPI(taskId);
       return result;
     } catch (err) {
-      console.error("Lỗi khi hoàn thành task:", err);
-      setError(err.message || "Lỗi không xác định khi hoàn thành task");
+      setError(err.message || "Lỗi khi hoàn thành nhiệm vụ.");
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Lấy các task đã hoàn thành theo stage
   const fetchCompletedTasksByStage = async (stageId) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await getCompletedTasksByStageAPI(stageId);
-
-      const completedTaskList = Array.isArray(response.data)
-        ? response.data
-        : response.data.data || [];
-
-      setCompletedTasks(completedTaskList);
-      return completedTaskList;
+      const list = await getCompletedTasksByStageAPI(stageId);
+      const taskList = Array.isArray(list) ? list : [];
+      setCompletedTasks(taskList);
+      return taskList;
     } catch (err) {
-      console.error("Lỗi khi lấy task đã hoàn thành:", err);
-      setError(err.message || "Lỗi không xác định khi lấy task đã hoàn thành");
+      setError(err.message || "Lỗi khi lấy nhiệm vụ đã hoàn thành.");
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Reset error
-  const clearError = () => {
-    setError(null);
-  };
-
-  // Reset selected task
-  const clearSelectedTask = () => {
-    setSelectedTask(null);
-  };
+  const clearError = () => setError(null);
+  const clearSelectedTask = () => setSelectedTask(null);
 
   return {
     // States
