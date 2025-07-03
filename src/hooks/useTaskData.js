@@ -2,12 +2,12 @@ import { useState, useCallback } from "react";
 import {
   fetchAllTasksAPI,
   fetchTasksByStageIdAPI,
+  fetchTasksByStageWithCompletionAPI,
   fetchTaskByIdAPI,
   createTaskAPI,
   updateTaskAPI,
   deleteTaskAPI,
   completeTaskAPI,
-  getCompletedTasksByStageAPI,
 } from "~/services/taskService";
 
 export function useTaskData() {
@@ -15,7 +15,6 @@ export function useTaskData() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [completedTasks, setCompletedTasks] = useState([]);
 
   const fetchAllTasks = useCallback(async () => {
     setLoading(true);
@@ -152,16 +151,13 @@ export function useTaskData() {
     }
   };
 
-  const fetchCompletedTasksByStage = async (stageId) => {
+  const fetchTasksByStageWithCompletion = async (stageId) => {
     setLoading(true);
     try {
-      const list = await getCompletedTasksByStageAPI(stageId);
-      const taskList = Array.isArray(list) ? list : [];
-      setCompletedTasks(taskList);
-      return taskList;
-    } catch (err) {
-      setError(err.message || "Lỗi khi lấy nhiệm vụ đã hoàn thành.");
-      throw err;
+      const taskList = await fetchTasksByStageWithCompletionAPI(stageId);
+      return Array.isArray(taskList) ? taskList : [];
+    } catch {
+      return [];
     } finally {
       setLoading(false);
     }
@@ -176,7 +172,6 @@ export function useTaskData() {
     loading,
     error,
     selectedTask,
-    completedTasks,
 
     // Methods
     fetchAllTasks,
@@ -187,7 +182,7 @@ export function useTaskData() {
     updateTask,
     deleteTask,
     completeTask,
-    fetchCompletedTasksByStage,
+    fetchTasksByStageWithCompletion,
     clearError,
     clearSelectedTask,
   };

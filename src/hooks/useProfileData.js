@@ -8,7 +8,12 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import { useAuth } from "./useAuth";
 
-const { fetchUserById, updateUserProfile, changeUserPassword, deleteUserAccount } = userService;
+const {
+  fetchUserById,
+  updateUserProfile,
+  changeUserPassword,
+  deleteUserAccount,
+} = userService;
 
 export function useProfileData() {
   const { currentUser, setUser } = useAuth();
@@ -63,9 +68,10 @@ export function useProfileData() {
         avatar_url: values.avatar_url,
       };
 
-      console.log("Dữ liệu gửi đi:", profileData);
-
-      const updated = await updateUserProfile(getUserId(currentUser), profileData);
+      const updated = await updateUserProfile(
+        getUserId(currentUser),
+        profileData
+      );
 
       const updatedUser = updated?.user
         ? { ...currentUser, ...updated.user }

@@ -32,7 +32,7 @@ const QuitPlanService = {
       target_quit_date: plan.target_quit_date || "",
       createdAt: plan.createdAt || "",
       updatedAt: plan.updatedAt || "",
-      image: plan.image || "/placeholder-plan.png",
+      image: plan.image || "",
       user_id: plan.user_id || null,
       status: plan.status || "draft",
     };
