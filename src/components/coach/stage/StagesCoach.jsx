@@ -1,6 +1,5 @@
-// File: src/pages/StagesCoach.jsx
-import React, { useEffect, useState, useCallback } from "react";
-import { Table, Button, Form, message } from "antd";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { Table, Button, Form, message, Modal } from "antd";
 import dayjs from "dayjs";
 import api from "~/services/api";
 import { useAuth } from "~/hooks/useAuth";
@@ -13,157 +12,176 @@ const StagesCoach = () => {
   const { currentUser } = useAuth();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [form] = Form.useForm();
   const [openModal, setOpenModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [form] = Form.useForm();
-
   const [viewStagesModal, setViewStagesModal] = useState(false);
   const [selectedStages, setSelectedStages] = useState([]);
   const [selectedPlanName, setSelectedPlanName] = useState("");
-
+  const [currentPlan, setCurrentPlan] = useState(null);
   const [taskModal, setTaskModal] = useState(false);
   const [selectedStage, setSelectedStage] = useState(null);
-  const [stageTasks, setStageTasks] = useState([]);
 
   const {
     createStage,
     fetchStagesByPlanId,
+    deleteStage,
     loading: stageLoading,
   } = useStageService();
-  const {
-    createTask,
-    fetchTasksByStageId,
-    updateTask,
-    deleteTask,
-    loading: taskLoading,
-  } = useTaskData();
 
-  const getPlanId = (plan) => plan?._id || plan?.plan_id || plan?.id || null;
+  const { createTask, fetchTasksByStageId, updateTask, deleteTask } =
+    useTaskData();
+
+  const getPlanId = useCallback(
+    (plan) => plan?._id || plan?.plan_id || plan?.id || null,
+    []
+  );
 
   const fetchQuitPlans = useCallback(async () => {
     if (!currentUser) return;
     setLoading(true);
     try {
       const res = await api.get("/quitPlan/my-users");
-      if (!Array.isArray(res.data)) {
-        message.error("Định dạng dữ liệu API không như mong đợi");
-        return;
-      }
-      const plansWithKeys = res.data.map((plan, index) => {
-        const planId = getPlanId(plan) || `temp-plan-${index}`;
-        return {
+      const data = Array.isArray(res.data) ? res.data : [];
+      setPlans(
+        data.map((plan, index) => ({
           ...plan,
-          key: planId,
-          _id: planId,
-        };
-      });
-      setPlans(plansWithKeys);
-    } catch (error) {
+          key: getPlanId(plan) || `temp-${index}`,
+          _id: getPlanId(plan) || `temp-${index}`,
+        }))
+      );
+    } catch {
       message.error("Lỗi khi lấy danh sách kế hoạch");
     } finally {
       setLoading(false);
     }
-  }, [currentUser]);
+  }, [currentUser, getPlanId]);
 
   const handleOpenModal = (plan) => {
     setSelectedPlan({ ...plan, _id: getPlanId(plan) });
-    setOpenModal(true);
     form.resetFields();
+    setOpenModal(true);
   };
 
   const handleSubmit = async () => {
     try {
       const planId = getPlanId(selectedPlan);
-      if (!planId) return message.error("Không thể xác định ID của kế hoạch");
+      if (!planId) return message.error("Không xác định được kế hoạch");
+
       const values = await form.validateFields();
-      const existingStages = await fetchStagesByPlanId(planId);
-      const nextStageNumber =
-        existingStages.length > 0
-          ? Math.max(...existingStages.map((s) => s.stage_number || 0)) + 1
+      const stages = await fetchStagesByPlanId(planId);
+      const nextNumber =
+        stages.length > 0
+          ? Math.max(...stages.map((s) => s.stage_number || 0)) + 1
           : 1;
+
       const payload = {
         ...values,
         plan_id: planId,
         start_date: values.start_date.toISOString(),
         end_date: values.end_date.toISOString(),
-        stage_number: nextStageNumber,
+        stage_number: nextNumber,
       };
+
       await createStage(payload);
       message.success("Tạo giai đoạn thành công");
       setOpenModal(false);
-      fetchQuitPlans();
-    } catch (error) {
+    } catch {
       message.error("Lỗi khi tạo giai đoạn");
     }
   };
 
   const handleViewStages = async (plan) => {
     const planId = getPlanId(plan);
-    if (!planId) return message.error("Không tìm thấy ID của kế hoạch");
+    if (!planId) return message.error("Không tìm thấy kế hoạch");
+
     try {
       const stages = await fetchStagesByPlanId(planId);
       setSelectedStages(Array.isArray(stages) ? stages : []);
       setSelectedPlanName(plan.plan_name || plan.name || "Kế hoạch");
+      setCurrentPlan(plan);
       setViewStagesModal(true);
-    } catch (error) {
+    } catch {
       message.error("Lỗi khi lấy danh sách giai đoạn");
-      setSelectedStages([]);
-      setViewStagesModal(true);
     }
   };
 
-  const fetchStageTasks = async (stageId) => {
-    setLoading(true);
-    try {
-      if (!stageId) return [];
-      const tasks = await fetchTasksByStageId(stageId);
-      const validTasks = Array.isArray(tasks)
-        ? tasks.filter((task) => task && typeof task === "object")
-        : [];
-      setStageTasks(validTasks);
-      return validTasks;
-    } catch (error) {
-      message.error("Lỗi khi lấy danh sách công việc");
-      setStageTasks([]);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleDeleteStage = useCallback(
+    async (stage) => {
+      if (!stage?._id) return message.error("Không tìm thấy giai đoạn");
 
-  const handleViewTasks = async (stage) => {
+      Modal.confirm({
+        title: "Xác nhận xóa giai đoạn",
+        content: `Bạn có chắc chắn muốn xóa giai đoạn "${
+          stage.title || "Không có tên"
+        }"?`,
+        okText: "Xóa",
+        okType: "danger",
+        cancelText: "Hủy",
+        onOk: async () => {
+          try {
+            await deleteStage(stage._id);
+            message.success("Đã xóa giai đoạn");
+
+            if (currentPlan) {
+              const planId = getPlanId(currentPlan);
+              const stages = await fetchStagesByPlanId(planId);
+              setSelectedStages(Array.isArray(stages) ? stages : []);
+            }
+          } catch (error) {
+            message.error("Lỗi khi xóa: " + (error.message || ""));
+          }
+        },
+      });
+    },
+    [currentPlan, deleteStage, fetchStagesByPlanId, getPlanId]
+  );
+
+  const handleViewTasks = useCallback((stage) => {
     setSelectedStage(stage);
-    await fetchStageTasks(stage._id);
     setTaskModal(true);
-  };
+  }, []);
+
+  const handleCloseTaskModal = useCallback(() => {
+    setTaskModal(false);
+    setSelectedStage(null);
+  }, []);
+
+  const memoStage = useMemo(() => {
+    if (!selectedStage?._id) return null;
+    return {
+      _id: selectedStage._id,
+      title: selectedStage.title || "Giai đoạn",
+    };
+  }, [selectedStage]);
+
+  const taskServices = useMemo(
+    () => ({ fetchTasksByStageId, createTask, updateTask, deleteTask }),
+    [fetchTasksByStageId, createTask, updateTask, deleteTask]
+  );
 
   useEffect(() => {
     fetchQuitPlans();
-  }, [fetchQuitPlans, currentUser]);
+  }, [fetchQuitPlans]);
 
   const columns = [
     {
       title: "Tên kế hoạch",
       dataIndex: "plan_name",
-      key: "plan_name",
       render: (text) => text || "Không có tên",
     },
     {
       title: "Người dùng",
       dataIndex: "name",
-      key: "name",
       render: (text, record) => text || record?.user_id?.name || "Không rõ",
     },
     {
       title: "Email",
       dataIndex: "email",
-      key: "email",
       render: (text, record) => text || record?.user_id?.email || "Không rõ",
     },
     {
       title: "Thời gian",
-      key: "timeframe",
       render: (record) => {
         try {
           return `${dayjs(record.start_date).format("DD/MM/YYYY")} - ${dayjs(
@@ -176,7 +194,6 @@ const StagesCoach = () => {
     },
     {
       title: "Hành động",
-      key: "actions",
       render: (_, record) => (
         <div className="flex gap-2">
           <Button type="primary" onClick={() => handleOpenModal(record)}>
@@ -208,7 +225,7 @@ const StagesCoach = () => {
         visible={openModal}
         onClose={() => setOpenModal(false)}
         selectedPlan={selectedPlan}
-        stageForm={form}
+        stageForm={form} // truyền đúng form
         onSubmit={handleSubmit}
       />
 
@@ -218,19 +235,15 @@ const StagesCoach = () => {
         selectedPlanName={selectedPlanName}
         selectedStages={selectedStages}
         handleViewTasks={handleViewTasks}
+        handleDeleteStage={handleDeleteStage}
         stageLoading={stageLoading}
       />
 
       <TasksManager
         visible={taskModal}
-        onClose={() => setTaskModal(false)}
-        selectedStage={selectedStage}
-        stageTasks={stageTasks}
-        taskLoading={taskLoading}
-        fetchTasksByStageId={fetchTasksByStageId}
-        createTask={createTask}
-        updateTask={updateTask}
-        deleteTask={deleteTask}
+        onClose={handleCloseTaskModal}
+        selectedStage={memoStage}
+        {...taskServices}
       />
     </div>
   );

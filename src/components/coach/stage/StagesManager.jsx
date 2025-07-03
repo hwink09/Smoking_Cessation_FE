@@ -2,12 +2,12 @@ import React, { useMemo } from "react";
 import {
   Button,
   Modal,
+  Table,
+  Typography,
+  Space,
   Form,
   Input,
   DatePicker,
-  message,
-  Table,
-  Typography,
 } from "antd";
 import dayjs from "dayjs";
 
@@ -19,6 +19,7 @@ const StagesManager = ({
   selectedPlanName,
   selectedStages = [],
   handleViewTasks,
+  handleDeleteStage,
   stageLoading,
 }) => {
   const columns = useMemo(
@@ -57,20 +58,57 @@ const StagesManager = ({
           date ? dayjs(date).format("DD/MM/YYYY") : "Không có ngày",
       },
       {
-        title: "Nhiệm vụ",
-        key: "tasks",
+        title: "Hành động",
+        key: "actions",
         render: (_, record) => (
-          <Button
-            onClick={() => handleViewTasks(record)}
-            disabled={!record || !record._id}
-          >
-            Quản lý nhiệm vụ
-          </Button>
+          <Space>
+            <Button
+              onClick={() => handleViewTasks(record)}
+              disabled={!record?._id}
+            >
+              Quản lý nhiệm vụ
+            </Button>
+            <Button
+              danger
+              onClick={() => handleDeleteStage(record)}
+              disabled={!record?._id}
+            >
+              Xóa giai đoạn
+            </Button>
+          </Space>
         ),
       },
     ],
-    [handleViewTasks]
+    [handleViewTasks, handleDeleteStage]
   );
+
+  const content = useMemo(() => {
+    if (stageLoading) {
+      return (
+        <div className="text-center py-8">
+          <Text type="secondary">Đang tải danh sách giai đoạn...</Text>
+        </div>
+      );
+    }
+
+    if (!selectedStages?.length) {
+      return (
+        <div className="text-center py-8">
+          <Text type="secondary">Chưa có giai đoạn nào cho kế hoạch này</Text>
+        </div>
+      );
+    }
+
+    return (
+      <Table
+        rowKey={(record) => record?._id || record.stage_number}
+        dataSource={selectedStages}
+        columns={columns}
+        pagination={false}
+        loading={stageLoading}
+      />
+    );
+  }, [stageLoading, selectedStages, columns]);
 
   return (
     <Modal
@@ -79,24 +117,9 @@ const StagesManager = ({
       onCancel={onClose}
       footer={null}
       width={800}
+      destroyOnHidden
     >
-      {stageLoading ? (
-        <div className="text-center py-8">
-          <Text type="secondary">Đang tải danh sách giai đoạn...</Text>
-        </div>
-      ) : !Array.isArray(selectedStages) || selectedStages.length === 0 ? (
-        <div className="text-center py-8">
-          <Text type="secondary">Chưa có giai đoạn nào cho kế hoạch này</Text>
-        </div>
-      ) : (
-        <Table
-          rowKey={(record) => record._id || `stage-${record.stage_number}`}
-          dataSource={selectedStages}
-          columns={columns}
-          pagination={false}
-          loading={stageLoading}
-        />
-      )}
+      {content}
     </Modal>
   );
 };
@@ -118,6 +141,7 @@ const CreateStageModal = ({
       onOk={onSubmit}
       okText="Tạo"
       cancelText="Huỷ"
+      destroyOnHidden
     >
       <Form form={stageForm} layout="vertical">
         <Form.Item

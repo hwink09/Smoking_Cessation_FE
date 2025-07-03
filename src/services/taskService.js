@@ -1,30 +1,52 @@
 import api from "./api";
 
+// Common request handler
 const handleRequest = async (requestFn, fallback = null) => {
   try {
     const response = await requestFn();
-    return response.data;
+    return response?.data?.data || response?.data || [];
   } catch (error) {
     console.error("API Error:", error);
     return fallback !== null ? fallback : Promise.reject(error);
   }
 };
 
+// Token checker
+const hasValidToken = () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.warn("Token not found");
+    return false;
+  }
+  return true;
+};
+
+// API methods
 export const fetchAllTasksAPI = () =>
   handleRequest(() => api.get("/tasks"), []);
 
 export const fetchTasksByStageIdAPI = (stageId) => {
-  if (!stageId) return Promise.resolve([]);
+  if (!stageId) {
+    console.warn("No stageId provided");
+    return Promise.resolve([]);
+  }
 
-  return handleRequest(() => api.get(`/tasks/stage/${stageId}`), []).then(
-    (response) => {
-      if (response && response.data && Array.isArray(response.data)) {
-        return response.data;
-      } else if (Array.isArray(response)) {
-        return response;
-      }
-      return [];
-    }
+  if (!hasValidToken()) return Promise.resolve([]);
+
+  return handleRequest(() => api.get(`/tasks/stage/${stageId}`), []);
+};
+
+export const fetchTasksByStageWithCompletionAPI = (stageId) => {
+  if (!stageId) {
+    console.warn("No stageId provided");
+    return Promise.resolve([]);
+  }
+
+  if (!hasValidToken()) return Promise.resolve([]);
+
+  return handleRequest(
+    () => api.get(`/tasks/stage/${stageId}/with-completion`),
+    []
   );
 };
 
@@ -44,4 +66,4 @@ export const completeTaskAPI = (taskId) =>
   handleRequest(() => api.post(`/tasks/${taskId}/complete`));
 
 export const getCompletedTasksByStageAPI = (stageId) =>
-  handleRequest(() => api.get(`/tasks/stage/${stageId}/completed`));
+  handleRequest(() => api.get(`/tasks/stage/${stageId}/completed`), []);

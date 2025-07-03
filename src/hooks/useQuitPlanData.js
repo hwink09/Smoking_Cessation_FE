@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import QuitPlanService from "~/services/quitPlanService";
 
 export function useQuitPlanData() {
@@ -61,22 +61,6 @@ export function useQuitPlanData() {
     []
   );
 
-  useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-    QuitPlanService.getAllQuitPlans()
-      .then((data) => isMounted && setQuitPlans(data))
-      .catch(
-        (err) =>
-          isMounted && setError(err?.response?.data?.message || err.message)
-      )
-      .finally(() => isMounted && setLoading(false));
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
   // ---------- CRUD with refresh ----------
   const createWithRefresh = async (data) => {
     const result = await callService(QuitPlanService.createQuitPlan, data);
@@ -128,6 +112,12 @@ export function useQuitPlanData() {
     return result;
   };
 
+  // Memoize các function để tránh re-render
+  const memoizedGetQuitPlanByUserId = useCallback(
+    (userId) => callService(QuitPlanService.getQuitPlanByUserId, userId),
+    [callService]
+  );
+
   return {
     // State
     quitPlans,
@@ -151,8 +141,7 @@ export function useQuitPlanData() {
     getQuitPlanById: (id) => callService(QuitPlanService.getQuitPlanById, id),
     updateQuitPlan: updateWithRefresh,
     deleteQuitPlan: deleteWithRefresh,
-    getQuitPlanByUserId: (userId) =>
-      callService(QuitPlanService.getQuitPlanByUserId, userId),
+    getQuitPlanByUserId: memoizedGetQuitPlanByUserId,
 
     // Public plans
     getPublicQuitPlans: () => callService(QuitPlanService.getPublicQuitPlans),

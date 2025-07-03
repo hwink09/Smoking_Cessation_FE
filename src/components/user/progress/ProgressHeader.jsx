@@ -12,7 +12,6 @@ import { Tooltip, Progress, Badge } from "antd";
 import ColourfulText from "~/components/ui/colourful-text";
 
 function ProgressHeader({ quitDate, stats = {}, healthMilestone }) {
-  console.log("========================",stats);
   const {
     days = 0,
     moneySaved = 0,

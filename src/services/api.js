@@ -1,10 +1,13 @@
 import axios from "axios";
 
-// Dùng VITE_API_URL và đảm bảo không lặp "/api"
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+const isDev = import.meta.env.DEV;
 
-// Tạo instance Axios
+// Chuẩn hóa URL base (tránh lặp `/api`)
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "") ||
+  "http://localhost:3000";
+
+// Tạo instance
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,
   withCredentials: true,
@@ -14,54 +17,66 @@ const api = axios.create({
   },
 });
 
+// Tách logic lấy token
+const getAuthToken = () => {
+  const directToken = localStorage.getItem("token");
+  if (directToken) return directToken;
+
+  const userStr = localStorage.getItem("user");
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      return user?.token || user?.accessToken || null;
+    } catch (e) {
+      isDev && console.error("Error parsing user from localStorage:", e);
+    }
+  }
+  return null;
+};
+
+// Request interceptor
 api.interceptors.request.use((config) => {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const token = user.token || localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  try {
+    const token = getAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      isDev && console.debug(`[API] Auth token set for ${config.url}`);
+    } else {
+      isDev && console.warn(`[API] No auth token for ${config.url}`);
+    }
+  } catch (err) {
+    console.error("Request interceptor error:", err);
   }
   return config;
 });
 
-//  Interceptor response để log lỗi
+// Response interceptor
 api.interceptors.response.use(
   (response) => {
-    // Check for login endpoint and validate response structure
-    if (
-      response.config.url.includes("/auth/login") &&
-      response.data &&
-      response.data.success !== false
-    ) {
-      // For login endpoint, verify we have a proper user object
-      if (!response.data.user || !response.data.user.userId) {
-        console.warn("Login API response missing user data:", response.data);
-
-        // Try to extract user from token if available
-        if (response.data.token) {
-          console.log(
-            "Login API returned token but no user, attempting to extract user from token"
-          );
-        }
+    // Optional: Kiểm tra login response
+    const isLogin = response.config.url.includes("/auth/login");
+    if (isLogin && response.data?.success !== false) {
+      const { user, token } = response.data;
+      if (!user?.userId && token) {
+        isDev &&
+          console.warn("[API] Login response missing user, token exists.");
       }
     }
     return response;
   },
   (error) => {
-    console.error("Response Error:", error.message);
+    console.error("[API Error]", error.message);
 
     if (error.response) {
-      console.error("Server Error Details:", {
+      console.error("→ Server responded with error:", {
         status: error.response.status,
         url: error.config?.url,
         data: error.response.data,
       });
     } else if (error.request) {
-      console.error("No response received:", {
-        request: error.request,
-        url: error.config?.url,
-      });
+      console.error("→ No response received for:", error.config?.url);
     } else {
-      console.error("Request setup error:", error.message);
+      console.error("→ Axios config error:", error.message);
     }
 
     return Promise.reject(error);

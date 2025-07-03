@@ -37,7 +37,6 @@ const useBadgeAchievementsManager = () => {
     try {
       // This function would typically check for any new badges awarded to the user
       // Since we don't have a direct API for this, we'll skip this step
-      console.log("Badge checking skipped - no direct API equivalent");
 
       // We won't show any new awards dialog since we're not checking for new badges
       setNewAwards([]);

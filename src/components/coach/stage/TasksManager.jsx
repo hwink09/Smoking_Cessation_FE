@@ -1,17 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
   Button,
   Modal,
   Form,
   Input,
-  DatePicker,
   message,
   Tabs,
   Typography,
   List,
   Spin,
 } from "antd";
-import dayjs from "dayjs";
 
 const { Text } = Typography;
 
@@ -19,8 +17,6 @@ const TasksManager = ({
   visible,
   onClose,
   selectedStage,
-  stageTasks,
-  taskLoading,
   fetchTasksByStageId,
   createTask,
   updateTask,
@@ -28,200 +24,175 @@ const TasksManager = ({
 }) => {
   const [activeTabKey, setActiveTabKey] = useState("1");
   const [taskForm] = Form.useForm();
-  const [localTasks, setLocalTasks] = useState([]);
-  const [localLoading, setLocalLoading] = useState(false);
-  const [editTaskModal, setEditTaskModal] = useState(false);
-  const [currentTask, setCurrentTask] = useState(null);
   const [editTaskForm] = Form.useForm();
 
-  React.useEffect(() => {
-    if (visible && selectedStage?._id) {
+  const [tasks, setTasks] = useState([]);
+  const [editTaskModal, setEditTaskModal] = useState(false);
+  const [currentTask, setCurrentTask] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadedStageId, setLoadedStageId] = useState(null);
+
+  const stageId = useMemo(() => selectedStage?._id || null, [selectedStage]);
+  const loadTasks = useCallback(async () => {
+    if (!stageId || loadedStageId === stageId) return;
+    setLoading(true);
+    try {
+      const result = await fetchTasksByStageId(stageId);
+      setTasks(Array.isArray(result) ? result.filter(Boolean) : []);
+      setLoadedStageId(stageId);
+    } catch {
+      message.error("Không thể tải danh sách nhiệm vụ");
+    } finally {
+      setLoading(false);
+    }
+  }, [stageId, fetchTasksByStageId, loadedStageId]);
+
+  const resetState = useCallback(() => {
+    setActiveTabKey("1");
+    setTasks([]);
+    setLoadedStageId(null);
+    setEditTaskModal(false);
+    setCurrentTask(null);
+    taskForm.resetFields();
+    editTaskForm.resetFields();
+  }, [taskForm, editTaskForm]);
+
+  const handleCloseModal = useCallback(() => {
+    resetState();
+    onClose();
+  }, [resetState, onClose]);
+
+  useEffect(() => {
+    if (visible && stageId) {
       loadTasks();
     }
-    if (stageTasks && Array.isArray(stageTasks)) {
-      setLocalTasks(stageTasks);
-    }
-  }, [visible, selectedStage, stageTasks]);
+  }, [visible, stageId, loadTasks]);
 
-  const loadTasks = async () => {
-    if (!selectedStage?._id) return;
-    setLocalLoading(true);
+  const handleAddTask = useCallback(async () => {
     try {
-      const result = await fetchTasksByStageId(selectedStage._id);
-      if (Array.isArray(result)) {
-        const validTasks = result.filter(
-          (task) => task && typeof task === "object"
-        );
-        setLocalTasks(validTasks);
-      } else {
-        setLocalTasks([]);
-      }
-    } catch (error) {
-      setLocalTasks([]);
-    } finally {
-      setLocalLoading(false);
-    }
-  };
-
-  const handleAddTask = async () => {
-    try {
-      if (!selectedStage || !selectedStage._id) {
-        message.error("Không thể thêm nhiệm vụ: Giai đoạn không hợp lệ");
-        return;
-      }
-
       const values = await taskForm.validateFields();
-      const payload = {
+      if (!stageId) return message.error("Giai đoạn không hợp lệ");
+
+      setLoading(true);
+      const newTask = await createTask({
         title: values.taskTitle,
         description: values.taskDescription,
-        stage_id: selectedStage._id,
-        due_date: values.taskDueDate?.toISOString(),
-      };
-
-      setLocalLoading(true);
-      try {
-        const newTask = await createTask(payload);
+        stage_id: stageId,
+      });
+      if (newTask) {
+        setTasks((prev) => [...prev, newTask]);
         message.success("Tạo nhiệm vụ thành công");
-        if (newTask) setLocalTasks((prev) => [...prev, newTask]);
-        await loadTasks();
         taskForm.resetFields();
-      } catch (error) {
-        message.error(
-          "Lỗi khi tạo nhiệm vụ: " + (error.message || "Lỗi không xác định")
-        );
-      } finally {
-        setLocalLoading(false);
       }
-    } catch {
-      message.error("Vui lòng kiểm tra thông tin nhập vào");
+    } catch (err) {
+      message.error(err?.message || "Vui lòng kiểm tra thông tin");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [stageId, createTask, taskForm]);
 
-  const handleEditTask = (task) => {
-    setCurrentTask(task);
-    editTaskForm.setFieldsValue({
-      taskTitle: task.title,
-      taskDescription: task.description,
-      taskDueDate: task.due_date ? dayjs(task.due_date) : undefined,
-    });
-    setEditTaskModal(true);
-  };
+  const handleEditTask = useCallback(
+    (task) => {
+      setCurrentTask(task);
+      editTaskForm.setFieldsValue({
+        taskTitle: task.title,
+        taskDescription: task.description,
+      });
+      setEditTaskModal(true);
+    },
+    [editTaskForm]
+  );
 
-  const handleSaveTask = async () => {
+  const handleSaveTask = useCallback(async () => {
     try {
-      if (!currentTask || !currentTask._id) {
-        message.error("Không thể cập nhật: Nhiệm vụ không hợp lệ");
-        return;
+      const values = await editTaskForm.validateFields();
+      if (!currentTask?._id || !stageId) {
+        return message.error("Dữ liệu không hợp lệ");
       }
 
-      const values = await editTaskForm.validateFields();
-      const payload = {
+      setLoading(true);
+      const result = await updateTask(currentTask._id, {
         title: values.taskTitle,
         description: values.taskDescription,
-        stage_id: selectedStage._id,
-        due_date: values.taskDueDate?.toISOString(),
-      };
+        stage_id: stageId,
+      });
 
-      setLocalLoading(true);
-      try {
-        const result = await updateTask(currentTask._id, payload);
-        if (result?.permissionDenied) {
-          message.warning(result.message);
-          setEditTaskModal(false);
-          return;
-        }
-        message.success("Cập nhật nhiệm vụ thành công");
-        setEditTaskModal(false);
-        setLocalTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task._id === currentTask._id ? { ...task, ...payload } : task
+      if (result?.permissionDenied) {
+        message.warning(result.message || "Không có quyền chỉnh sửa");
+      } else {
+        setTasks((prev) =>
+          prev.map((t) =>
+            t._id === currentTask._id
+              ? {
+                  ...t,
+                  title: values.taskTitle,
+                  description: values.taskDescription,
+                }
+              : t
           )
         );
-        await loadTasks();
-      } catch (error) {
-        if (
-          error?.response?.status === 403 ||
-          error?.message?.includes("403")
-        ) {
-          message.warning("Bạn không có quyền cập nhật nhiệm vụ này.");
-          setEditTaskModal(false);
-        } else {
-          message.error("Lỗi khi cập nhật nhiệm vụ: " + (error.message || ""));
-        }
-      } finally {
-        setLocalLoading(false);
+        message.success("Cập nhật nhiệm vụ thành công");
+        setEditTaskModal(false);
       }
-    } catch {
-      message.error("Vui lòng kiểm tra thông tin nhập vào");
+    } catch (err) {
+      message.error(err?.message || "Vui lòng kiểm tra thông tin");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [currentTask, stageId, updateTask, editTaskForm]);
 
-  const handleDeleteTask = async (taskId) => {
-    if (!taskId) {
-      message.error("Không thể xóa: ID nhiệm vụ không hợp lệ");
-      return;
-    }
-
-    Modal.confirm({
-      title: "Xác nhận xóa nhiệm vụ",
-      content: "Bạn có chắc chắn muốn xóa nhiệm vụ này không?",
-      okText: "Xóa",
-      okType: "danger",
-      cancelText: "Hủy",
-      onOk: async () => {
-        setLocalLoading(true);
-        try {
-          const result = await deleteTask(taskId);
-          if (result?.permissionDenied) {
-            message.success("Nhiệm vụ đã được xóa thành công");
-          } else {
-            message.success("Đã xóa nhiệm vụ thành công");
+  const handleDeleteTask = useCallback(
+    (taskId) => {
+      if (!taskId) return;
+      Modal.confirm({
+        title: "Xác nhận xóa nhiệm vụ",
+        content: "Bạn có chắc chắn muốn xóa nhiệm vụ này không?",
+        okText: "Xóa",
+        okType: "danger",
+        cancelText: "Hủy",
+        onOk: async () => {
+          setLoading(true);
+          try {
+            await deleteTask(taskId);
+            setTasks((prev) => prev.filter((task) => task._id !== taskId));
+            message.success("Đã xóa nhiệm vụ");
+          } catch (err) {
+            message.error(err?.message || "Lỗi khi xóa nhiệm vụ");
+          } finally {
+            setLoading(false);
           }
-          setLocalTasks((prev) => prev.filter((task) => task._id !== taskId));
-          await loadTasks();
-        } catch (error) {
-          if (
-            error?.response?.status === 403 ||
-            error?.message?.includes("403")
-          ) {
-            message.success("Nhiệm vụ đã được xóa thành công");
-            setLocalTasks((prev) => prev.filter((task) => task._id !== taskId));
-          } else {
-            message.error("Lỗi khi xóa nhiệm vụ: " + (error.message || ""));
-          }
-        } finally {
-          setLocalLoading(false);
-        }
-      },
-    });
-  };
+        },
+      });
+    },
+    [deleteTask]
+  );
 
   return (
     <>
       <Modal
         open={visible}
         title={`Quản lý nhiệm vụ - Giai đoạn: ${selectedStage?.title || ""}`}
-        onCancel={onClose}
+        onCancel={handleCloseModal}
         footer={null}
         width={1000}
       >
         <Tabs
           activeKey={activeTabKey}
-          onChange={(key) => setActiveTabKey(key)}
+          onChange={setActiveTabKey}
           items={[
             {
               key: "1",
               label: "Danh sách nhiệm vụ",
               children: (
-                <>
-                  {localLoading || taskLoading ? (
+                <div>
+                  {loading ? (
                     <div className="text-center py-8">
                       <Spin />
                       <Text type="secondary">
                         Đang tải danh sách nhiệm vụ...
                       </Text>
                     </div>
-                  ) : localTasks.length === 0 ? (
+                  ) : tasks.length === 0 ? (
                     <div className="text-center py-8">
                       <Text type="secondary">
                         Chưa có nhiệm vụ nào cho giai đoạn này
@@ -238,7 +209,7 @@ const TasksManager = ({
                   ) : (
                     <List
                       itemLayout="horizontal"
-                      dataSource={localTasks}
+                      dataSource={tasks}
                       renderItem={(task) => (
                         <List.Item
                           key={task._id}
@@ -262,71 +233,55 @@ const TasksManager = ({
                         >
                           <List.Item.Meta
                             title={task.title || "Không có tiêu đề"}
-                            description={
-                              <>
-                                <div>
-                                  {task.description || "Không có mô tả"}
-                                </div>
-                                <Text type="secondary">
-                                  Hạn chót:{" "}
-                                  {task.due_date
-                                    ? dayjs(task.due_date).format("DD/MM/YYYY")
-                                    : "Không có hạn chót"}
-                                </Text>
-                              </>
-                            }
+                            description={task.description || "Không có mô tả"}
                           />
                         </List.Item>
                       )}
                     />
                   )}
-                </>
+                </div>
               ),
             },
             {
               key: "2",
               label: "Thêm nhiệm vụ mới",
               children: (
-                <Form form={taskForm} layout="vertical">
-                  <Form.Item
-                    name="taskTitle"
-                    label="Tiêu đề nhiệm vụ"
-                    rules={[
-                      { required: true, message: "Vui lòng nhập tiêu đề" },
-                    ]}
-                  >
-                    <Input />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="taskDescription"
-                    label="Mô tả nhiệm vụ"
-                    rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
-                  >
-                    <Input.TextArea rows={4} />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="taskDueDate"
-                    label="Hạn chót"
-                    rules={[
-                      { required: true, message: "Vui lòng chọn hạn chót" },
-                    ]}
-                  >
-                    <DatePicker format="DD/MM/YYYY" className="w-full" />
-                  </Form.Item>
-
-                  <Button type="primary" block onClick={handleAddTask}>
-                    Thêm nhiệm vụ mới
-                  </Button>
-                </Form>
+                <div>
+                  <Form form={taskForm} layout="vertical">
+                    <Form.Item
+                      name="taskTitle"
+                      label="Tiêu đề nhiệm vụ"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập tiêu đề" },
+                      ]}
+                    >
+                      <Input />
+                    </Form.Item>
+                    <Form.Item
+                      name="taskDescription"
+                      label="Mô tả nhiệm vụ"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập mô tả" },
+                      ]}
+                    >
+                      <Input.TextArea rows={4} />
+                    </Form.Item>
+                    <Button
+                      type="primary"
+                      block
+                      onClick={handleAddTask}
+                      loading={loading}
+                    >
+                      Thêm nhiệm vụ mới
+                    </Button>
+                  </Form>
+                </div>
               ),
             },
           ]}
         />
       </Modal>
 
-      {/* Modal chỉnh sửa */}
       <Modal
         open={editTaskModal}
         title="Chỉnh sửa nhiệm vụ"
@@ -334,6 +289,7 @@ const TasksManager = ({
         onOk={handleSaveTask}
         okText="Lưu"
         cancelText="Hủy"
+        confirmLoading={loading}
       >
         <Form form={editTaskForm} layout="vertical">
           <Form.Item
@@ -343,21 +299,12 @@ const TasksManager = ({
           >
             <Input />
           </Form.Item>
-
           <Form.Item
             name="taskDescription"
             label="Mô tả nhiệm vụ"
             rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
           >
             <Input.TextArea rows={4} />
-          </Form.Item>
-
-          <Form.Item
-            name="taskDueDate"
-            label="Hạn chót"
-            rules={[{ required: true, message: "Vui lòng chọn hạn chót" }]}
-          >
-            <DatePicker format="DD/MM/YYYY" className="w-full" />
           </Form.Item>
         </Form>
       </Modal>
