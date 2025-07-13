@@ -70,7 +70,7 @@ export default function SmokingStatusPage() {
     try {
       await deleteSmokingStatus(userId);
       await fetchSmokingStatus(userId);
-    } catch (err) {
+    } catch {
       // Error messages are already handled in the hook
     }
   };

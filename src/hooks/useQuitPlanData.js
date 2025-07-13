@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import QuitPlanService from "~/services/quitPlanService";
 
 export function useQuitPlanData() {

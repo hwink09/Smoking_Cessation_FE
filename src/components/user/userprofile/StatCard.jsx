@@ -1,6 +1,12 @@
-import { Card, Col } from "antd"
+import { Card, Col } from "antd";
 
-export function StatCard({ icon: Icon, value, label, color, backgroundColor, borderColor }) {
+export function StatCard({
+  value,
+  label,
+  color,
+  backgroundColor,
+  borderColor,
+}) {
   return (
     <Col span={8}>
       <Card
@@ -19,14 +25,28 @@ export function StatCard({ icon: Icon, value, label, color, backgroundColor, bor
       >
         <div style={{ padding: "8px 0" }}>
           <Icon size={24} style={{ color, marginBottom: "8px" }} />
-          <div style={{ fontSize: "18px", fontWeight: "bold", color, lineHeight: "1.2" }}>
+          <div
+            style={{
+              fontSize: "18px",
+              fontWeight: "bold",
+              color,
+              lineHeight: "1.2",
+            }}
+          >
             {value}
           </div>
-          <div style={{ fontSize: "11px", color, marginTop: "4px", lineHeight: "1.2" }}>
+          <div
+            style={{
+              fontSize: "11px",
+              color,
+              marginTop: "4px",
+              lineHeight: "1.2",
+            }}
+          >
             {label}
           </div>
         </div>
       </Card>
     </Col>
-  )
+  );
 }

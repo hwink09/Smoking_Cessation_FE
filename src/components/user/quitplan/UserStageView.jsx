@@ -1,29 +1,18 @@
-import { useCallback, useEffect, useState } from "react";
-import {
-  Typography,
-  Tag,
-  Alert,
-  Button,
-  message,
-  Progress,
-  Checkbox,
-  Spin,
-  Steps,
-  Card,
-} from "antd";
+import { useCallback, useEffect } from "react";
+import { Typography, Alert, Button, message, Spin, Steps, Card } from "antd";
 import {
   ReloadOutlined,
   CheckCircleFilled,
   ClockCircleFilled,
 } from "@ant-design/icons";
 import { useUserQuitPlan } from "~/hooks/useUserQuitPlan";
+import TaskCard from "./TaskCard";
+import ProgressCard from "~/components/common/ProgressCard";
+import StatCard from "~/components/common/StatCard";
 
 const { Title, Text, Paragraph } = Typography;
 
-const UserStageView = ({ quitPlan }) => {
-  const [showStageCompletionAlert, setShowStageCompletionAlert] =
-    useState(false);
-
+const UserStageView = () => {
   const {
     currentStage,
     myStages,
@@ -40,7 +29,6 @@ const UserStageView = ({ quitPlan }) => {
   // Fetch data lần đầu khi component mount
   useEffect(() => {
     refetch();
-    setShowStageCompletionAlert(false); // Reset alert khi load trang
   }, [refetch]);
 
   const handleCompleteTask = useCallback(
@@ -315,120 +303,5 @@ const EmptyCard = ({ title, desc }) => (
     </div>
   </div>
 );
-
-const StatCard = ({ label, value, color }) => (
-  <div
-    className={`bg-${color}-50 p-4 rounded-lg border border-${color}-100 flex justify-between items-center`}
-  >
-    <Text strong className={`text-${color}-800 text-sm`}>
-      {label}
-    </Text>
-    <Text className={`text-2xl font-bold text-${color}-700`}>{value}</Text>
-  </div>
-);
-
-const ProgressCard = ({ percent, completed, total }) => (
-  <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-    <div className="flex flex-col">
-      <div className="flex justify-between mb-2">
-        <Text strong className="text-green-800 text-sm">
-          Tiến độ hoàn thành
-        </Text>
-        <Text className="text-2xl font-bold text-green-700">{percent}%</Text>
-      </div>
-      <Progress
-        percent={percent}
-        showInfo={false}
-        strokeColor={{ "0%": "#10b981", "100%": "#059669" }}
-        size="small"
-        className="mb-1"
-      />
-      <Text type="secondary" className="text-xs">
-        {completed}/{total} nhiệm vụ
-      </Text>
-    </div>
-  </div>
-);
-
-const TaskCard = ({ task, index, onComplete }) => {
-  const isLocked = false; // Trong tương lai có thể thêm logic lock task
-
-  return (
-    <div
-      className={`group relative overflow-hidden rounded-lg border transition-all duration-300 mb-3 ${
-        task.is_completed
-          ? "bg-green-50 border-green-200"
-          : isLocked
-          ? "bg-gray-50 border-gray-200 opacity-60"
-          : "bg-white border-gray-200 hover:border-blue-300 hover:shadow-lg"
-      }`}
-    >
-      <div className="p-4 flex items-start gap-3">
-        <div className="flex items-center gap-2">
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-              task.is_completed
-                ? "bg-green-500 text-white"
-                : isLocked
-                ? "bg-gray-400 text-white"
-                : "bg-blue-500 text-white"
-            }`}
-          >
-            {task.is_completed ? "✓" : isLocked ? "🔒" : index + 1}
-          </div>
-          <Checkbox checked={task.is_completed} disabled size="small" />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <Title
-            level={5}
-            className={`${
-              task.is_completed
-                ? "line-through text-gray-500"
-                : isLocked
-                ? "text-gray-400"
-                : "text-gray-800"
-            } mb-1`}
-            ellipsis={{ rows: 2, tooltip: task.title }}
-            style={{ fontSize: "14px" }}
-          >
-            {task.title}
-          </Title>
-          <Paragraph
-            className={`${
-              task.is_completed
-                ? "text-gray-400"
-                : isLocked
-                ? "text-gray-400"
-                : "text-gray-600"
-            } mb-2`}
-            ellipsis={{ rows: 2 }}
-          >
-            {task.description}
-          </Paragraph>
-          {task.deadline && (
-            <Text className="text-xs text-gray-500">
-              Hạn: {new Date(task.deadline).toLocaleDateString("vi-VN")}
-            </Text>
-          )}
-        </div>
-
-        {!task.is_completed && !isLocked && (
-          <Button
-            size="small"
-            onClick={() => onComplete(task._id)}
-            className="ml-2 bg-green-500 hover:bg-green-600 border-0 shadow-md hover:shadow-lg text-white text-xs"
-          >
-            Hoàn thành
-          </Button>
-        )}
-
-        {task.is_completed && (
-          <div className="ml-2 text-green-500 text-xl">✅</div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 export default UserStageView;
