@@ -6,11 +6,8 @@ import {
   CalendarOutlined,
   RocketOutlined,
 } from "@ant-design/icons";
-
-import PlanCard from "./PlanCard";
 import { useQuitPlanData } from "~/hooks/useQuitPlanData";
 import { useAuth } from "~/hooks/useAuth";
-import useCoachData from "~/hooks/useCoachData";
 import ColourfulText from "~/components/ui/colourful-text";
 import CoachCardList from "~/components/user/quitplan/CoachCardList";
 import UserStageView from "~/components/user/quitplan/UserStageView";

@@ -81,7 +81,7 @@ const authService = {
             let storedUser;
             try {
               storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-            } catch (e) {
+            } catch {
               storedUser = {};
             }
 

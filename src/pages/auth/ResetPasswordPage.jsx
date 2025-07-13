@@ -44,7 +44,7 @@ function ResetPasswordPage() {
 
     setIsLoading(true);
     try {
-      const response = await api.post(`/auth/resset-password/${token}`, {
+      await api.post(`/auth/resset-password/${token}`, {
         newPassword: password,
       });
 

@@ -126,7 +126,7 @@ export function useUserQuitPlan() {
                   : stage
               )
             );
-          } catch (stageError) {
+          } catch {
             // Tiếp tục dù lỗi vì có thể backend chưa hỗ trợ API này
           }
 

@@ -42,7 +42,7 @@ const cardData = [
 export default function Cards({ stats = {} }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-6">
-      {cardData.map((c, idx) => (
+      {cardData.map((c) => (
         <div
           key={c.key}
           className={`group relative bg-gradient-to-br ${c.gradient} p-6 rounded-3xl shadow-xl transition-transform transform hover:scale-105 hover:rotate-[1deg] cursor-pointer`}

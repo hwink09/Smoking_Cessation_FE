@@ -6,13 +6,8 @@ import { useAuth } from "~/hooks/useAuth";
 
 function Register() {
   const navigate = useNavigate();
-  const {
-    register,
-    validateRegistrationForm,
-    isFormValid,
-    formatAuthError,
-    clearError,
-  } = useAuth();
+  const { register, validateRegistrationForm, isFormValid, formatAuthError } =
+    useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({

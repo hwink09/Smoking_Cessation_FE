@@ -9,7 +9,6 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { TrendingUp } from "lucide-react";
-import dayjs from "dayjs";
 
 function ProgressUser() {
   const mockQuitData = {
@@ -17,8 +16,8 @@ function ProgressUser() {
     cigarettesPerDay: 20,
     pricePerPack: 50000,
     cigarettesPerPack: 20,
-    userId: localStorage.getItem("user")?.id, 
-    stageId: "684a8fe73a565ab924db5bd8", // TODO: lấy state id ở đâu ?? 
+    userId: localStorage.getItem("user")?.id,
+    stageId: "684a8fe73a565ab924db5bd8", // TODO: lấy state id ở đâu ??
   };
 
   const [quitDate] = useState(new Date(mockQuitData.quitDate));
@@ -107,8 +106,19 @@ function ProgressUser() {
   );
 
   const stats = useMemo(() => {
-    return calculateStats(quitDate, cigarettesPerDay, pricePerPack, cigarettesPerPack);
-  }, [quitDate, cigarettesPerDay, pricePerPack, cigarettesPerPack, calculateStats]);
+    return calculateStats(
+      quitDate,
+      cigarettesPerDay,
+      pricePerPack,
+      cigarettesPerPack
+    );
+  }, [
+    quitDate,
+    cigarettesPerDay,
+    pricePerPack,
+    cigarettesPerPack,
+    calculateStats,
+  ]);
 
   const currentMilestone = useMemo(
     () =>
@@ -122,9 +132,13 @@ function ProgressUser() {
     try {
       clearError();
 
-      const dailySavings = (pricePerPack / cigarettesPerPack) * cigarettesPerDay;
-      const actualMoneySaved = entry.smoked 
-        ? Math.max(0, dailySavings - (entry.cigarettes * (pricePerPack / cigarettesPerPack)))
+      const dailySavings =
+        (pricePerPack / cigarettesPerPack) * cigarettesPerDay;
+      const actualMoneySaved = entry.smoked
+        ? Math.max(
+            0,
+            dailySavings - entry.cigarettes * (pricePerPack / cigarettesPerPack)
+          )
         : dailySavings;
 
       const progressData = {
@@ -149,7 +163,7 @@ function ProgressUser() {
     if (error) {
       const timer = setTimeout(() => {
         clearError();
-      }, 5000); 
+      }, 5000);
 
       return () => clearTimeout(timer);
     }

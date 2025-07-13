@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   Card,
   Avatar,
-  Skeleton,
   Typography,
   Alert,
   Rate,
@@ -13,116 +12,15 @@ import {
 } from "antd";
 import QuitPlanModal from "./QuitPlanModal";
 import UserStageView from "./UserStageView";
+import CoachCard from "./CoachCard";
 import { useQuitPlanData } from "~/hooks/useQuitPlanData";
 import useCoachData from "~/hooks/useCoachData";
 import { useAuth } from "~/hooks/useAuth";
-import StageService from "~/services/stageService";
 import api from "~/services/api";
+import InfoBox from "~/components/common/InfoBox";
+import LoadingSkeleton from "~/components/common/LoadingSkeleton";
 
 const { Title, Paragraph, Text } = Typography;
-
-const LoadingSkeleton = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50">
-    <Card className="p-8 shadow-lg rounded-lg w-full max-w-6xl">
-      <Skeleton.Input active size="large" className="w-96 h-12 mx-auto mb-12" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {[...Array(6)].map((_, i) => (
-          <Card
-            key={i}
-            loading
-            className="rounded-lg border-0 shadow-lg h-96"
-          />
-        ))}
-      </div>
-    </Card>
-  </div>
-);
-
-const CoachCard = ({ coach, onSelectCoach }) => (
-  <Card
-    hoverable
-    className="rounded-lg border-0 shadow-lg bg-white transition-all group overflow-hidden flex flex-col"
-    styles={{ body: { padding: 0, height: "100%" } }}
-  >
-    <div className="bg-blue-500 p-4 text-white flex items-center min-h-[120px]">
-      <Avatar
-        size={64}
-        src={coach.coach_id?.avatar_url}
-        className="border-3 border-white shadow-lg group-hover:scale-110 transition-transform"
-      />
-      <div className="ml-3">
-        <Title
-          level={5}
-          className="m-0 mb-2 text-white"
-          ellipsis={{ rows: 2, tooltip: coach.coach_id?.name }}
-        >
-          {coach.coach_id?.name || "Ẩn danh"}
-        </Title>
-        <Tag className="bg-white bg-opacity-20 border-0 text-white text-xs">
-          {coach.specialization?.length > 20
-            ? `${coach.specialization.slice(0, 20)}...`
-            : coach.specialization}
-        </Tag>
-      </div>
-    </div>
-
-    <div className="p-4 flex flex-col flex-1">
-      <div className="space-y-3 mb-4">
-        <InfoBox
-          label="Kinh nghiệm"
-          value={`${coach.experience_years} năm`}
-          color="green"
-        />
-        <InfoBox
-          label="Buổi hỗ trợ"
-          value={coach.total_sessions}
-          color="blue"
-        />
-        <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 flex justify-between items-center">
-          <Text className="text-yellow-800 text-sm">Đánh giá</Text>
-          <div className="flex items-center gap-1">
-            <Rate
-              disabled
-              allowHalf
-              defaultValue={coach.rating_avg}
-              style={{ fontSize: "12px" }}
-            />
-            <Text className="text-yellow-600 text-xs">
-              ({coach.rating_avg})
-            </Text>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-4 flex-1">
-        <Text strong className="block mb-2 text-sm">
-          Giới thiệu:
-        </Text>
-        <Paragraph ellipsis={{ rows: 3 }} className="text-xs text-gray-600">
-          {coach.bio}
-        </Paragraph>
-      </div>
-
-      <Button
-        type="primary"
-        size="large"
-        className="w-full bg-pink-500 hover:bg-pink-600"
-        onClick={() => onSelectCoach(coach)}
-      >
-        Chọn làm huấn luyện viên
-      </Button>
-    </div>
-  </Card>
-);
-
-const InfoBox = ({ label, value, color }) => (
-  <div
-    className={`bg-${color}-50 p-3 rounded-lg border border-${color}-100 flex justify-between items-center`}
-  >
-    <Text className={`text-${color}-800 text-sm`}>{label}</Text>
-    <Text className={`text-${color}-600 font-bold`}>{value}</Text>
-  </div>
-);
 
 const CoachCardList = () => {
   const { currentUser } = useAuth();
@@ -130,7 +28,6 @@ const CoachCardList = () => {
   const { getQuitPlanByUserId, sendQuitPlanRequest, getMyQuitPlanRequests } =
     useQuitPlanData();
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedCoach, setSelectedCoach] = useState(null);
   const [coaches, setCoaches] = useState([]);
   const [userQuitPlan, setUserQuitPlan] = useState(null);
@@ -343,7 +240,6 @@ const CoachCardList = () => {
     try {
       await sendQuitPlanRequest({ coach_id: coachId, ...formData });
       message.success("Gửi yêu cầu thành công!");
-      setIsModalVisible(false);
       setSelectedCoach(null);
       // Refresh data immediately after sending request
       await refreshDataRef.current?.();

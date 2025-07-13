@@ -33,7 +33,7 @@ const CoachProfile = ({ coachId, isEditable = false }) => {
       if (Array.isArray(updatedData.feedbacks)) {
         setFeedbacks(updatedData.feedbacks);
       }
-    } catch (error) {
+    } catch {
       message.error("Không thể tải lại thông tin hồ sơ.");
     } finally {
       setLoading(false);

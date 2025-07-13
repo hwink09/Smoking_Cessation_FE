@@ -1,9 +1,9 @@
 import React from "react";
 import { Trophy, Timer, Zap } from "lucide-react";
 import { Progress } from "antd";
-import BadgeIcon from "../../ui/BadgeIcon";
+import BadgeIcon from "~/components/ui/BadgeIcon";
 
-const AchievementStats = ({ badges = [], stats = {}, onView, lightTheme }) => {
+const AchievementStats = ({ badges = [], onView, lightTheme }) => {
   const badgesArray = Array.isArray(badges) ? badges : [];
 
   const earned = badgesArray.filter((b) => b && b.earned);

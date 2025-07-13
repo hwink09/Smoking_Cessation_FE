@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await authService.loginWithGoogle(credential);
+      await authService.loginWithGoogle(credential);
       const user = authService.getCurrentUser();
       setCurrentUser(user);
       return { success: true, user };

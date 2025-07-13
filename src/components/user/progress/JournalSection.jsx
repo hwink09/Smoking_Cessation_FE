@@ -32,7 +32,6 @@ const { TextArea } = Input;
 function JournalSection({ entries, onSubmit, isLoading }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-  const [showCigarettesField, setShowCigarettesField] = useState(false);
 
   const initialValues = {
     date: dayjs(),
@@ -56,7 +55,6 @@ function JournalSection({ entries, onSubmit, isLoading }) {
       await onSubmit(entry);
       form.resetFields();
       message.success("Đã lưu nhật ký thành công");
-      setShowCigarettesField(false);
     } catch (error) {
       message.error("Không thể lưu nhật ký");
       console.error(error);
@@ -68,14 +66,14 @@ function JournalSection({ entries, onSubmit, isLoading }) {
   const disabledDate = (current) => current && current > dayjs().endOf("day");
 
   const handleSmokedChange = (value) => {
-    setShowCigarettesField(value);
     if (!value) {
       form.setFieldValue("cigarettes", 0);
     }
   };
 
   const getSmokingStatus = (entry) => {
-    const hasSmoked = entry.smoked || (entry.cigarettes_smoked && entry.cigarettes_smoked > 0);
+    const hasSmoked =
+      entry.smoked || (entry.cigarettes_smoked && entry.cigarettes_smoked > 0);
     return hasSmoked;
   };
 
@@ -339,7 +337,9 @@ function JournalSection({ entries, onSubmit, isLoading }) {
                               <span className="font-semibold text-base text-yellow-600 mr-1">
                                 {item.mood}
                               </span>
-                              <span className="text-yellow-500 text-xs">/10</span>
+                              <span className="text-yellow-500 text-xs">
+                                /10
+                              </span>
                               <Rate
                                 count={1}
                                 value={1}
@@ -367,7 +367,9 @@ function JournalSection({ entries, onSubmit, isLoading }) {
                         {healthRating > 0 && (
                           <div
                             className={`p-3 rounded-lg bg-blue-50 border border-blue-200 ${
-                              !hasSmoked || cigaretteCount === 0 ? "col-span-2" : ""
+                              !hasSmoked || cigaretteCount === 0
+                                ? "col-span-2"
+                                : ""
                             }`}
                           >
                             <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
@@ -403,9 +405,11 @@ function JournalSection({ entries, onSubmit, isLoading }) {
                       {healthStatus && (
                         <div className="mt-4 p-3 rounded-lg bg-gray-50 border border-gray-200">
                           <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                          Ghi chú
+                            Ghi chú
                           </p>
-                          <p className="text-sm text-gray-700">{healthStatus}</p>
+                          <p className="text-sm text-gray-700">
+                            {healthStatus}
+                          </p>
                         </div>
                       )}
                     </div>

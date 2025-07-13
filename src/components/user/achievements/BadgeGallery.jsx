@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { BadgeCheck } from "lucide-react";
 import { Marquee } from "~/components/ui/Marquee"; // Giữ lại nếu bạn dùng custom Marquee
 import BadgeIcon from "../../ui/BadgeIcon";
