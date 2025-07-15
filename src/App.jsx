@@ -59,7 +59,7 @@ import CoachProfilePage from "./pages/coach/CoachProfilePage";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
-
+import SubscriptionsManagement from "./pages/admin/SubscriptionsManagement";
 
 // Layout Wrapper
 const Layout = () => {
@@ -147,6 +147,11 @@ function App() {
               path="/admin/notifications"
               element={<AdminRoute element={<NotificationManagement />} />}
             />
+            <Route
+              path="/admin/subscriptions"
+              element={<AdminRoute element={<SubscriptionsManagement />} />}
+            />
+
             {/* User Routes */}
             <Route path="/user" element={<UserLayout />}>
               <Route
