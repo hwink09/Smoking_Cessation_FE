@@ -1,4 +1,5 @@
 import { Card, Col } from "antd";
+import { Icon } from "lucide-react";
 
 export function StatCard({
   value,
@@ -21,8 +22,7 @@ export function StatCard({
           alignItems: "center",
           justifyContent: "center",
         }}
-        bodyStyle={{ padding: 0 }}
-      >
+        bodyStyle={{ padding: 0 }}>
         <div style={{ padding: "8px 0" }}>
           <Icon size={24} style={{ color, marginBottom: "8px" }} />
           <div
@@ -31,8 +31,7 @@ export function StatCard({
               fontWeight: "bold",
               color,
               lineHeight: "1.2",
-            }}
-          >
+            }}>
             {value}
           </div>
           <div
@@ -41,8 +40,7 @@ export function StatCard({
               color,
               marginTop: "4px",
               lineHeight: "1.2",
-            }}
-          >
+            }}>
             {label}
           </div>
         </div>

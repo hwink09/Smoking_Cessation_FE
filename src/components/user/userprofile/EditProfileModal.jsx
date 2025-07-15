@@ -1,14 +1,14 @@
-import { Modal, Form, Input, Upload, Avatar, Button} from "antd"
-import { Edit, Camera, User, Mail, Phone } from "lucide-react"
+import { Modal, Form, Input, Upload, Avatar, Button } from "antd";
+import { Edit, Camera, User, Mail, Phone } from "lucide-react";
 
-export function EditProfileModal({ 
-  isVisible, 
-  onCancel, 
-  onSave, 
-  user, 
+export function EditProfileModal({
+  isVisible,
+  onCancel,
+  onSave,
+  user,
   form,
   handleAvatarUpload,
-  avatarPreviewUrl, 
+  avatarPreviewUrl,
 }) {
   return (
     <Modal
@@ -22,9 +22,12 @@ export function EditProfileModal({
       onCancel={onCancel}
       footer={null}
       width={500}
-      style={{ top: 20 }}
-    >
-      <Form form={form} layout="vertical" onFinish={onSave} style={{ marginTop: "24px" }}>
+      style={{ top: 20 }}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onSave}
+        style={{ marginTop: "24px" }}>
         {/* Avatar Upload Section */}
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
           <div style={{ position: "relative", display: "inline-block" }}>
@@ -36,13 +39,12 @@ export function EditProfileModal({
                 boxShadow: "0 4px 12px rgba(24, 144, 255, 0.3)",
               }}
             />
-            <Upload 
-              showUploadList={false} 
+            <Upload
+              showUploadList={false}
               beforeUpload={(file) => {
                 handleAvatarUpload(file);
                 return false;
-              }}
-            >
+              }}>
               <div
                 style={{
                   position: "absolute",
@@ -57,8 +59,7 @@ export function EditProfileModal({
                   justifyContent: "center",
                   cursor: "pointer",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                }}
-              >
+                }}>
                 <Camera size={14} style={{ color: "white" }} />
               </div>
             </Upload>
@@ -69,7 +70,7 @@ export function EditProfileModal({
         </div>
 
         <Form.Item name="avatar_url" hidden>
-            <Input />
+          <Input />
         </Form.Item>
 
         <Form.Item
@@ -83,9 +84,12 @@ export function EditProfileModal({
           rules={[
             { required: true, message: "Vui lòng nhập họ và tên!" },
             { min: 2, message: "Họ và tên phải có ít nhất 2 ký tự!" },
-          ]}
-        >
-          <Input size="large" placeholder="Nhập họ và tên" prefix={<User size={16} style={{ color: "#d9d9d9" }} />} />
+          ]}>
+          <Input
+            size="large"
+            placeholder="Nhập họ và tên"
+            prefix={<User size={16} style={{ color: "#d9d9d9" }} />}
+          />
         </Form.Item>
         <Form.Item
           label={
@@ -98,8 +102,7 @@ export function EditProfileModal({
           rules={[
             { required: true, message: "Vui lòng nhập email!" },
             { type: "email", message: "Email không hợp lệ!" },
-          ]}
-        >
+          ]}>
           <Input
             size="large"
             placeholder="Nhập địa chỉ email"
@@ -108,17 +111,25 @@ export function EditProfileModal({
         </Form.Item>
 
         <Form.Item style={{ marginBottom: 0, marginTop: "32px" }}>
-          <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              justifyContent: "flex-end",
+            }}>
             <Button onClick={onCancel} size="large">
               Hủy
             </Button>
-            <Button type="primary" htmlType="submit" size="large" icon={<Edit size={16} />}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              icon={<Edit size={16} />}>
               Lưu thay đổi
             </Button>
           </div>
         </Form.Item>
       </Form>
     </Modal>
-
-  )
+  );
 }
