@@ -10,7 +10,7 @@ import {
   validateEmail,
   isFormValid,
   formatAuthError,
-} from "~/utils/validations";
+} from "~/utils/authValidation";
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);

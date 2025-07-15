@@ -255,13 +255,17 @@ function PlanSection() {
                   <div className="ml-11">
                     <Tag
                       color={
-                        userQuitPlan.status === "active"
+                        userQuitPlan.status === "completed"
+                          ? "gold"
+                          : userQuitPlan.status === "active"
                           ? "green"
                           : "processing"
                       }
                       className="px-3 py-1 text-sm font-medium rounded-full border-0"
                     >
-                      {userQuitPlan.status === "active" ? (
+                      {userQuitPlan.status === "completed" ? (
+                        <>🏆 Đã hoàn thành</>
+                      ) : userQuitPlan.status === "active" ? (
                         <>🟢 Đang hoạt động</>
                       ) : (
                         <>🔄 Đang chuẩn bị</>

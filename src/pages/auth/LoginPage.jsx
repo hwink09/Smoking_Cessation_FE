@@ -7,7 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useAuth } from "~/hooks/useAuth";
-import { sanitizeInput } from "~/utils/validations";
+import { sanitizeInput } from "~/utils/authValidation";
 import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 
