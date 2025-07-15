@@ -1,21 +1,16 @@
 import { Card, Avatar, Typography, Rate, Tag, Button } from "antd";
-import InfoBox from "~/components/common/InfoBox";
-// Thêm các dòng import này vào đầu file CoachCard.jsx
-import React, { useState } from "react";
-import FeedbackModal from "./FeedbackModal"; // Import Modal vừa tạo
-import { useAuth } from "~/hooks/useAuth"; // Import hook để lấy thông tin user
+import { InfoBox } from "~/components/common/QuitPlanComponents";
+import React from "react";
 
 const { Title, Paragraph, Text } = Typography;
 
 const CoachCard = ({ coach, onSelectCoach }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { user } = useAuth();
-
   return (
     <Card
       hoverable
       className="rounded-lg border-0 shadow-lg bg-white transition-all group overflow-hidden flex flex-col"
-      styles={{ body: { padding: 0, height: "100%" } }}>
+      styles={{ body: { padding: 0, height: "100%" } }}
+    >
       <div className="bg-blue-500 p-4 text-white flex items-center min-h-[120px]">
         <Avatar
           size={64}
@@ -26,7 +21,8 @@ const CoachCard = ({ coach, onSelectCoach }) => {
           <Title
             level={5}
             className="m-0 mb-2 text-white"
-            ellipsis={{ rows: 2, tooltip: coach.coach_id?.name }}>
+            ellipsis={{ rows: 2, tooltip: coach.coach_id?.name }}
+          >
             {coach.coach_id?.name || "Ẩn danh"}
           </Title>
           <Tag className="bg-white bg-opacity-20 border-0 text-white text-xs">
@@ -78,24 +74,11 @@ const CoachCard = ({ coach, onSelectCoach }) => {
           type="primary"
           size="large"
           className="w-full bg-pink-500 hover:bg-pink-600"
-          onClick={() => onSelectCoach(coach)}>
+          onClick={() => onSelectCoach(coach)}
+        >
           Chọn làm huấn luyện viên
         </Button>
-
-        <Button type="primary" onClick={() => setIsModalOpen(true)}>
-          Đánh giá
-        </Button>
       </div>
-      {/* Đặt Modal ở đây, nó sẽ tự động ẩn/hiện */}
-      <FeedbackModal
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        coachId={coach?._id} // Truyền ID của Coach vào Modal
-        userId={user?._id} // Truyền ID của User vào Modal
-        onSuccess={() => {
-          setIsModalOpen(false); // Đóng modal sau khi gửi thành công
-        }}
-      />
     </Card>
   );
 };

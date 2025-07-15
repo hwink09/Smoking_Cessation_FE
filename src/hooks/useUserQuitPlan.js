@@ -5,17 +5,22 @@ import UserQuitPlanService from "~/services/userQuitPlanService";
 const determineCurrentStage = (stages) => {
   if (!stages || stages.length === 0) return null;
 
-  // 1. Tìm stage có status "in_progress"
+  // 1. Tìm stage có status "in_progress" (nếu có)
   let currentStage = stages.find((s) => s.status === "in_progress");
-  if (currentStage) return currentStage;
+  if (currentStage) {
+    return currentStage;
+  }
 
-  // 2. Tìm stage đầu tiên chưa completed
-  currentStage = stages.find((s) => s.status !== "completed");
-  if (currentStage) return currentStage;
+  // 2. Tìm stage đầu tiên chưa completed (sử dụng is_completed từ backend)
+  currentStage = stages.find((s) => !s.is_completed);
+  if (currentStage) {
+    return currentStage;
+  }
 
-  // 3. Nếu tất cả đều completed, lấy stage cuối cùng
-  if (stages.length > 0) {
-    return stages[stages.length - 1];
+  // 3. Nếu tất cả đều completed, trả về null để báo hiệu quit plan đã hoàn thành
+  const allStagesCompleted = stages.every((s) => s.is_completed);
+  if (allStagesCompleted) {
+    return null; // Quit plan đã hoàn thành
   }
 
   // 4. Fallback: stage đầu tiên
@@ -122,7 +127,7 @@ export function useUserQuitPlan() {
             setMyStages((prevStages) =>
               prevStages.map((stage) =>
                 stage._id === currentStage._id
-                  ? { ...stage, status: "completed" }
+                  ? { ...stage, is_completed: true }
                   : stage
               )
             );
@@ -150,10 +155,24 @@ export function useUserQuitPlan() {
               }!`,
             };
           } else {
-            // Đã hoàn thành tất cả stages
+            // Đã hoàn thành tất cả stages - cập nhật trạng thái quit plan
+            try {
+              // Cập nhật trạng thái quit plan thành "completed"
+              await UserQuitPlanService.completeQuitPlan(myQuitPlan._id);
+
+              // Cập nhật trạng thái local
+              setMyQuitPlan((prev) => ({ ...prev, status: "completed" }));
+
+              // Đặt currentStage về null vì đã hoàn thành hết
+              setCurrentStage(null);
+            } catch (error) {
+              // Tiếp tục dù lỗi vì có thể backend chưa hỗ trợ API này
+            }
+
             return {
               success: true,
               allStagesCompleted: true,
+              planCompleted: true,
               message:
                 "🏆 Chúc mừng! Bạn đã hoàn thành tất cả các giai đoạn trong kế hoạch cai thuốc!",
             };
@@ -169,7 +188,7 @@ export function useUserQuitPlan() {
         return { success: false, error: errorMsg };
       }
     },
-    [stageTasks, currentStage, myStages]
+    [stageTasks, currentStage, myStages, myQuitPlan]
   );
 
   // Chuyển sang stage tiếp theo thủ công
@@ -201,7 +220,7 @@ export function useUserQuitPlan() {
       setMyStages((prevStages) =>
         prevStages.map((stage) => {
           if (stage._id === currentStage._id) {
-            return { ...stage, status: "completed" };
+            return { ...stage, is_completed: true };
           } else if (stage._id === nextStage._id) {
             return { ...stage, status: "in_progress" };
           }
@@ -265,17 +284,34 @@ export function useUserQuitPlan() {
       const currentStageData = determineCurrentStage(stages);
       setCurrentStage(currentStageData);
 
-      // 4. Lấy tasks của stage hiện tại
-      if (currentStageData) {
-        const tasks = await UserQuitPlanService.getTasksWithCompletion(
-          currentStageData._id
-        );
-        setStageTasks(tasks);
-        return { plan, stages, tasks };
-      } else {
+      // 4. Nếu currentStageData là null, có nghĩa là tất cả stages đã hoàn thành
+      if (!currentStageData) {
+        // Kiểm tra xem quit plan đã được đánh dấu completed chưa
+        if (plan.status !== "completed") {
+          try {
+            // Cập nhật trạng thái quit plan thành "completed"
+            await UserQuitPlanService.completeQuitPlan(plan._id);
+
+            // Cập nhật trạng thái local
+            const completedPlan = { ...plan, status: "completed" };
+            setMyQuitPlan(completedPlan);
+
+            return { plan: completedPlan, stages, tasks: [], completed: true };
+          } catch (error) {
+            // Tiếp tục dù lỗi
+          }
+        }
+
         setStageTasks([]);
-        return { plan, stages, tasks: [] };
+        return { plan, stages, tasks: [], completed: true };
       }
+
+      // 5. Lấy tasks của stage hiện tại
+      const tasks = await UserQuitPlanService.getTasksWithCompletion(
+        currentStageData._id
+      );
+      setStageTasks(tasks);
+      return { plan, stages, tasks };
     } catch (err) {
       const errorMsg =
         err?.response?.data?.message || err.message || "Lỗi khi tải dữ liệu";
