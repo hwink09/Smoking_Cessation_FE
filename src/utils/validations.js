@@ -65,6 +65,49 @@ export const validateRegisterForm = ({
 };
 
 /**
+ * Validate registration form with terms acceptance
+ */
+export const validateRegistrationForm = (data) => {
+  const errors = {};
+
+  if (!data.name || data.name.trim().length < 2) {
+    errors.name = "Name must be at least 2 characters";
+  }
+
+  if (!data.email || !validateEmail(data.email)) {
+    errors.email = "Email is invalid";
+  }
+
+  const passCheck = validatePassword(data.password);
+  if (!passCheck.isValid) {
+    errors.password = passCheck.errors[0];
+  }
+
+  if (!data.confirmPassword || data.confirmPassword !== data.password) {
+    errors.confirmPassword = "Passwords do not match";
+  }
+
+  if (!data.terms) {
+    errors.terms = "You must accept the terms and conditions";
+  }
+
+  return errors;
+};
+
+/**
+ * Validate forgot password form
+ */
+export const validateForgotPasswordForm = (email) => {
+  if (!email || email.trim() === "") {
+    return "Email không được để trống";
+  }
+  if (!validateEmail(email)) {
+    return "Định dạng email không hợp lệ";
+  }
+  return null;
+};
+
+/**
  * Simple name check
  */
 export const validateName = (name) => name?.trim().length >= 2;

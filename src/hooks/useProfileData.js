@@ -3,7 +3,7 @@ import { Form, message } from "antd";
 import { Trophy, Coins, Heart } from "lucide-react";
 
 import userService from "../services/userService";
-import { storage } from "../firebase/config";
+import { storage } from "../config/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import { useAuth } from "./useAuth";
