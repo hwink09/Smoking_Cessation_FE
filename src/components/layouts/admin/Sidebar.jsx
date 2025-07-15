@@ -6,6 +6,12 @@ import {
   MenuUnfoldOutlined,
   DownOutlined,
   SettingOutlined,
+  CreditCardOutlined,
+  BarChartOutlined,
+  CheckCircleOutlined,
+  FieldTimeOutlined,
+  FileTextOutlined,
+  BellOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Dropdown, Space } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -22,20 +28,35 @@ import { useAuth } from "~/hooks/useAuth";
 const menu = [
   { label: "Overview", icon: <DashboardOutlined />, path: "/admin/dashboard" },
   {
-    label: "Management User",
+    label: "Người dùng",
     icon: <TeamOutlined />,
     path: "/admin/dashboard/user-management",
   },
   {
-    label: "Badge Management",
+    label: "Huy hiệu",
     icon: <SlBadge />,
     path: "/admin/dashboard/badge-management",
   },
   {
-    label: "Feedback & Rating",
+    label: "Phản hồi",
     icon: <MdOutlineFeedback />,
     path: "/admin/dashboard/feedback-management",
   },
+  {
+    label: "Đăng ký",
+    icon: <CreditCardOutlined />,
+    path: "/admin/subscriptions",
+  },
+  { label: "Giai đoạn", icon: <BarChartOutlined />, path: "/admin/stages" },
+  {
+    label: "Kế hoạch bỏ thuốc",
+    icon: <CheckCircleOutlined />,
+    path: "/admin/quit-plans",
+  },
+  { label: "Tiến độ", icon: <FieldTimeOutlined />, path: "/admin/progress" },
+  { label: "Bài viết blog", icon: <FileTextOutlined />, path: "/admin/blogs" },
+  { label: "Thông báo", icon: <BellOutlined />, path: "/admin/notifications" },
+
   { label: "Report", icon: <HiOutlineDocumentReport />, path: "#" },
 ];
 

@@ -57,6 +57,7 @@ import CoachProfilePage from "./pages/coach/CoachProfilePage";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
+import BlogManagement from "./pages/admin/BlogManagement";
 
 // Layout Wrapper
 const Layout = () => {
@@ -135,6 +136,10 @@ function App() {
             <Route
               path="/admin/profile"
               element={<AdminRoute element={<ProfilePage />} />}
+            />
+               <Route
+              path="/admin/blogs"
+              element={<AdminRoute element={<BlogManagement />} />}
             />
 
             {/* User Routes */}
