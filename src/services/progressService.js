@@ -49,3 +49,8 @@ export const getUserConsecutiveNoSmokeAPI = async (userId) => {
   const response = await api.get(`/progress/consecutive-no-smoke/${userId}`);
   return response.data;
 };
+
+export const getAllProgress = async () => {
+  const response = await api.get("/progress");
+  return response.data;
+};

@@ -29,6 +29,7 @@ import UnauthorizedPage from "./pages/error/UnauthorizedPage";
 import BlogPage from "./pages/generic/BlogPage";
 import QuitPlanPage from "./pages/generic/QuitPlanPage";
 import QuitPlanDetailPage from "./pages/generic/QuitPlanDetailPage";
+import NotificationManagement from "./pages/admin/NotificationManagement";
 
 // Admin Pages
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
@@ -36,6 +37,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import BadgeManagement from "./pages/admin/BadgeManagement";
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
 import ProfilePage from "./pages/admin/ProfilePage";
+import BlogManagement from "./pages/admin/BlogManagement";
 
 // User Pages
 import UserDashboard from "./pages/user/UserDashBoard";
@@ -57,7 +59,7 @@ import CoachProfilePage from "./pages/coach/CoachProfilePage";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
-import BlogManagement from "./pages/admin/BlogManagement";
+
 
 // Layout Wrapper
 const Layout = () => {
@@ -137,11 +139,14 @@ function App() {
               path="/admin/profile"
               element={<AdminRoute element={<ProfilePage />} />}
             />
-               <Route
+            <Route
               path="/admin/blogs"
               element={<AdminRoute element={<BlogManagement />} />}
             />
-
+            <Route
+              path="/admin/notifications"
+              element={<AdminRoute element={<NotificationManagement />} />}
+            />
             {/* User Routes */}
             <Route path="/user" element={<UserLayout />}>
               <Route
