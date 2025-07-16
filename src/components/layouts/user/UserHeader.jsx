@@ -24,12 +24,30 @@ const UserHeader = () => {
         key: "profile",
         icon: <FaUser className="text-purple-400" />,
         label: <span className="text-white">Profile</span>,
-        onClick: () =>
-          navigate(
-            `/user/profile/${
-              currentUser?.userId || currentUser?._id || currentUser?.id
-            }`
-          ),
+        onClick: () => {
+          const role = currentUser?.role;
+          const id = currentUser?.userId || currentUser?._id || currentUser?.id;
+
+          if (!id) {
+            console.error("Không tìm thấy ID người dùng để điều hướng.");
+            return;
+          }
+
+          let path = "";
+          if (role === "admin") {
+            // Admin xem profile của chính mình
+            path = `/admin/profile/${id}`;
+          } else if (role === "coach") {
+            // Coach xem profile của chính mình
+            // Dựa theo App.jsx của đệ, route của coach không cần ID
+            path = `/coach/profile`;
+          } else {
+            // User xem profile của chính mình
+            path = `/user/profile/${id}`;
+          }
+
+          navigate(path);
+        },
       },
       {
         key: "logout",
@@ -50,8 +68,7 @@ const UserHeader = () => {
               : role === "coach"
               ? "/coach/dashboard"
               : "/user/dashboard"
-          }
-        >
+          }>
           <span className="text-white">Dashboard</span>
         </Link>
       ),
@@ -93,8 +110,7 @@ const UserHeader = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className="text-white hover:text-purple-400 transition-colors"
-              >
+                className="text-white hover:text-purple-400 transition-colors">
                 {item.name}
               </Link>
             ))}

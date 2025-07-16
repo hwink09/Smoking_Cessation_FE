@@ -1,6 +1,5 @@
 import api from "./api";
 
-
 // Tất cả các API liên quan đến người dùng
 const userService = {
   // Lấy tất cả người dùng
@@ -52,7 +51,10 @@ const userService = {
   // Cập nhật hồ sơ người dùng (self-update)
   updateUserProfile: async (userId, profileData) => {
     try {
-      const response = await api.put(`/user/edit-profile/${userId}`, profileData);
+      const response = await api.put(
+        `/user/edit-profile/${userId}`,
+        profileData
+      );
       return response.data;
     } catch (error) {
       console.error("Error updating user profile:", error);
@@ -70,6 +72,29 @@ const userService = {
       return response.data;
     } catch (error) {
       console.error("Error changing password:", error);
+      throw error;
+    }
+  },
+
+  // Lấy thông tin hồ sơ của chính người dùng đang đăng nhập (mới)
+  getMyProfile: async () => {
+    try {
+      const response = await api.get("/user/me");
+      // console.log("My profile data:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching my profile:", error);
+      throw error;
+    }
+  },
+
+  // Tự cập nhật hồ sơ của chính mình (mới)
+  updateMyProfile: async (profileData) => {
+    try {
+      const response = await api.put("/user/me", profileData);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating my profile:", error);
       throw error;
     }
   },
