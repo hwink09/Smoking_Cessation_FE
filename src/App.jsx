@@ -55,6 +55,7 @@ import UserProfilePage from "./pages/user/UserProfilePage";
 import UserBlogPage from "./pages/user/UserBlogPage";
 import SmokingStatusPage from "./pages/user/SmokingStatusPage";
 import UserQuitPlanPage from "./pages/user/UserQuitPlanPage";
+import MeetSessionPage from "./pages/user/MeetSessionPage";
 
 // Coach Pages
 import CoachLayout from "./components/layouts/coach/CoachLayout";
@@ -213,6 +214,10 @@ function App() {
               <Route
                 path="quitplan"
                 element={<UserRoute element={<UserQuitPlanPage />} />}
+              />
+              <Route
+                path="user-meet-session"
+                element={<UserRoute element={<MeetSessionPage />} />}
               />
             </Route>
 
