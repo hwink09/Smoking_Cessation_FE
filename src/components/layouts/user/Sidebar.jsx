@@ -5,6 +5,7 @@ import {
   FieldTimeOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  MessageOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Dropdown, Space } from "antd";
@@ -28,6 +29,11 @@ const menu = [
   { label: "Progress", icon: <FieldTimeOutlined />, path: "/user/progress" },
   { label: "Achievements", icon: <Trophy />, path: "/user/achievements" },
   { label: "Support", icon: <MessageCircleHeart />, path: "/user/support" },
+  {
+    label: "Yêu cầu tư vấn ",
+    icon: <MessageOutlined />,
+    path: "/user/user-meet-session",
+  },
 ];
 
 function Sidebar() {
