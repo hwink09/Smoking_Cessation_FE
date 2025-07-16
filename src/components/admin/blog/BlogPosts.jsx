@@ -145,7 +145,7 @@ const BlogPosts = () => {
 
   return (
     <section style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto 32px", textAlign: "right" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto 32px", display: "flex", justifyContent: "flex-start" }}>
         <Button type="primary" icon={<PlusOutlined />} shape="round" size="large" onClick={handleNew}>
           Bài viết mới
         </Button>
