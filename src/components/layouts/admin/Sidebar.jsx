@@ -40,7 +40,7 @@ const menu = [
   {
     label: "Phản hồi",
     icon: <MdOutlineFeedback />,
-    path: "/admin/dashboard/feedback-management",
+    path: "/admin/feedback-management",
   },
   {
     label: "Đăng ký",

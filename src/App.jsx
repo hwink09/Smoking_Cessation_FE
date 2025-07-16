@@ -35,7 +35,6 @@ import BlogDetail from "./components/generic/blog/BlogDetail";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 import BadgeManagement from "./pages/admin/BadgeManagement";
-import FeedbackManagement from "./pages/admin/FeedbackManagement";
 import ProfilePage from "./pages/admin/ProfilePage";
 import BlogManagement from "./pages/admin/BlogManagement";
 import SubscriptionsManagement from "./pages/admin/SubscriptionsManagement";
@@ -45,6 +44,7 @@ import ProgressManagement from "./pages/admin/ProgressManagement";
 import QuitPlanDetailPageAdmin from "./components/admin/quitPlan/QuitPlansDetail";
 import NotificationManagement from "./pages/admin/NotificationManagement";
 import PackageManagement from "./pages/admin/PackageManagement";
+import Feedbacks from "./pages/admin/FeedbackPage";
 
 // User Pages
 import UserDashboard from "./pages/user/UserDashBoard";
@@ -141,8 +141,8 @@ function App() {
               element={<AdminRoute element={<BadgeManagement />} />}
             />
             <Route
-              path="/admin/dashboard/feedback-management"
-              element={<AdminRoute element={<FeedbackManagement />} />}
+              path="/admin/feedback-management"
+              element={<AdminRoute element={<Feedbacks/>} />}
             />
             <Route
               path="/admin/profile/:userId"
