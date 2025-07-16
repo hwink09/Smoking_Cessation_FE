@@ -41,6 +41,7 @@ import BlogManagement from "./pages/admin/BlogManagement";
 import SubscriptionsManagement from "./pages/admin/SubscriptionsManagement";
 import QuitPlanManagement from "./pages/admin/QuitPlanManagement";
 import StageMangement from "./pages/admin/StageMangement";
+import ProgressManagement from "./pages/admin/ProgressManagement";
 
 // User Pages
 import UserDashboard from "./pages/user/UserDashBoard";
@@ -62,7 +63,6 @@ import CoachProfilePage from "./pages/coach/CoachProfilePage";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
-
 
 // Layout Wrapper
 const Layout = () => {
@@ -162,6 +162,11 @@ function App() {
               path="/admin/stages"
               element={<AdminRoute element={<StageMangement />} />}
             />
+            <Route
+              path="/admin/progress"
+              element={<AdminRoute element={<ProgressManagement />} />}
+            />
+
             {/* User Routes */}
             <Route path="/user" element={<UserLayout />}>
               <Route
