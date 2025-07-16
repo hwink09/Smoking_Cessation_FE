@@ -1,4 +1,4 @@
-import { Modal, List, Typography, Tag } from "antd";
+import { Modal, List, Typography, Tag, Button } from "antd";
 import { useEffect, useState } from "react";
 import meetSessionService from "~/services/meetSessionService";
 import dayjs from "dayjs";
@@ -40,7 +40,7 @@ const UserSessionModalAll = ({ open, onClose }) => {
         dataSource={sessions}
         locale={{ emptyText: "Bạn chưa có lịch tư vấn nào." }}
         renderItem={(item) => (
-          <List.Item>
+          <List.Item style={item.status && item.status.toLowerCase() === "completed" ? { opacity: 0.5, pointerEvents: "none" } : {}}>
             <div className="w-full">
               <Text strong>
                 📅 {item.schedule_at ? dayjs(item.schedule_at).format("DD/MM/YYYY") : ""} - 🕒 {item.schedule_at ? dayjs(item.schedule_at).format("HH:mm") : ""}
@@ -49,10 +49,12 @@ const UserSessionModalAll = ({ open, onClose }) => {
                 Coach: <b>{item.coach_id?.name || "Không rõ"}</b>
               </div>
               <div className="mt-1">
-                {item.meet_link ? (
-                  <Link href={item.meet_link} target="_blank">
+                {item.status && item.status.toLowerCase() === "completed" ? (
+                  <Tag color="green">Đã hoàn thành</Tag>
+                ) : item.meet_link ? (
+                  <Button type="primary" href={item.meet_link} target="_blank">
                     Vào phòng họp Google Meet
-                  </Link>
+                  </Button>
                 ) : (
                   <Tag color="red">Chưa có link</Tag>
                 )}
