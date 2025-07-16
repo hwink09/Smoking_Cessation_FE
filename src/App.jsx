@@ -38,6 +38,10 @@ import BadgeManagement from "./pages/admin/BadgeManagement";
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
 import ProfilePage from "./pages/admin/ProfilePage";
 import BlogManagement from "./pages/admin/BlogManagement";
+import SubscriptionsManagement from "./pages/admin/SubscriptionsManagement";
+import QuitPlanManagement from "./pages/admin/QuitPlanManagement";
+import StageMangement from "./pages/admin/StageMangement";
+import ProgressManagement from "./pages/admin/ProgressManagement";
 
 // User Pages
 import UserDashboard from "./pages/user/UserDashBoard";
@@ -59,8 +63,6 @@ import CoachProfilePage from "./pages/coach/CoachProfilePage";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
-import SubscriptionsManagement from "./pages/admin/SubscriptionsManagement";
-import QuitPlanManagement from "./pages/admin/QuitPlanManagement";
 
 // Layout Wrapper
 const Layout = () => {
@@ -155,6 +157,14 @@ function App() {
             <Route
               path="/admin/quit-plans"
               element={<AdminRoute element={<QuitPlanManagement />} />}
+            />
+            <Route
+              path="/admin/stages"
+              element={<AdminRoute element={<StageMangement />} />}
+            />
+            <Route
+              path="/admin/progress"
+              element={<AdminRoute element={<ProgressManagement />} />}
             />
 
             {/* User Routes */}
