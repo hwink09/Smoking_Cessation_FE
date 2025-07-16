@@ -65,6 +65,7 @@ import CoachProfilePage from "./pages/coach/CoachProfilePage";
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
 import PackageManagement from "./pages/admin/PackageManagement";
+import BlogDetail from "./components/generic/blog/BlogDetail";
 
 // Layout Wrapper
 const Layout = () => {
@@ -103,6 +104,7 @@ function App() {
             <Route path="/login/:token" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/fogot-password" element={<ForgotPassword />} />
+              <Route path="/blog/:id" element={<BlogDetail />} />
             <Route
               path="/resset-password/:token"
               element={<ResetPasswordPage />}
