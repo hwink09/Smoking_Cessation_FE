@@ -62,9 +62,7 @@ const CoachCard = ({ coach, onSelectCoach }) => {
         </div>
 
         <div className="mb-4 flex-1">
-          <Text strong className="block mb-2 text-sm">
-            Giới thiệu:
-          </Text>
+          <Text strong className="block mb-2 text-sm">Giới thiệu:</Text>
           <Paragraph ellipsis={{ rows: 3 }} className="text-xs text-gray-600">
             {coach.bio}
           </Paragraph>
@@ -76,7 +74,7 @@ const CoachCard = ({ coach, onSelectCoach }) => {
           className="w-full bg-pink-500 hover:bg-pink-600"
           onClick={() => onSelectCoach(coach)}
         >
-          Chọn huấn luyện viên 
+          Chọn tư vấn
         </Button>
       </div>
     </Card>
