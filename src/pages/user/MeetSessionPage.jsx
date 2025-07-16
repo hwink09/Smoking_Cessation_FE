@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { Row, Col, Spin } from "antd";
+import { Row, Col, Spin, Button } from "antd";
 import useCoachData from "~/hooks/useCoachData";
-
+import UserSessionModalAll from "~/components/user/meetSession/UserSessionModalAll";
 import BookSessionModal from "~/components/user/meetSession/BookSessionModal";
 import CoachCard from "~/components/user/meetSession/CoachCard";
-
 
 const MeetSessionPage = () => {
   const { getAllCoaches, loading } = useCoachData();
   const [coaches, setCoaches] = useState([]);
   const [selectedCoach, setSelectedCoach] = useState(null);
+  const [showSessionModal, setShowSessionModal] = useState(false);
 
   useEffect(() => {
     const fetchCoaches = async () => {
@@ -25,9 +25,14 @@ const MeetSessionPage = () => {
 
   return (
     <div className="p-6 min-h-screen bg-gray-100">
-  <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-[#6a5af9] to-[#1ecbe1] text-transparent bg-clip-text">
-           Chọn huấn luyện viên
-         </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-[#6a5af9] to-[#1ecbe1] text-transparent bg-clip-text">
+          Yêu cầu tư vấn
+        </h1>
+        <Button onClick={() => setShowSessionModal(true)} type="primary">
+          Xem lịch tư vấn
+        </Button>
+      </div>
 
       {loading ? (
         <Spin />
@@ -35,16 +40,26 @@ const MeetSessionPage = () => {
         <Row gutter={[16, 16]}>
           {coaches.map((coach) => (
             <Col key={coach.id} xs={24} sm={12} md={8}>
-              <CoachCard coach={coach} onSelectCoach={() => setSelectedCoach(coach)} />
+              <CoachCard
+                coach={coach}
+                onSelectCoach={() => setSelectedCoach(coach)}
+              />
             </Col>
           ))}
         </Row>
       )}
 
+      {/* Modal đặt lịch */}
       <BookSessionModal
         open={!!selectedCoach}
         coach={selectedCoach}
         onClose={() => setSelectedCoach(null)}
+      />
+
+      {/* Modal xem tất cả lịch tư vấn của học viên */}
+      <UserSessionModalAll
+        open={showSessionModal}
+        onClose={() => setShowSessionModal(false)}
       />
     </div>
   );
