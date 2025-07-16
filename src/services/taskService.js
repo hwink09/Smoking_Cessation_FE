@@ -36,20 +36,6 @@ export const fetchTasksByStageIdAPI = (stageId) => {
   return handleRequest(() => api.get(`/tasks/stage/${stageId}`), []);
 };
 
-export const fetchTasksByStageWithCompletionAPI = (stageId) => {
-  if (!stageId) {
-    console.warn("No stageId provided");
-    return Promise.resolve([]);
-  }
-
-  if (!hasValidToken()) return Promise.resolve([]);
-
-  return handleRequest(
-    () => api.get(`/tasks/stage/${stageId}/with-completion`),
-    []
-  );
-};
-
 export const fetchTaskByIdAPI = (taskId) =>
   handleRequest(() => api.get(`/tasks/${taskId}`));
 
@@ -64,6 +50,3 @@ export const deleteTaskAPI = (taskId) =>
 
 export const completeTaskAPI = (taskId) =>
   handleRequest(() => api.post(`/tasks/${taskId}/complete`));
-
-export const getCompletedTasksByStageAPI = (stageId) =>
-  handleRequest(() => api.get(`/tasks/stage/${stageId}/completed`), []);

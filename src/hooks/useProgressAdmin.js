@@ -1,8 +1,12 @@
-import { useState, useEffect } from 'react';
-
-import api from '~/services/api';
-import { createProgressAPI, deleteProgressAPI, getAllProgress, updateProgressAPI } from '~/services/progressService';
-
+import { useState, useEffect } from "react";
+import StageService from "~/services/stageService";
+import {
+  createProgressAPI,
+  deleteProgressAPI,
+  getAllProgress,
+  updateProgressAPI,
+} from "~/services/progressService";
+import useUsers from "./useUsers";
 
 const useProgressAdmin = () => {
   const [progress, setProgress] = useState([]);
@@ -10,14 +14,22 @@ const useProgressAdmin = () => {
   const [error, setError] = useState(null);
   const [selectedProgress, setSelectedProgress] = useState(null);
   const [stages, setStages] = useState([]);
-  const [users, setUsers] = useState([]);
+
+  // Sử dụng hook useUsers thay vì state riêng
+  const {
+    users,
+    loading: userLoading,
+    error: userError,
+    fetchUsers,
+  } = useUsers();
+
   const [editedProgress, setEditedProgress] = useState({
     stage_id: "",
     date: "",
     cigarettes_smoked: "",
     money_saved: "",
     user_id: "",
-    health_stat: ""
+    health_stat: "",
   });
   const [errors, setErrors] = useState({
     stage_id: "",
@@ -25,35 +37,30 @@ const useProgressAdmin = () => {
     cigarettes_smoked: "",
     money_saved: "",
     user_id: "",
-    health_stat: ""
+    health_stat: "",
   });
   const [isNew, setIsNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [progressToDelete, setProgressToDelete] = useState(null);
 
+  // Combine loading states
+  const combinedLoading = loading || userLoading;
+  const combinedError = error || userError;
+
   useEffect(() => {
     fetchProgress();
     fetchStages();
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   const fetchStages = async () => {
     try {
-      const response = await api.get('/stages');
-      setStages(response.data);
+      const response = await StageService.getAllStages();
+      setStages(response);
     } catch (err) {
-      setError(err.response?.data?.message || "Không thể tải danh sách giai đoạn");
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const response = await api.get('/user');
-      if (response.data.users) {
-        setUsers(response.data.users);
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || "Không thể tải danh sách người dùng");
+      setError(
+        err.response?.data?.message || "Không thể tải danh sách giai đoạn"
+      );
     }
   };
 
@@ -64,7 +71,9 @@ const useProgressAdmin = () => {
       const data = await getAllProgress();
       setProgress(data);
     } catch (err) {
-      setError(err.response?.data?.message || "Không thể tải danh sách tiến trình");
+      setError(
+        err.response?.data?.message || "Không thể tải danh sách tiến trình"
+      );
     } finally {
       setLoading(false);
     }
@@ -76,11 +85,13 @@ const useProgressAdmin = () => {
     setIsNew(false);
     setEditedProgress({
       stage_id: progress.stage_id,
-      date: progress.date ? new Date(progress.date).toISOString().split('T')[0] : "",
+      date: progress.date
+        ? new Date(progress.date).toISOString().split("T")[0]
+        : "",
       cigarettes_smoked: progress.cigarettes_smoked,
       money_saved: progress.money_saved,
       user_id: progress.user_id,
-      health_stat: progress.health_stat || ""
+      health_stat: progress.health_stat || "",
     });
   };
 
@@ -92,7 +103,7 @@ const useProgressAdmin = () => {
       cigarettes_smoked: "",
       money_saved: "",
       user_id: "",
-      health_stat: ""
+      health_stat: "",
     });
     setSelectedProgress({});
   };
@@ -102,13 +113,19 @@ const useProgressAdmin = () => {
     const newErrors = {
       stage_id: !editedProgress.stage_id ? "Vui lòng chọn một giai đoạn" : "",
       date: !editedProgress.date ? "Vui lòng chọn ngày" : "",
-      cigarettes_smoked: !editedProgress.cigarettes_smoked ? "Vui lòng nhập số điếu thuốc đã hút" : "",
-      money_saved: !editedProgress.money_saved ? "Vui lòng nhập số tiền tiết kiệm" : "",
+      cigarettes_smoked: !editedProgress.cigarettes_smoked
+        ? "Vui lòng nhập số điếu thuốc đã hút"
+        : "",
+      money_saved: !editedProgress.money_saved
+        ? "Vui lòng nhập số tiền tiết kiệm"
+        : "",
       user_id: !editedProgress.user_id ? "Vui lòng chọn người dùng" : "",
-      health_stat: !editedProgress.health_stat ? "Vui lòng nhập trạng thái hút thuốc ban đầu" : ""
+      health_stat: !editedProgress.health_stat
+        ? "Vui lòng nhập trạng thái hút thuốc ban đầu"
+        : "",
     };
     setErrors(newErrors);
-    return !Object.values(newErrors).some(error => error !== "");
+    return !Object.values(newErrors).some((error) => error !== "");
   };
 
   // Save changes (add or edit)
@@ -146,8 +163,8 @@ const useProgressAdmin = () => {
 
   return {
     progress,
-    loading,
-    error,
+    loading: combinedLoading,
+    error: combinedError,
     selectedProgress,
     setSelectedProgress,
     stages,
@@ -172,4 +189,4 @@ const useProgressAdmin = () => {
   };
 };
 
-export default useProgressAdmin; 
+export default useProgressAdmin;
