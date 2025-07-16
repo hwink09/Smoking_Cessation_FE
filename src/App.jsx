@@ -143,7 +143,7 @@ function App() {
               element={<AdminRoute element={<FeedbackManagement />} />}
             />
             <Route
-              path="/admin/profile"
+              path="/admin/profile/:userId"
               element={<AdminRoute element={<ProfilePage />} />}
             />
             <Route

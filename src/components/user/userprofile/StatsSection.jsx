@@ -1,14 +1,14 @@
-import { Row } from "antd"
-import { Calendar, DollarSign, Activity } from "lucide-react"
-import { StatCard } from "./StatCard"
+import { Row } from "antd";
+import { Calendar, DollarSign, Activity } from "lucide-react";
+import { StatCard } from "./StatCard";
 
 export function StatsSection({ stats }) {
   const formatMoney = (amount) => {
     if (amount >= 1000000) {
-      return `${(amount / 1000000).toFixed(1)}M`
+      return `${(amount / 1000000).toFixed(1)}M`;
     }
-    return amount.toLocaleString("vi-VN")
-  }
+    return amount.toLocaleString("vi-VN");
+  };
 
   return (
     <Row gutter={[8, 8]} style={{ marginBottom: "16px" }}>
@@ -37,5 +37,5 @@ export function StatsSection({ stats }) {
         borderColor="#ffadd2"
       />
     </Row>
-  )
+  );
 }
