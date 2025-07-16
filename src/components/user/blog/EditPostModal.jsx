@@ -2,7 +2,6 @@ import { Modal, Form, Input, message } from "antd";
 import { useEffect } from "react";
 import { usePostData } from "~/hooks/usePostData";
 
-
 function EditPostModal({ visible, onClose, postId, initialData, refetchUserPosts }) {
   const { updatePost } = usePostData();
   const [form] = Form.useForm();
@@ -51,7 +50,7 @@ function EditPostModal({ visible, onClose, postId, initialData, refetchUserPosts
       <Form layout="vertical" form={form}>
         <Form.Item
           name="title"
-          label="Tiêu đề"
+          label="Tieu de"
           rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
         >
           <Input.TextArea rows={4} placeholder="Nhập nội dung tiều đề" />
