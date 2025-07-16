@@ -64,7 +64,27 @@ const Subscriptions = () => {
       title: "Gói",
       dataIndex: "package_id",
       key: "package_id",
-      render: (id) => packages.find((p) => p._id === id)?.name || id,
+      render: (id) => {
+        const pkg = packages.find((p) => p._id === id);
+        if (!pkg) return id;
+        let color = "#d9d9d9";
+        if (pkg.name === "free") color = "#52c41a";
+        if (pkg.name === "plus") color = "#1890ff";
+        if (pkg.name === "premium") color = "#faad14";
+        return (
+          <span style={{
+            border: `2px solid ${color}`,
+            color: color,
+            padding: "2px 12px",
+            borderRadius: 8,
+            fontWeight: 600,
+            textTransform: "capitalize",
+            background: "#fff"
+          }}>
+            {pkg.name}
+          </span>
+        );
+      }
     },
     {
       title: "Trạng thái",

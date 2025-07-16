@@ -18,7 +18,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { MdOutlineFeedback, MdLogout } from "react-icons/md";
 import { HiOutlineDocumentReport } from "react-icons/hi";
-import { FaUser } from "react-icons/fa";
+import { FaBoxOpen, FaUser } from "react-icons/fa";
 import { useEffect } from "react";
 import { SlBadge } from "react-icons/sl";
 import { IoIosArrowBack } from "react-icons/io";
@@ -56,7 +56,7 @@ const menu = [
   { label: "Tiến độ", icon: <FieldTimeOutlined />, path: "/admin/progress" },
   { label: "Bài viết blog", icon: <FileTextOutlined />, path: "/admin/blogs" },
   { label: "Thông báo", icon: <BellOutlined />, path: "/admin/notifications" },
-
+  { label: "Quản lý gói", icon: <FaBoxOpen />, path: "/admin/package" },
   { label: "Report", icon: <HiOutlineDocumentReport />, path: "#" },
 ];
 
