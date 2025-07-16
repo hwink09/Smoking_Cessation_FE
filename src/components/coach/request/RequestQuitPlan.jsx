@@ -11,10 +11,13 @@ import {
   Input,
   DatePicker,
   Empty,
+  Typography,
 } from "antd";
 import dayjs from "dayjs";
 import { useAuth } from "~/hooks/useAuth";
 import { useQuitPlanData } from "~/hooks/useQuitPlanData";
+
+const { Title } = Typography;
 
 const RequestQuitPlan = () => {
   const { currentUser } = useAuth();
@@ -222,6 +225,14 @@ const RequestQuitPlan = () => {
             );
           }
 
+          if (status === "created") {
+            return (
+              <span className="text-green-600 font-medium">
+                Đã tạo kế hoạch
+              </span>
+            );
+          }
+
           return <span>-</span>;
         },
       },
@@ -231,69 +242,73 @@ const RequestQuitPlan = () => {
   );
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-4">
+    <section className="p-10 bg-gradient-to-b from-gray-900 to-black min-h-screen text-white">
+      <Title level={2} style={{ textAlign: "center", color: "#fff" }}>
         Danh sách yêu cầu kế hoạch
-      </h2>
-      <Table
-        rowKey="_id"
-        loading={loading || localLoading}
-        dataSource={data}
-        columns={columns}
-        pagination={{ pageSize: 5 }}
-        locale={{
-          emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description="Không có yêu cầu kế hoạch nào từ người dùng chọn bạn làm huấn luyện viên"
-            />
-          ),
-        }}
-      />
+      </Title>
+      <div className="mt-6 bg-white rounded-xl shadow-lg p-6">
+        <Table
+          rowKey="_id"
+          loading={loading || localLoading}
+          dataSource={data}
+          columns={columns}
+          pagination={{ pageSize: 5 }}
+          locale={{
+            emptyText: (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="Không có yêu cầu kế hoạch nào từ người dùng chọn bạn làm huấn luyện viên"
+              />
+            ),
+          }}
+        />
 
-      <Modal
-        title="Tạo kế hoạch từ yêu cầu"
-        open={openModal}
-        onCancel={() => setOpenModal(false)}
-        onOk={handleCreatePlan}
-        okText="Tạo kế hoạch"
-        cancelText="Hủy"
-      >
-        <Form layout="vertical" form={form}>
-          <Form.Item
-            label="Tên kế hoạch"
-            name="name"
-            rules={[{ required: true, message: "Vui lòng nhập tên kế hoạch" }]}
-          >
-            <Input />
-          </Form.Item>
+        <Modal
+          title="Tạo kế hoạch từ yêu cầu"
+          open={openModal}
+          onCancel={() => setOpenModal(false)}
+          onOk={handleCreatePlan}
+          okText="Tạo kế hoạch"
+          cancelText="Hủy"
+        >
+          <Form layout="vertical" form={form}>
+            <Form.Item
+              label="Tên kế hoạch"
+              name="name"
+              rules={[
+                { required: true, message: "Vui lòng nhập tên kế hoạch" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Form.Item
-            label="Lý do"
-            name="reason"
-            rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
-          >
-            <Input.TextArea rows={3} />
-          </Form.Item>
+            <Form.Item
+              label="Lý do"
+              name="reason"
+              rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
+            >
+              <Input.TextArea rows={3} />
+            </Form.Item>
 
-          <Form.Item
-            label="Ngày bắt đầu"
-            name="start_date"
-            rules={[{ required: true, message: "Chọn ngày bắt đầu" }]}
-          >
-            <DatePicker format="DD/MM/YYYY" className="w-full" />
-          </Form.Item>
+            <Form.Item
+              label="Ngày bắt đầu"
+              name="start_date"
+              rules={[{ required: true, message: "Chọn ngày bắt đầu" }]}
+            >
+              <DatePicker format="DD/MM/YYYY" className="w-full" />
+            </Form.Item>
 
-          <Form.Item
-            label="Ngày bỏ thuốc"
-            name="target_quit_date"
-            rules={[{ required: true, message: "Chọn ngày bỏ thuốc" }]}
-          >
-            <DatePicker format="DD/MM/YYYY" className="w-full" />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
+            <Form.Item
+              label="Ngày bỏ thuốc"
+              name="target_quit_date"
+              rules={[{ required: true, message: "Chọn ngày bỏ thuốc" }]}
+            >
+              <DatePicker format="DD/MM/YYYY" className="w-full" />
+            </Form.Item>
+          </Form>
+        </Modal>
+      </div>
+    </section>
   );
 };
 
