@@ -9,7 +9,7 @@ const BlogCard = ({ post, likePost, refetchPosts }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/user/blog/${post._id}`);
+    navigate(`/blog/${post._id}`);
   };
 
   const hasLiked = userId ? post.like_user_ids?.includes(userId) : false;

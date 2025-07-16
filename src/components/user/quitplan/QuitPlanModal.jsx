@@ -7,6 +7,8 @@ import {
   Avatar,
   Typography,
 } from "antd";
+import { quitPlanValidationRules } from "~/utils/userValidation";
+import { handleFormSubmit } from "~/utils/formHelpers";
 
 const { Title, Text } = Typography;
 
@@ -33,10 +35,12 @@ const QuitPlanModal = ({ visible, onCancel, onSubmit, coach }) => {
       styles={{ body: { padding: 0 } }}
     >
       <div className="bg-blue-500 p-8 text-white text-center">
-        <Title level={2} className="mb-2">
+        <Title level={2} className="mb-2 text-white">
           Tạo Kế Hoạch Cai Thuốc
         </Title>
-        <Text>Bắt đầu hành trình cai thuốc cùng chuyên gia</Text>
+        <Text className="text-white">
+          Bắt đầu hành trình cai thuốc cùng chuyên gia
+        </Text>
       </div>
 
       <div className="p-8">
@@ -63,7 +67,7 @@ const QuitPlanModal = ({ visible, onCancel, onSubmit, coach }) => {
           <Form.Item
             label="Tên kế hoạch"
             name="name"
-            rules={[{ required: true, message: "Vui lòng nhập tên kế hoạch" }]}
+            rules={quitPlanValidationRules.planName}
           >
             <Input
               size="large"
@@ -76,9 +80,7 @@ const QuitPlanModal = ({ visible, onCancel, onSubmit, coach }) => {
             <Form.Item
               label="Ngày bắt đầu"
               name="start_date"
-              rules={[
-                { required: true, message: "Vui lòng chọn ngày bắt đầu" },
-              ]}
+              rules={quitPlanValidationRules.startDate}
             >
               <DatePicker
                 size="large"
@@ -91,9 +93,7 @@ const QuitPlanModal = ({ visible, onCancel, onSubmit, coach }) => {
             <Form.Item
               label="Ngày mục tiêu"
               name="target_quit_date"
-              rules={[
-                { required: true, message: "Vui lòng chọn ngày mục tiêu" },
-              ]}
+              rules={quitPlanValidationRules.targetQuitDate}
             >
               <DatePicker
                 size="large"
@@ -107,12 +107,14 @@ const QuitPlanModal = ({ visible, onCancel, onSubmit, coach }) => {
           <Form.Item
             label="Lý do cai thuốc"
             name="reason"
-            rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
+            rules={quitPlanValidationRules.reason}
           >
             <Input.TextArea
               rows={4}
               placeholder="Chia sẻ lý do tại sao bạn muốn cai thuốc..."
               className="rounded-lg"
+              showCount
+              maxLength={500}
             />
           </Form.Item>
 

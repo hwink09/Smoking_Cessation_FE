@@ -2,6 +2,15 @@
 import React, { useState, useEffect } from "react";
 import AuthContext from "./AuthContext";
 import authService from "~/services/authService";
+import {
+  validateLoginForm,
+  validateRegisterForm,
+  validateRegistrationForm,
+  validateForgotPasswordForm,
+  validateEmail,
+  isFormValid,
+  formatAuthError,
+} from "~/utils/authValidation";
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -26,56 +35,6 @@ export const AuthProvider = ({ children }) => {
     };
     checkAuth();
   }, []);
-
-  // Helpers: Validate Forms
-  const validateLoginForm = (data) => {
-    const errors = {};
-    if (!data.email) {
-      errors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
-      errors.email = "Email is invalid";
-    }
-    if (!data.password) {
-      errors.password = "Password is required";
-    } else if (data.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
-    }
-    return errors;
-  };
-
-  const validateRegistrationForm = (data) => {
-    const errors = {};
-    if (!data.name || data.name.trim().length < 2) {
-      errors.name = "Name must be at least 2 characters";
-    }
-    if (!data.email || !/\S+@\S+\.\S+/.test(data.email)) {
-      errors.email = "Email is invalid";
-    }
-    if (!data.password || data.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(data.password)) {
-      errors.password =
-        "Password must contain uppercase, lowercase, and numbers";
-    }
-    if (!data.confirmPassword || data.confirmPassword !== data.password) {
-      errors.confirmPassword = "Passwords do not match";
-    }
-    if (!data.terms) {
-      errors.terms = "You must accept the terms and conditions";
-    }
-    return errors;
-  };
-
-  const validateForgotPasswordForm = (email) => {
-    if (!email || email.trim() === "") {
-      return "Email không được để trống";
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return "Định dạng email không hợp lệ";
-    }
-    return null;
-  };
-  const isFormValid = (errors) => Object.keys(errors).length === 0;
 
   // Core Actions
   const login = async (credentials) => {
@@ -251,7 +210,7 @@ export const AuthProvider = ({ children }) => {
     validateRegistrationForm,
     validateForgotPasswordForm,
     isFormValid,
-    formatAuthError: (msg) => msg || "An error occurred",
+    formatAuthError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

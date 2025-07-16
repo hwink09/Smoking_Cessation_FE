@@ -1,117 +1,157 @@
-import { Check } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Check, Star } from "lucide-react";
+
+import classNames from "classnames";
+import { useAuth } from "~/hooks/useAuth";
+import usePackages from "~/hooks/usePackages";
+import SubscriptionService from "~/services/subscriptionService";
+import PaymentService from "~/services/PaymentService";
+
 
 
 export function Pricing() {
-  const plans = [
-    {
-      name: "Starter",
-      price: "$49",
-      description: "Great for individuals beginning their quit-smoking journey.",
-      features: [
-        "Personalized quit plan",
-        "Email support",
-        "Access to beginner resources",
-        "Daily motivation tips",
-        "Progress tracking tools",
-      ],
-      cta: "Get Started",
-      popular: false,
-    },
-    {
-      name: "Complete",
-      price: "$149",
-      description: "Designed for those who want expert guidance and full support.",
-      features: [
-        "One-on-one coaching (2 sessions/month)",
-        "Full access to premium tools",
-        "Habit tracking dashboard",
-        "Relapse prevention strategies",
-        "Community support group access",
-      ],
-      cta: "Get Started",
-      popular: true,
-    },
-    {
-      name: "Premium Care",
-      price: "Custom",
-      description: "Tailored support for long-term smokers or complex cases.",
-      features: [
-        "Comprehensive health assessment",
-        "Unlimited coaching sessions",
-        "Nicotine replacement guidance",
-        "Therapist referrals (if needed)",
-        "Family support planning",
-        "12-month follow-up support",
-        "Dedicated quit advisor",
-      ],
-      cta: "Contact Us",
-      popular: false,
-    },
-  ];
-  
+  const { packages, loading, error } = usePackages();
+  const { currentUser: user } = useAuth();
+
+  // Sắp xếp packages theo thứ tự mong muốn
+  const packageOrder = ["free", "plus", "premium"];
+  const sortedPackages = (packages || []).slice().sort((a, b) => {
+    const aIndex = packageOrder.indexOf(a.name?.toLowerCase());
+    const bIndex = packageOrder.indexOf(b.name?.toLowerCase());
+    // Nếu không tìm thấy, cho xuống cuối
+    return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex);
+  });
+
+  const formatPrice = (price) =>
+    price === 0 ? "Free" : `${new Intl.NumberFormat().format(price)}`;
+
+  const isPopular = (plan) => plan.name?.toLowerCase() === "plus";
+
+  const handleGetStarted = async (plan) => {
+    console.log("[GetStarted] User:", user);
+    console.log("[GetStarted] Plan:", plan);
+    try {
+      const subscriptionPayload = {
+        package_id: plan._id,
+        user_id: user.userId, // Sửa lại ở đây
+        start_date: new Date().toISOString(),
+        end_date: "",
+        status: "pending",
+        name: plan.name,
+        price: plan.price,
+      };
+      console.log("[GetStarted] Subscription Payload:", subscriptionPayload);
+      const createdSub = await SubscriptionService.createSubscription(subscriptionPayload);
+      console.log("[GetStarted] Created Subscription:", createdSub);
+
+      const paymentPayload = {
+        subscription_id: createdSub.subscription._id,
+        user_id: user.userId, // Sửa lại ở đây
+        amount: plan.price,
+        description: `Thanh toán cho gói ${plan.name}`,
+      };
+      console.log("[GetStarted] Payment Payload:", paymentPayload);
+      const paymentResult = await PaymentService.createPaymentLink(paymentPayload);
+      console.log("[GetStarted] Payment Result:", paymentResult);
+
+      if (paymentResult?.checkoutUrl) {
+        console.log("[GetStarted] Redirecting to:", paymentResult.checkoutUrl);
+        window.location.href = paymentResult.checkoutUrl;
+      } else {
+        alert("Không thể tạo liên kết thanh toán.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi tạo đăng ký/thanh toán:", error); 
+      alert("Có lỗi xảy ra. Vui lòng thử lại sau.");
+    }
+  };
 
   return (
-    <section id="pricing" className="py-20 relative">
+    <section
+      id="pricing"
+      className="py-20 relative bg-gradient-to-b from-black via-gray-900 to-black"
+    >
       <div className="absolute inset-0 z-0">
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-600/20 rounded-full filter blur-3xl" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Simple, Transparent{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500">Pricing</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500">
+              Pricing
+            </span>
           </h2>
-          <p className="text-xl text-white/70 max-w-2xl mx-auto">
-          Select the perfect support package to help you quit smoking no hidden costs, just real results.
+          <p className="text-lg text-white/70 max-w-2xl mx-auto">
+            Select the perfect support package to help you quit smoking — no hidden costs, just real results.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {plans.map((plan, index) => (
-            <div
-              key={index}
-              className={`
-                bg-white/5 backdrop-blur-sm border rounded-xl p-6 transition-all
-                ${plan.popular ? "border-purple-500 relative" : "border-white/10 hover:border-white/30"}
-              `}
-            >
-              {plan.popular && (
-                <div className="absolute -top-4 left-0 right-0 mx-auto w-fit px-4 py-1 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-full text-sm font-medium">
-                  Most Popular
+        {loading ? (
+          <p className="text-center text-white/70">Đang tải gói dịch vụ...</p>
+        ) : error ? (
+          <p className="text-center text-red-500">Lỗi: {error.message}</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+            {sortedPackages.map((plan, index) => {
+              const popular = isPopular(plan);
+              return (
+                <div
+                  key={plan._id || index}
+                  className={classNames(
+                    "relative border rounded-2xl p-8 transition-all shadow-lg hover:scale-[1.02]",
+                    "bg-white/5 backdrop-blur-md text-white",
+                    popular
+                      ? "border-purple-500 shadow-purple-500/20"
+                      : "border-white/10 hover:border-white/30"
+                  )}
+                >
+                  {popular && (
+                    <div className="absolute -top-5 left-0 right-0 flex justify-center">
+                      <div className="flex items-center gap-2 px-4 py-1 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-full text-sm font-medium text-white shadow-lg">
+                        <Star className="w-4 h-4" />
+                        Most Popular
+                      </div>
+                    </div>
+                  )}
+
+                  <h3 className="text-2xl font-bold mb-2 capitalize">
+                    {plan.name}
+                  </h3>
+                  <div className="text-4xl font-bold text-white mb-4">
+                    {formatPrice(plan.price)}
+                  </div>
+                  <p className="text-white/70 mb-6">{plan.description}</p>
+
+                  <ul className="space-y-3 mb-8">
+                    {plan.features?.map((feature, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-2 text-white/90"
+                      >
+                        <Check className="w-5 h-5 text-green-400 shrink-0 mt-1" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    onClick={() => handleGetStarted(plan)}
+                    className={classNames(
+                      "block w-full py-3 rounded-full text-center font-semibold transition-all duration-200",
+                      popular
+                        ? "bg-gradient-to-r from-purple-600 to-cyan-600 hover:brightness-110 text-white"
+                        : "bg-white/10 hover:bg-white/20 text-white"
+                    )}
+                  >
+                    {plan.cta || "Get Started"}
+                  </button>
                 </div>
-              )}
-              <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
-              <div className="mb-4">
-                <span className="text-3xl font-bold">{plan.price}</span>
-              </div>
-              <p className="text-white/70 mb-6">{plan.description}</p>
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start">
-                    <Check className="w-5 h-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                    <span className="text-white/80">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="#contact"
-                className={`
-                  block w-full py-3 rounded-full text-center font-medium transition-all
-                  ${
-                    plan.popular
-                      ? "bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white"
-                      : "bg-white/10 hover:bg-white/20 text-white"
-                  }
-                `}
-              >
-                {plan.cta}
-              </Link>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
-  )
+  );
 }

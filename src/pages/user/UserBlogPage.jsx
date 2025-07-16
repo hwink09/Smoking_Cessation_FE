@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import CreateBlog from "~/components/user/blog/CreateBlog";
 import MyPosts from "~/components/user/blog/MyPosts";
-import UserBlogDetail from "~/components/user/blog/UserBlogDetail";
+
 import { usePostData } from "~/hooks/usePostData";
+// import BlogDetail from "../../components/generic/blog/BlogDetail";
 
 
 function UserBlogPage() {
@@ -13,20 +14,16 @@ function UserBlogPage() {
   } = usePostData();
 
   const [currentView, setCurrentView] = useState("myPosts");
-  const [selectedPost, setSelectedPost] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
 
   const fetchUserPosts = async () => {
     const userString = localStorage.getItem("user");
     const user = userString ? JSON.parse(userString) : null;
-    if (!user?.id) {
-      console.log("Không tìm thấy user id khi fetchUserPosts");
-      return;
-    }
-    console.log("Gọi fetchUserPosts với userId:", user.id);
+    const userId = user?.userId || user?._id || user?.id;
+    if (!userId) return;
+
     try {
-      const posts = await getPostsByUserId(user.id);
-      console.log("Kết quả fetchUserPosts:", posts);
+      const posts = await getPostsByUserId(userId);
       setUserPosts(posts);
     } catch (error) {
       console.error("Error fetching user posts:", error);
@@ -55,63 +52,59 @@ function UserBlogPage() {
 
   const handlePostCreate = async (newPost) => {
     try {
-      console.log("Tạo post với dữ liệu:", newPost);
-      await createPost({
+      const createdPost = await createPost({
         ...newPost,
         author: "user",
         data: new Date().toISOString(),
         like: 0,
         comment: 0,
       });
-      console.log("Tạo post thành công, gọi lại fetchUserPosts");
-      await fetchUserPosts(); // Chỉ cần gọi lại fetchUserPosts để cập nhật danh sách
+
+      setUserPosts((prev) => [createdPost, ...prev]);
+      await fetchUserPosts(); // Refresh posts after creation
       setCurrentView("myPosts");
     } catch (error) {
       console.error("Failed to create post:", error);
     }
   };
 
-  if (currentView === "detail" && selectedPost) {
-    console.log("Chuyển sang view detail với post:", selectedPost);
-    return (
-      <UserBlogDetail
-        post={selectedPost}
-        onBack={() => {
-          setCurrentView("myPosts");
-          fetchUserPosts(); // Refresh posts khi quay lại
-        }}
-        onPostClick={(post) => setSelectedPost(post)}
-        relatedPosts={userPosts.filter((p) => p._id !== selectedPost._id)}
-      />
-    );
-  }
+  // if (currentView === "detail" && selectedPost) {
+  //   return (
+  //     <BlogDetail
+  //       post={selectedPost}
+  //       onBack={() => {
+  //         setCurrentView("myPosts");
+  //         fetchUserPosts(); // Refresh posts khi quay lại
+  //       }}
+  //       onPostClick={(post) => setSelectedPost(post)}
+  //       relatedPosts={userPosts.filter((p) => p._id !== selectedPost._id)}
+  //     />
+  //   );
+  // }
 
   if (currentView === "create") {
-    console.log("Chuyển sang view tạo bài viết mới");
     return (
-      <CreateBlog
-        onSubmit={handlePostCreate}
-        onCancel={() => setCurrentView("myPosts")}
-        tags={tags}
-      />
+      <div style={{ background: '#fff', minHeight: '100vh', padding: '40px 0' }}>
+        <CreateBlog
+          onSubmit={handlePostCreate}
+          onCancel={() => setCurrentView("myPosts")}
+          tags={tags}
+        />
+      </div>
     );
   }
 
-  console.log("Render view danh sách bài viết, số lượng:", userPosts.length);
   return (
-    <MyPosts
-      posts={userPosts}
-      refetchUserPosts={fetchUserPosts} 
-      onPostClick={(post) => {
-        console.log("Chọn post để xem chi tiết:", post);
-        setSelectedPost(post);
-        setCurrentView("detail");
-      }}
-      onCreateNew={() => {
-        console.log("Bấm nút tạo bài viết mới");
-        setCurrentView("create");
-      }}
-    />
+    <div style={{ background: '#fff', minHeight: '100vh', padding: '40px 0' }}>
+      <MyPosts
+        posts={userPosts}
+        refetchUserPosts={fetchUserPosts} 
+        onPostClick={() => {
+          setCurrentView("detail");
+        }}
+        onCreateNew={() => setCurrentView("create")}
+      />
+    </div>
   );
 }
 

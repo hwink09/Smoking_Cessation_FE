@@ -29,6 +29,7 @@ import UnauthorizedPage from "./pages/error/UnauthorizedPage";
 import BlogPage from "./pages/generic/BlogPage";
 import QuitPlanPage from "./pages/generic/QuitPlanPage";
 import QuitPlanDetailPage from "./pages/generic/QuitPlanDetailPage";
+import NotificationManagement from "./pages/admin/NotificationManagement";
 
 // Admin Pages
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
@@ -36,6 +37,12 @@ import UserManagement from "./pages/admin/UserManagement";
 import BadgeManagement from "./pages/admin/BadgeManagement";
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
 import ProfilePage from "./pages/admin/ProfilePage";
+import BlogManagement from "./pages/admin/BlogManagement";
+import SubscriptionsManagement from "./pages/admin/SubscriptionsManagement";
+import QuitPlanManagement from "./pages/admin/QuitPlanManagement";
+import StageMangement from "./pages/admin/StageMangement";
+import ProgressManagement from "./pages/admin/ProgressManagement";
+import QuitPlanDetailPageAdmin from "./components/admin/quitPlan/QuitPlansDetail";
 
 // User Pages
 import UserDashboard from "./pages/user/UserDashBoard";
@@ -57,6 +64,8 @@ import CoachProfilePage from "./pages/coach/CoachProfilePage";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
+import PackageManagement from "./pages/admin/PackageManagement";
+import BlogDetail from "./components/generic/blog/BlogDetail";
 
 // Layout Wrapper
 const Layout = () => {
@@ -95,6 +104,7 @@ function App() {
             <Route path="/login/:token" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/fogot-password" element={<ForgotPassword />} />
+              <Route path="/blog/:id" element={<BlogDetail />} />
             <Route
               path="/resset-password/:token"
               element={<ResetPasswordPage />}
@@ -135,6 +145,38 @@ function App() {
             <Route
               path="/admin/profile/:userId"
               element={<AdminRoute element={<ProfilePage />} />}
+            />
+            <Route
+              path="/admin/blogs"
+              element={<AdminRoute element={<BlogManagement />} />}
+            />
+            <Route
+              path="/admin/notifications"
+              element={<AdminRoute element={<NotificationManagement />} />}
+            />
+            <Route
+              path="/admin/subscriptions"
+              element={<AdminRoute element={<SubscriptionsManagement />} />}
+            />
+            <Route
+              path="/admin/quit-plans"
+              element={<AdminRoute element={<QuitPlanManagement />} />}
+            />
+            <Route
+              path="/admin/quit-plans/:id"
+              element={<AdminRoute element={<QuitPlanDetailPageAdmin />} />}
+            />
+            <Route
+              path="/admin/stages"
+              element={<AdminRoute element={<StageMangement />} />}
+            />
+            <Route
+              path="/admin/progress"
+              element={<AdminRoute element={<ProgressManagement />} />}
+            />
+            <Route
+              path="/admin/package"
+              element={<AdminRoute element={<PackageManagement />} />}
             />
 
             {/* User Routes */}

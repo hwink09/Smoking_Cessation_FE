@@ -14,13 +14,8 @@ const PackageService = {
 
   // GET /api/packages - Get All Package
   getAllPackages: async () => {
-    try {
-      const response = await api.get("/packages");
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching packages:", error);
-      throw error;
-    }
+    const response = await api.get('/packages');
+    return response.data.packages;
   },
 
   // GET /api/packages/:id - Get Package By Id

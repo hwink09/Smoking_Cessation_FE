@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { validatePassword, passwordsMatch } from "~/utils/validations";
+import { validatePassword, passwordsMatch } from "~/utils/authValidation";
 import { toast } from "react-toastify";
 import api from "~/services/api";
 
