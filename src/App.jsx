@@ -63,6 +63,7 @@ import CoachProfilePage from "./pages/coach/CoachProfilePage";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
+import PackageManagement from "./pages/admin/PackageManagement";
 
 // Layout Wrapper
 const Layout = () => {
@@ -165,6 +166,10 @@ function App() {
             <Route
               path="/admin/progress"
               element={<AdminRoute element={<ProgressManagement />} />}
+            />
+            <Route
+              path="/admin/package"
+              element={<AdminRoute element={<PackageManagement />} />}
             />
 
             {/* User Routes */}
