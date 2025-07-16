@@ -94,6 +94,17 @@ const FeedbackService = {
     }
   },
 
+  // GET /api/feedback?type={type} - Get Feedback by Type
+  getFeedbacksByType: async (type = "all") => {
+    try {
+      const response = await api.get(`/feedback?type=${type}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching feedbacks by type:", error);
+      throw error;
+    }
+  },
+
   // GET /api/feedback/system-rating - Get AVG System
   getSystemRating: async () => {
     try {

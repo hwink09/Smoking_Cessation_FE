@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Avatar, Typography, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
-import api from "~/services/api";
+import QuitPlanService from "~/services/quitPlanService";
 
 const { Title } = Typography;
 
@@ -14,8 +14,8 @@ const CoachQuitPlanTable = () => {
     const fetchQuitPlans = async () => {
       setLoading(true);
       try {
-        const response = await api.get("/quitPlan/my-users");
-        const plansWithKeys = (response.data || []).map((plan, index) => ({
+        const response = await QuitPlanService.coach.getMyUsers();
+        const plansWithKeys = (response || []).map((plan, index) => ({
           ...plan,
           key: plan._id || `plan-${index}`,
         }));

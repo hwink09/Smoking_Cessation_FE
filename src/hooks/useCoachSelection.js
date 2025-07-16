@@ -3,11 +3,7 @@ import { message } from "antd";
 import { useQuitPlanData } from "~/hooks/useQuitPlanData";
 import useCoachData from "~/hooks/useCoachData";
 import { useAuth } from "~/hooks/useAuth";
-import api from "~/services/api";
-import {
-  FullPageLoadingSkeleton,
-  FullPageErrorCard,
-} from "~/components/common/QuitPlanComponents";
+import StageService from "~/services/stageService";
 
 /**
  * Custom hook to manage all the logic for coach selection and quit plan management
@@ -48,20 +44,16 @@ export const useCoachSelection = () => {
   // Helper function to check if a quit plan has stages/tasks
   const checkPlanHasStages = useCallback(async (planId) => {
     try {
-      const response = await api.get(`/stages/plan/${planId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await StageService.getStagesByPlanId(planId);
 
       // Handle different response structures
       let stages = [];
-      if (Array.isArray(response.data)) {
+      if (Array.isArray(response)) {
+        stages = response;
+      } else if (Array.isArray(response?.data)) {
         stages = response.data;
-      } else if (Array.isArray(response?.data?.data)) {
-        stages = response.data.data;
-      } else if (response.data && typeof response.data === "object") {
-        stages = response.data.stages || response.data.results || [];
+      } else if (response && typeof response === "object") {
+        stages = response.stages || response.results || [];
       }
 
       return stages.length > 0;

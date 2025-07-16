@@ -71,6 +71,7 @@ export default function Sidebar({ admin }) {
 
   // Sử dụng currentUser nếu admin không được truyền vào
   const userData = admin || currentUser || {};
+  console.log(userData);
 
   const navigate = useNavigate();
 
@@ -92,10 +93,14 @@ export default function Sidebar({ admin }) {
       label: "Profile",
       icon: <FaUser />,
       onClick: () => {
-        navigate("/admin/profile"); // Điều hướng đến trang profile
+        // Đảm bảo có ID trước khi điều hướng
+        if (userData?.userId) {
+          navigate(`/admin/profile/${userData.userId}`); // <--- ĐÃ SỬA LẠI
+        } else {
+          toast.error("Không thể xác định ID của Admin!");
+        }
       },
     },
-
     {
       key: "3",
       label: "Settings",
@@ -124,8 +129,7 @@ export default function Sidebar({ admin }) {
     <div
       className={`h-screen sticky top-0 ${
         collapsed ? "w-20" : "w-64"
-      } bg-gradient-to-b from-[#1a1333] via-[#2b2256] to-[#1a2a3a] flex flex-col  transition-all duration-300`}
-    >
+      } bg-gradient-to-b from-[#1a1333] via-[#2b2256] to-[#1a2a3a] flex flex-col  transition-all duration-300`}>
       {/* Collapse button */}
 
       <div
@@ -133,8 +137,7 @@ export default function Sidebar({ admin }) {
           !collapsed
             ? "flex justify-between items-center border-b"
             : "flex items-center"
-        } `}
-      >
+        } `}>
         <div className="">
           <Button
             type="text"
@@ -142,8 +145,7 @@ export default function Sidebar({ admin }) {
             icon={<IoIosArrowBack />}
             onClick={() => {
               navigate("/");
-            }}
-          ></Button>
+            }}></Button>
         </div>
         {!collapsed && (
           <div className="text-xs uppercase text-gray-500 mt-4 mb-2 px-4">
@@ -166,8 +168,7 @@ export default function Sidebar({ admin }) {
           !collapsed
             ? "px-4 py-3 border-b border-[#1f1f1f] flex items-center gap-3 hover:bg-[#232042] hover:cursor-pointer transition-colors duration-200"
             : "px-4 py-3 border-b border-[#1f1f1f] flex items-center gap-3 hover:bg-[#232042] hover:cursor-pointer transition-colors duration-200 flex-col justify-center"
-        }`}
-      >
+        }`}>
         <Dropdown menu={{ items }}>
           <a onClick={(e) => e.preventDefault()}>
             <Space>
@@ -213,8 +214,7 @@ export default function Sidebar({ admin }) {
                                     `}
               style={{
                 minHeight: collapsed ? 48 : undefined,
-              }}
-            >
+              }}>
               <span className={`text-lg ${isActive ? "text-[#232042]" : ""}`}>
                 {item.icon}
               </span>

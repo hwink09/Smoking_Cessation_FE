@@ -1,8 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import PaymentService from "~/services/PaymentService";
 
-
-
 export function usePaymentData() {
   const [payments, setPayments] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
