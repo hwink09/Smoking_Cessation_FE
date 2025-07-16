@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import {
   fetchAllTasksAPI,
   fetchTasksByStageIdAPI,
-  fetchTasksByStageWithCompletionAPI,
   fetchTaskByIdAPI,
   createTaskAPI,
   updateTaskAPI,
@@ -151,18 +150,6 @@ export function useTaskData() {
     }
   };
 
-  const fetchTasksByStageWithCompletion = async (stageId) => {
-    setLoading(true);
-    try {
-      const taskList = await fetchTasksByStageWithCompletionAPI(stageId);
-      return Array.isArray(taskList) ? taskList : [];
-    } catch {
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const clearError = () => setError(null);
   const clearSelectedTask = () => setSelectedTask(null);
 
@@ -182,7 +169,6 @@ export function useTaskData() {
     updateTask,
     deleteTask,
     completeTask,
-    fetchTasksByStageWithCompletion,
     clearError,
     clearSelectedTask,
   };

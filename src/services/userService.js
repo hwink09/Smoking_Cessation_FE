@@ -61,43 +61,6 @@ const userService = {
       throw error;
     }
   },
-
-  // Đổi mật khẩu người dùng
-  changeUserPassword: async (oldPassword, newPassword) => {
-    try {
-      const response = await api.post(`/user/change-password`, {
-        oldPassword,
-        newPassword,
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error changing password:", error);
-      throw error;
-    }
-  },
-
-  // Lấy thông tin hồ sơ của chính người dùng đang đăng nhập (mới)
-  getMyProfile: async () => {
-    try {
-      const response = await api.get("/user/me");
-      // console.log("My profile data:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching my profile:", error);
-      throw error;
-    }
-  },
-
-  // Tự cập nhật hồ sơ của chính mình (mới)
-  updateMyProfile: async (profileData) => {
-    try {
-      const response = await api.put("/user/me", profileData);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating my profile:", error);
-      throw error;
-    }
-  },
 };
 
 export default userService;
