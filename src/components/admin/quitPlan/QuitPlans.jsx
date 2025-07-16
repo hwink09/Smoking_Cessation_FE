@@ -152,7 +152,7 @@ const QuitPlans = () => {
 
   return (
     <section style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto 32px auto", display: "flex", justifyContent: "flex-end" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto 32px auto", display: "flex", justifyContent: "flex-start" }}>
         <Button
           type="primary"
           icon={<PlusOutlined />}

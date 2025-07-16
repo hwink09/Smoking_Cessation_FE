@@ -42,6 +42,7 @@ import SubscriptionsManagement from "./pages/admin/SubscriptionsManagement";
 import QuitPlanManagement from "./pages/admin/QuitPlanManagement";
 import StageMangement from "./pages/admin/StageMangement";
 import ProgressManagement from "./pages/admin/ProgressManagement";
+import QuitPlanDetailPageAdmin from "./components/admin/quitPlan/QuitPlansDetail";
 
 // User Pages
 import UserDashboard from "./pages/user/UserDashBoard";
@@ -158,6 +159,10 @@ function App() {
             <Route
               path="/admin/quit-plans"
               element={<AdminRoute element={<QuitPlanManagement />} />}
+            />
+            <Route
+              path="/admin/quit-plans/:id"
+              element={<AdminRoute element={<QuitPlanDetailPageAdmin />} />}
             />
             <Route
               path="/admin/stages"

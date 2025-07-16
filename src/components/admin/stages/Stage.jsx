@@ -53,7 +53,14 @@ const Stage = () => {
       title: "Kế hoạch",
       dataIndex: "plan_id",
       key: "plan_id",
-      render: (id) => plans.find(p => p._id === id)?.name || id,
+      render: (planObjOrId) => {
+        // Nếu là object, lấy _id, nếu là string thì dùng luôn
+        const planId = typeof planObjOrId === "object" && planObjOrId !== null
+          ? planObjOrId._id
+          : planObjOrId;
+        const plan = plans.find(p => String(p._id) === String(planId));
+        return plan ? plan.name : <span style={{ color: "#aaa" }}>Không rõ</span>;
+      },
     },
     {
       title: "Ngày bắt đầu",
@@ -177,7 +184,7 @@ const Stage = () => {
 
   return (
     <section style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto 32px auto", display: "flex", justifyContent: "flex-end" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto 32px auto", display: "flex", justifyContent: "flex-start" }}>
         <Button
           type="primary"
           icon={<PlusOutlined />}
