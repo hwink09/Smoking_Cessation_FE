@@ -1,7 +1,8 @@
 import api from "./api";
 
+
 const meetSessionService = {
-  // POST /api/meet-session - Book Session
+ 
   bookSession: async (sessionData) => {
     try {
       const response = await api.post("/meet-session", sessionData);
@@ -12,7 +13,6 @@ const meetSessionService = {
     }
   },
 
-  // GET /api/meet-session/coach - Get Coach Session
   getCoachSessions: async () => {
     try {
       const response = await api.get("/meet-session/coach");
@@ -23,7 +23,7 @@ const meetSessionService = {
     }
   },
 
-  // GET /api/meet-session/user - Get User Session
+
   getUserSessions: async () => {
     try {
       const response = await api.get("/meet-session/user");
@@ -34,7 +34,6 @@ const meetSessionService = {
     }
   },
 
-  // PUT /api/meet-session/{id}/status - Coach Update Status
   updateSessionStatus: async (sessionId, statusData) => {
     try {
       const response = await api.put(
@@ -47,6 +46,28 @@ const meetSessionService = {
         `Error updating session status for session ${sessionId}:`,
         error
       );
+      throw error;
+    }
+  },
+
+
+  updateSession: async (sessionId, updatedData) => {
+    try {
+      const response = await api.put(`/meet-session/${sessionId}`, updatedData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating session ${sessionId}:`, error);
+      throw error;
+    }
+  },
+
+ 
+  deleteSession: async (sessionId) => {
+    try {
+      const response = await api.delete(`/meet-session/${sessionId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting session ${sessionId}:`, error);
       throw error;
     }
   },

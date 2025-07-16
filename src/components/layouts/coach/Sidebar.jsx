@@ -58,6 +58,11 @@ function SidebarCoach() {
       icon: <BellOutlined />,
       path: "/coach/notifications",
     },
+    {
+      label: "Yêu cầu tư vấn ",
+      icon: <MessageOutlined />,
+      path: "/coach/meet-session",
+    },
   ];
 
   const dropdownItems = [

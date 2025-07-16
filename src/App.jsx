@@ -29,7 +29,7 @@ import UnauthorizedPage from "./pages/error/UnauthorizedPage";
 import BlogPage from "./pages/generic/BlogPage";
 import QuitPlanPage from "./pages/generic/QuitPlanPage";
 import QuitPlanDetailPage from "./pages/generic/QuitPlanDetailPage";
-import NotificationManagement from "./pages/admin/NotificationManagement";
+import BlogDetail from "./components/generic/blog/BlogDetail";
 
 // Admin Pages
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
@@ -43,6 +43,8 @@ import QuitPlanManagement from "./pages/admin/QuitPlanManagement";
 import StageMangement from "./pages/admin/StageMangement";
 import ProgressManagement from "./pages/admin/ProgressManagement";
 import QuitPlanDetailPageAdmin from "./components/admin/quitPlan/QuitPlansDetail";
+import NotificationManagement from "./pages/admin/NotificationManagement";
+import PackageManagement from "./pages/admin/PackageManagement";
 
 // User Pages
 import UserDashboard from "./pages/user/UserDashBoard";
@@ -60,12 +62,11 @@ import CoachQuitPlan from "./pages/coach/CoachDashBoard";
 import RequestQuitPlan from "./pages/coach/RequestQuitPlanPage";
 import StagesCoach from "./pages/coach/StagesCoachPage";
 import CoachProfilePage from "./pages/coach/CoachProfilePage";
+import MeetSessionManagement from "./pages/coach/MeetSessionManagement";
 
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
-import PackageManagement from "./pages/admin/PackageManagement";
-import BlogDetail from "./components/generic/blog/BlogDetail";
 
 // Layout Wrapper
 const Layout = () => {
@@ -232,6 +233,10 @@ function App() {
               <Route
                 path="profile"
                 element={<CoachRoute element={<CoachProfilePage />} />}
+              />
+              <Route
+                path="meet-session"
+                element={<CoachRoute element={<MeetSessionManagement />} />}
               />
             </Route>
 
