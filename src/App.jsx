@@ -60,6 +60,7 @@ import CoachProfilePage from "./pages/coach/CoachProfilePage";
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
 import SubscriptionsManagement from "./pages/admin/SubscriptionsManagement";
+import QuitPlanManagement from "./pages/admin/QuitPlanManagement";
 
 // Layout Wrapper
 const Layout = () => {
@@ -150,6 +151,10 @@ function App() {
             <Route
               path="/admin/subscriptions"
               element={<AdminRoute element={<SubscriptionsManagement />} />}
+            />
+            <Route
+              path="/admin/quit-plans"
+              element={<AdminRoute element={<QuitPlanManagement />} />}
             />
 
             {/* User Routes */}
