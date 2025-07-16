@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import PackageService from '~/services/packageService';
-
-
 import SubscriptionService from '~/services/subscriptionService';
+import userService from '~/services/userService';
 
 const useSubscriptions = () => {
   // State cho subscriptions và packages
@@ -10,6 +9,7 @@ const useSubscriptions = () => {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [users, setUsers] = useState([]);
 
   // State cho modal/form
   const [selectedSub, setSelectedSub] = useState(null);
@@ -34,6 +34,16 @@ const useSubscriptions = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [subToDelete, setSubToDelete] = useState(null);
 
+  const fetchUsers = async () => {
+    try{
+      const data = await userService.getAllUser();
+      console.log("users from API", data);
+      setUsers(data.users);
+    }catch (err) {
+      setError(err.response?.data?.message || 'Không thể tải danh sách người dùng');
+    }
+  }
+
   // Fetch packages
   const fetchPackages = async () => {
     try {
@@ -51,6 +61,7 @@ const useSubscriptions = () => {
       setLoading(true);
       setError(null);
       const data = await SubscriptionService.getAllSubscriptions();
+      console.log("subscriptions from API", data); // log dữ liệu subscriptions
       setSubscriptions(data);
     } catch (err) {
       setError(err.response?.data?.message || 'Không thể tải danh sách đăng ký');
@@ -62,6 +73,7 @@ const useSubscriptions = () => {
   useEffect(() => {
     fetchSubscriptions();
     fetchPackages();
+    fetchUsers();
   }, []);
 
   // Modal handlers
@@ -139,6 +151,7 @@ const useSubscriptions = () => {
   };
 
   return {
+    users,
     subscriptions,
     packages,
     loading,
