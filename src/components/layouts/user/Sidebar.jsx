@@ -28,7 +28,6 @@ const menu = [
   { label: "Quit Plan", icon: <CarryOutOutlined />, path: "/user/quitplan" },
   { label: "Progress", icon: <FieldTimeOutlined />, path: "/user/progress" },
   { label: "Achievements", icon: <Trophy />, path: "/user/achievements" },
-  { label: "Support", icon: <MessageCircleHeart />, path: "/user/support" },
   {
     label: "Yêu cầu tư vấn ",
     icon: <MessageOutlined />,

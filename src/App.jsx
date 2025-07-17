@@ -49,7 +49,6 @@ import FeedbackPage from "./pages/admin/FeedbackPage";
 import UserDashboard from "./pages/user/UserDashBoard";
 import UserProgress from "./pages/user/UserProgress";
 import UserAchievement from "./pages/user/UserAchievement";
-import UserSupport from "./pages/user/UserSupport";
 import UserProfilePage from "./pages/user/UserProfilePage";
 import UserBlogPage from "./pages/user/UserBlogPage";
 import SmokingStatusPage from "./pages/user/SmokingStatusPage";
@@ -192,10 +191,6 @@ function App() {
               element={<UserRoute element={<UserAchievement />} />}
             />
             <Route
-              path="support"
-              element={<UserRoute element={<UserSupport />} />}
-            />
-            <Route
               path="profile/:id"
               element={<UserRoute element={<UserProfilePage />} />}
             />
@@ -236,7 +231,7 @@ function App() {
               element={<CoachRoute element={<CoachProfilePage />} />}
             />
             <Route
-              path="meet-sessions"
+              path="meet-session"
               element={<CoachRoute element={<CoachMeetSessionPage />} />}
             />
             <Route

@@ -10,6 +10,7 @@ import {
   getTotalMoneySavedInPlanAPI,
   getPlanSmokingStatsAPI,
 } from "~/services/progressService";
+import QuitPlanService from "~/services/quitPlanService";
 import { message } from "antd";
 import dayjs from "dayjs";
 
@@ -434,6 +435,213 @@ const useProgress = (userId = null, stageId = null, planId = null) => {
       else fetchProgress();
     },
   };
+};
+
+// Hook chính để quản lý data và logic của progress cho coach
+export const useProgressData = () => {
+  const [users, setUsers] = useState([]);
+  const [progressData, setProgressData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [dateRange, setDateRange] = useState([]);
+  const [healthStatusFilter, setHealthStatusFilter] = useState(null);
+
+  // Fetch danh sách user của coach
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await QuitPlanService.coach.getMyUsers();
+      const usersWithKeys = (response || []).map((user, index) => ({
+        ...user,
+        key: user._id || user.user_id || `user-${index}`,
+      }));
+      setUsers(usersWithKeys);
+    } catch (err) {
+      console.error("Lỗi khi lấy danh sách user:", err);
+      message.error("Không thể lấy danh sách người dùng");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Fetch progress data của tất cả users
+  const fetchProgressData = useCallback(async () => {
+    if (users.length === 0) return;
+
+    setLoading(true);
+    try {
+      const response = await getAllProgress();
+      const userIds = users.map((user) => user.user_id || user._id);
+      const filteredProgress = (response || []).filter((progress) =>
+        userIds.includes(progress.user_id?._id || progress.user_id)
+      );
+      setProgressData(filteredProgress);
+    } catch (err) {
+      console.error("Lỗi khi lấy tiến độ:", err);
+      message.error("Không thể lấy dữ liệu tiến độ");
+    } finally {
+      setLoading(false);
+    }
+  }, [users]);
+
+  // Filter progress data theo các điều kiện
+  const filteredProgressData = useMemo(() => {
+    let filtered = progressData;
+
+    if (selectedUser) {
+      filtered = filtered.filter(
+        (progress) =>
+          (progress.user_id?._id || progress.user_id) === selectedUser
+      );
+    }
+
+    if (dateRange && dateRange.length === 2) {
+      filtered = filtered.filter((progress) => {
+        const progressDate = dayjs(progress.date);
+        return (
+          progressDate.isAfter(dateRange[0]) &&
+          progressDate.isBefore(dateRange[1])
+        );
+      });
+    }
+
+    if (healthStatusFilter) {
+      filtered = filtered.filter(
+        (progress) => progress.health_status === healthStatusFilter
+      );
+    }
+
+    return filtered;
+  }, [progressData, selectedUser, dateRange, healthStatusFilter]);
+
+  // Handle chọn user
+  const handleUserSelect = (userId) => {
+    setSelectedUser(userId);
+  };
+
+  // Handle refresh data
+  const handleRefresh = useCallback(async () => {
+    await fetchUsers();
+  }, [fetchUsers]);
+
+  // Initial data load
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  useEffect(() => {
+    fetchProgressData();
+  }, [fetchProgressData]);
+
+  return {
+    users,
+    progressData,
+    filteredProgressData,
+    loading,
+    selectedUser,
+    dateRange,
+    healthStatusFilter,
+    setDateRange,
+    setHealthStatusFilter,
+    handleUserSelect,
+    handleRefresh,
+  };
+};
+
+// Hook để tính toán thống kê tổng quan
+export const useOverallStats = (filteredData) => {
+  return useMemo(() => {
+    const totalSmokeFreeDays = filteredData.filter(
+      (p) => p.cigarettes_smoked === 0
+    ).length;
+
+    const totalMoneySaved = filteredData.reduce(
+      (sum, p) => sum + (p.money_saved || 0),
+      0
+    );
+
+    const totalCigarettesSmoked = filteredData.reduce(
+      (sum, p) => sum + (p.cigarettes_smoked || 0),
+      0
+    );
+
+    const averageCigarettes =
+      filteredData.length > 0 ? totalCigarettesSmoked / filteredData.length : 0;
+
+    const smokeFreeRate =
+      filteredData.length > 0
+        ? (totalSmokeFreeDays / filteredData.length) * 100
+        : 0;
+
+    const uniqueUsers = new Set(
+      filteredData.map((p) => p.user_id?._id || p.user_id)
+    ).size;
+
+    return {
+      totalSmokeFreeDays,
+      totalMoneySaved,
+      averageCigarettes: Math.round(averageCigarettes * 10) / 10,
+      totalRecords: filteredData.length,
+      smokeFreeRate: Math.round(smokeFreeRate * 10) / 10,
+      uniqueUsers,
+    };
+  }, [filteredData]);
+};
+
+// Hook để tính toán thống kê user cụ thể
+export const useUserStats = (selectedUser, filteredData) => {
+  return useMemo(() => {
+    if (!selectedUser || filteredData.length === 0) {
+      return null;
+    }
+
+    const userProgressData = filteredData.filter(
+      (progress) => (progress.user_id?._id || progress.user_id) === selectedUser
+    );
+
+    if (userProgressData.length === 0) {
+      return {
+        total_smoke_free_days: 0,
+        total_money_saved: 0,
+        total_cigarettes_saved: 0,
+        total_records: 0,
+        average_cigarettes_per_day: 0,
+      };
+    }
+
+    const smokeFreeData = userProgressData.filter(
+      (p) => p.cigarettes_smoked === 0
+    );
+
+    const totalMoneySaved = userProgressData.reduce(
+      (sum, p) => sum + (p.money_saved || 0),
+      0
+    );
+
+    const totalCigarettesSmoked = userProgressData.reduce(
+      (sum, p) => sum + (p.cigarettes_smoked || 0),
+      0
+    );
+
+    const averageCigarettesPerDay =
+      userProgressData.length > 0
+        ? totalCigarettesSmoked / userProgressData.length
+        : 0;
+
+    // Giả định trước khi bỏ thuốc hút 20 điếu/ngày
+    const originalCigarettesPerDay = 20;
+    const totalCigarettesSaved =
+      userProgressData.length * originalCigarettesPerDay -
+      totalCigarettesSmoked;
+
+    return {
+      total_smoke_free_days: smokeFreeData.length,
+      total_money_saved: totalMoneySaved,
+      total_cigarettes_saved: Math.max(0, totalCigarettesSaved),
+      total_records: userProgressData.length,
+      average_cigarettes_per_day: Math.round(averageCigarettesPerDay * 10) / 10,
+    };
+  }, [selectedUser, filteredData]);
 };
 
 export default useProgress;
