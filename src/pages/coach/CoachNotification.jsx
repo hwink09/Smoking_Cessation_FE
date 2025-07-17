@@ -72,6 +72,7 @@ const CoachNotification = () => {
       message.success("Gửi thông báo thành công");
       setModalVisible(false);
       form.resetFields();
+      await fetchData(); // cập nhật lại bảng sau khi gửi
     } catch (err) {
       message.error("Lỗi khi gửi thông báo", err);
     }

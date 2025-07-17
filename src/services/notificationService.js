@@ -55,6 +55,10 @@ const NotificationService = {
       throw error;
     }
   },
+    getUserNotifications: async (userId) => {
+    const response = await api.get(`/notifications/user/${userId}`);
+    return response.data;
+  },
 };
 
 export default NotificationService;
