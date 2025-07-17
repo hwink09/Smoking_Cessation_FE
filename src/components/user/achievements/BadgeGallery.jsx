@@ -118,13 +118,6 @@ const BadgeGallery = ({ badges = [], onView, onShare, lightTheme }) => {
                   >
                     {badge.name}
                   </h4>
-                  <p
-                    className={`text-xs line-clamp-2 ${
-                      lightTheme ? "text-slate-500" : "text-gray-400"
-                    }`}
-                  >
-                    {badge.condition || badge.description}
-                  </p>
                 </div>
               </div>
 
