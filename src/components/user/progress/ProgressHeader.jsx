@@ -5,10 +5,11 @@ import {
   CalendarClock,
   Cigarette,
   TrendingUp,
+  Flame,
 } from "lucide-react";
-import { Progress } from "antd";
 import ColourfulText from "~/components/ui/colourful-text";
 
+// Định dạng tiền tệ Việt Nam
 const formatCurrency = (amount) =>
   new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -16,7 +17,47 @@ const formatCurrency = (amount) =>
     maximumFractionDigits: 0,
   }).format(amount);
 
-function ProgressHeader({ quitDate, stats = {} }) {
+// Card hiển thị thống kê
+const StatCard = ({
+  icon,
+  title,
+  value,
+  unit,
+  bgColor,
+  textColor,
+  borderColor,
+}) => (
+  <div
+    className={`bg-gradient-to-br from-white to-gray-50 hover:shadow-xl transition-all duration-300 rounded-xl text-center p-6 border-t-4 ${borderColor} border border-gray-200 group hover:scale-105`}
+  >
+    <div
+      className={`w-20 h-20 mx-auto mb-4 flex items-center justify-center rounded-full shadow-lg ${bgColor}`}
+    >
+      {icon}
+    </div>
+    <p className="text-gray-700 mb-2 font-medium">{title}</p>
+    <h2 className={`text-4xl font-bold mb-2 ${textColor}`}>{value}</h2>
+    <div
+      className={`border-t ${borderColor.replace(
+        "border-t-",
+        "border-"
+      )} pt-2 mt-2`}
+    >
+      <span
+        className={`inline-block px-3 py-1 ${textColor} text-sm font-medium rounded-full bg-opacity-10`}
+      >
+        {unit}
+      </span>
+    </div>
+  </div>
+);
+
+function ProgressHeader({
+  quitDate,
+  stats = {},
+  planTotalStats = null,
+  planSmokingStats = null,
+}) {
   const {
     days = 0,
     moneySaved = 0,
@@ -24,11 +65,13 @@ function ProgressHeader({ quitDate, stats = {} }) {
     healthImprovement = 0,
   } = stats;
 
-  const quitDateText = quitDate?.toLocaleDateString("vi-VN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const quitDateText = useMemo(() => {
+    return quitDate?.toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }, [quitDate]);
 
   const actualDaysSinceQuit = useMemo(() => {
     if (!quitDate) return 0;
@@ -40,49 +83,17 @@ function ProgressHeader({ quitDate, stats = {} }) {
 
   const safeStats = {
     days: Math.max(0, days),
-    moneySaved: Math.max(0, moneySaved),
-    cigarettesAvoided: Math.max(0, cigarettesAvoided),
+    moneySaved: planTotalStats
+      ? Math.max(0, planTotalStats.total_money_saved)
+      : Math.max(0, moneySaved),
+    cigarettesAvoided: planSmokingStats
+      ? Math.max(0, planSmokingStats.total_cigarettes_reduced)
+      : Math.max(0, cigarettesAvoided),
+    cigarettesSmoked: planSmokingStats
+      ? Math.max(0, planSmokingStats.total_cigarettes_smoked)
+      : 0,
     healthImprovement: Math.max(0, Math.min(100, healthImprovement)),
   };
-
-  const StatCard = ({ icon, title, value, unit, color, borderColor }) => (
-    <div
-      className={`bg-gradient-to-br from-white to-gray-50 hover:shadow-xl hover:border-blue-300 transition-all duration-300 rounded-xl text-center p-6 border border-gray-200 border-t-4 ${borderColor} group hover:scale-105`}
-    >
-      <div
-        className={`${color} rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:${color
-          .replace("bg-", "bg-")
-          .replace("-100", "-200")}`}
-      >
-        {icon}
-      </div>
-      <p className="text-gray-700 mb-2 font-medium">{title}</p>
-      <h2
-        className={`text-4xl font-bold mb-2 ${color
-          .replace("bg-", "text-")
-          .replace("-100", "-600")}`}
-      >
-        {value}
-      </h2>
-      <div
-        className={`border-t ${borderColor.replace(
-          "border-t-",
-          "border-"
-        )} pt-2 mt-2`}
-      >
-        <span
-          className={`inline-block px-3 py-1 ${color.replace(
-            "-100",
-            "-50"
-          )} ${color
-            .replace("bg-", "text-")
-            .replace("-100", "-700")} text-sm font-medium rounded-full`}
-        >
-          {unit}
-        </span>
-      </div>
-    </div>
-  );
 
   return (
     <div className="text-center mb-8 bg-gradient-to-br from-purple-50 via-white to-blue-50 p-8 rounded-2xl shadow-md border border-blue-200">
@@ -95,41 +106,62 @@ function ProgressHeader({ quitDate, stats = {} }) {
           Theo dõi nhật ký hàng ngày và duy trì động lực để đạt được mục tiêu
           của bạn
         </p>
+        {planTotalStats && (
+          <div className="inline-block px-4 py-2 bg-green-50 border border-green-300 rounded-full text-green-800 text-sm font-medium">
+            📊 Đang hiển thị thống kê tổng từ tất cả stages
+          </div>
+        )}
       </div>
 
-      <div className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-100 to-blue-50 rounded-full shadow-md border-2 border-blue-200 mb-6 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-        <CalendarClock className="w-7 h-7 text-purple-600 mr-4" />
-        <span className="text-gray-700 text-lg">
-          Ngày bắt đầu cai:{" "}
-          <span className="font-bold text-blue-800">{quitDateText}</span>
-        </span>
-      </div>
+      {quitDateText && (
+        <div className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-100 to-blue-50 rounded-full shadow-md border-2 border-blue-200 mb-6 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <CalendarClock className="w-7 h-7 text-purple-600 mr-4" />
+          <span className="text-gray-700 text-lg">
+            Ngày bắt đầu cai:{" "}
+            <span className="font-bold text-blue-800">{quitDateText}</span>
+          </span>
+        </div>
+      )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
         <StatCard
           icon={<Clock className="w-10 h-10 text-purple-600" />}
           title="Bạn Đã Cai Thuốc Được"
           value={actualDaysSinceQuit}
-          unit="ngày"
-          color="bg-purple-100"
+          unit="Ngày"
+          bgColor="bg-purple-100"
+          textColor="text-purple-600"
           borderColor="border-t-purple-500"
         />
         <StatCard
           icon={<TrendingUp className="w-10 h-10 text-green-600" />}
-          title="Tiết Kiệm Được"
+          title="Bạn Đã Tiết Kiệm Được"
           value={formatCurrency(safeStats.moneySaved)}
           unit="VND"
-          color="bg-green-100"
+          bgColor="bg-green-100"
+          textColor="text-green-600"
           borderColor="border-t-green-500"
         />
         <StatCard
           icon={<Cigarette className="w-10 h-10 text-red-600" />}
-          title="Điếu Thuốc Không Hút"
+          title="Bạn Đã Giảm Được"
           value={safeStats.cigarettesAvoided.toLocaleString()}
-          unit="điếu"
-          color="bg-red-100"
+          unit="Điếu"
+          bgColor="bg-red-100"
+          textColor="text-red-600"
           borderColor="border-t-red-500"
         />
+        {planSmokingStats && (
+          <StatCard
+            icon={<Flame className="w-10 h-10 text-orange-600" />}
+            title="Bạn Đã Hút"
+            value={safeStats.cigarettesSmoked.toLocaleString()}
+            unit="Điếu"
+            bgColor="bg-orange-100"
+            textColor="text-orange-600"
+            borderColor="border-t-orange-500"
+          />
+        )}
       </div>
     </div>
   );

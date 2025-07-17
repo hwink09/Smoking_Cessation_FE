@@ -7,6 +7,8 @@ import {
   getUserOverallProgressAPI,
   getSinglePlanProgressAPI,
   getSingleStageProgressAPI,
+  getTotalMoneySavedInPlanAPI,
+  getPlanSmokingStatsAPI,
 } from "~/services/progressService";
 import { message } from "antd";
 import dayjs from "dayjs";
@@ -16,6 +18,8 @@ const useProgress = (userId = null, stageId = null, planId = null) => {
   const [overallProgress, setOverallProgress] = useState(null);
   const [planProgress, setPlanProgress] = useState(null);
   const [stageProgress, setStageProgress] = useState(null);
+  const [planTotalStats, setPlanTotalStats] = useState(null);
+  const [planSmokingStats, setPlanSmokingStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -25,6 +29,8 @@ const useProgress = (userId = null, stageId = null, planId = null) => {
     fetchUserOverall: false,
     fetchPlan: false,
     fetchStage: false,
+    fetchPlanTotal: false,
+    fetchPlanSmoking: false,
   });
 
   const fetchProgress = useCallback(async () => {
@@ -78,6 +84,48 @@ const useProgress = (userId = null, stageId = null, planId = null) => {
         setError(err.message || "Không thể tải tiến độ kế hoạch");
       } finally {
         loadingRefs.current.fetchPlan = false;
+        setLoading(false);
+      }
+    },
+    [planId]
+  );
+
+  const fetchPlanTotalStats = useCallback(
+    async (targetPlanId = planId) => {
+      if (!targetPlanId || loadingRefs.current.fetchPlanTotal) return;
+      loadingRefs.current.fetchPlanTotal = true;
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getTotalMoneySavedInPlanAPI(targetPlanId);
+        setPlanTotalStats(data);
+      } catch (err) {
+        setError(err.message || "Không thể tải thống kê tổng của kế hoạch");
+      } finally {
+        loadingRefs.current.fetchPlanTotal = false;
+        setLoading(false);
+      }
+    },
+    [planId]
+  );
+
+  const fetchPlanSmokingStats = useCallback(
+    async (targetPlanId = planId) => {
+      if (!targetPlanId || loadingRefs.current.fetchPlanSmoking) return;
+      loadingRefs.current.fetchPlanSmoking = true;
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getPlanSmokingStatsAPI(targetPlanId);
+        setPlanSmokingStats(data);
+      } catch (err) {
+        setError(
+          err.message || "Không thể tải thống kê hút thuốc của kế hoạch"
+        );
+      } finally {
+        loadingRefs.current.fetchPlanSmoking = false;
         setLoading(false);
       }
     },
@@ -346,11 +394,25 @@ const useProgress = (userId = null, stageId = null, planId = null) => {
     }
   }, [planId, fetchPlanProgress]);
 
+  useEffect(() => {
+    if (planId && !loadingRefs.current.fetchPlanTotal) {
+      fetchPlanTotalStats(planId);
+    }
+  }, [planId, fetchPlanTotalStats]);
+
+  useEffect(() => {
+    if (planId && !loadingRefs.current.fetchPlanSmoking) {
+      fetchPlanSmokingStats(planId);
+    }
+  }, [planId, fetchPlanSmokingStats]);
+
   return {
     progress,
     overallProgress,
     planProgress,
     stageProgress,
+    planTotalStats,
+    planSmokingStats,
     recentEntries,
     recentStats,
     loading,
@@ -360,6 +422,8 @@ const useProgress = (userId = null, stageId = null, planId = null) => {
     fetchUserOverallProgress,
     fetchPlanProgress,
     fetchStageProgress,
+    fetchPlanTotalStats,
+    fetchPlanSmokingStats,
     createProgressEntry,
     updateProgressEntry,
     deleteProgressEntry,
