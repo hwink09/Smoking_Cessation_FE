@@ -1,427 +1,414 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Form,
   InputNumber,
-  Rate,
-  Select,
   Button,
-  DatePicker,
   List,
   Card,
   Input,
   message,
   Empty,
   Badge,
-  Divider,
+  Spin,
+  Alert,
 } from "antd";
-import dayjs from "dayjs";
 import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
+  PlusOutlined,
+  BookOutlined,
   CalendarOutlined,
-  EditOutlined,
-  SaveOutlined,
-  SmileOutlined,
-  HeartOutlined,
-  MessageOutlined,
 } from "@ant-design/icons";
-import { Clock, Cigarette, PenLine } from "lucide-react";
+import { Calendar, Cigarette, Heart, TrendingDown } from "lucide-react";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 
+dayjs.extend(utc);
 const { TextArea } = Input;
 
-function JournalSection({ entries, onSubmit, isLoading }) {
+function calculateMoneySaved(smokingStatus, cigarettesSmoked) {
+  if (!smokingStatus || smokingStatus.cigarettesPerDay <= 0) return 0;
+  const { cigarettesPerDay, costPerPack, cigarettesPerPack } = smokingStatus;
+  const reduction = Math.max(0, cigarettesPerDay - cigarettesSmoked);
+  const costPerCigarette = costPerPack / cigarettesPerPack;
+  return Math.round(reduction * costPerCigarette);
+}
+
+function calculateSmokeFreeStreak(entries) {
+  const sorted = [...entries].sort(
+    (a, b) => dayjs.utc(b.date).valueOf() - dayjs.utc(a.date).valueOf()
+  );
+
+  let streak = 0;
+  for (const entry of sorted) {
+    if ((entry.cigarettes_smoked || 0) === 0) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function JournalSection({
+  entries = [],
+  onSubmit,
+  isLoading = false,
+  currentStage,
+  smokingStatus,
+}) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(
+    dayjs().format("YYYY-MM-DD")
+  );
 
-  const initialValues = {
-    date: dayjs(),
-    smoked: false,
-    cigarettes: 0,
-    mood: 5,
-    health: 5,
-    symptoms: "",
-  };
+  const entriesForDate = useMemo(() => {
+    const filtered = entries.filter(
+      (entry) => dayjs.utc(entry.date).format("YYYY-MM-DD") === selectedDate
+    );
+    console.log(`Filtering entries for date ${selectedDate}:`, {
+      totalEntries: entries.length,
+      filteredEntries: filtered.length,
+      filtered: filtered.map((e) => ({
+        id: e._id,
+        date: e.date,
+        formattedDate: dayjs.utc(e.date).format("YYYY-MM-DD"),
+        cigarettes: e.cigarettes_smoked,
+      })),
+    });
+    return filtered;
+  }, [entries, selectedDate]);
 
-  const handleFinish = async (values) => {
-    setSubmitting(true);
-    const entry = {
-      ...values,
-      date: values.date.format("YYYY-MM-DD"),
-      cigarettes: values.smoked ? values.cigarettes : 0,
-      id: Date.now().toString(),
-    };
+  const existingEntryForDate = entriesForDate[0] || null;
 
+  console.log(`Selected date: ${selectedDate}, Existing entry:`, {
+    found: !!existingEntryForDate,
+    entryId: existingEntryForDate?._id,
+    entryDate: existingEntryForDate?.date,
+    cigarettes: existingEntryForDate?.cigarettes_smoked,
+  });
+
+  const groupedEntries = useMemo(() => {
+    const grouped = {};
+    entries.forEach((entry) => {
+      const dateKey = dayjs.utc(entry.date).format("YYYY-MM-DD");
+      if (!grouped[dateKey]) grouped[dateKey] = [];
+      grouped[dateKey].push(entry);
+    });
+    return Object.entries(grouped).sort(
+      ([a], [b]) => dayjs(b).valueOf() - dayjs(a).valueOf()
+    );
+  }, [entries]);
+
+  const handleSubmit = async (values) => {
     try {
-      await onSubmit(entry);
-      form.resetFields();
-      message.success("Đã lưu nhật ký thành công");
+      setSubmitting(true);
+      const cigarettesSmoked = values.cigarettes || 0;
+      const moneySaved = calculateMoneySaved(smokingStatus, cigarettesSmoked);
+
+      const entryData = {
+        date: selectedDate, // YYYY-MM-DD format
+        cigarettes: cigarettesSmoked,
+        symptoms: values.symptoms || "",
+        time: dayjs().format("HH:mm:ss"),
+        isUpdate: !!existingEntryForDate,
+        entryId: existingEntryForDate?._id,
+        money_saved: moneySaved,
+      };
+
+      console.log("Creating entryData:", {
+        originalSelectedDate: selectedDate,
+        dateType: typeof selectedDate,
+        entryDataDate: entryData.date,
+        currentTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        isoString: new Date(selectedDate).toISOString(),
+      });
+
+      // Truyền method để backend biết dùng PUT hay POST
+      const requestMethod = existingEntryForDate ? "PUT" : "POST";
+
+      console.log("Submitting entry:", {
+        method: requestMethod,
+        isUpdate: entryData.isUpdate,
+        entryId: entryData.entryId,
+        selectedDate: selectedDate,
+        date: entryData.date,
+        existingEntry: existingEntryForDate,
+        existingEntryDate: existingEntryForDate
+          ? dayjs.utc(existingEntryForDate.date).format("YYYY-MM-DD")
+          : null,
+      });
+
+      await onSubmit(entryData, requestMethod);
+      message.success(
+        existingEntryForDate
+          ? "Cập nhật nhật ký thành công!"
+          : "Ghi nhật ký thành công!"
+      );
+
+      // Reset form sau khi thành công để reflect changes
+      setTimeout(() => {
+        if (!existingEntryForDate) {
+          form.resetFields();
+        }
+      }, 100);
     } catch (error) {
-      message.error("Không thể lưu nhật ký");
-      console.error(error);
+      message.error("Có lỗi xảy ra khi ghi nhật ký");
+      console.error("Submit error:", error);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const disabledDate = (current) => current && current > dayjs().endOf("day");
-
-  const handleSmokedChange = (value) => {
-    if (!value) {
-      form.setFieldValue("cigarettes", 0);
+  useEffect(() => {
+    if (!submitting) {
+      form.setFieldsValue(
+        existingEntryForDate
+          ? {
+              cigarettes: existingEntryForDate.cigarettes_smoked || 0,
+              symptoms: existingEntryForDate.health_status || "",
+            }
+          : { cigarettes: 0, symptoms: "" }
+      );
     }
-  };
-
-  const getSmokingStatus = (entry) => {
-    const hasSmoked =
-      entry.smoked || (entry.cigarettes_smoked && entry.cigarettes_smoked > 0);
-    return hasSmoked;
-  };
-
-  const getCigaretteCount = (entry) => {
-    return entry.cigarettes_smoked || entry.cigarettes || 0;
-  };
-
-  const getHealthRating = (entry) => {
-    return entry.health_rating || entry.health || 0;
-  };
-
-  const getHealthStatus = (entry) => {
-    return entry.health_stat || entry.symptoms || "";
-  };
+  }, [existingEntryForDate, selectedDate, form, submitting]);
 
   return (
-    <>
-      {" "}
-      <div className="bg-gradient-to-b from-white to-purple-50 shadow-md border border-blue-200 p-8 rounded-xl mb-10">
-        <div className="flex items-center mb-6 border-b border-purple-200 pb-4">
-          <div className="bg-purple-100 p-3 rounded-full mr-4">
-            <PenLine className="h-6 w-6 text-purple-600" />
+    <div className="space-y-8">
+      {/* Nhật ký */}
+      <Card
+        title={
+          <div className="flex items-center">
+            <BookOutlined className="text-2xl text-purple-600 mr-3" />
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
+              Nhật Ký Hàng Ngày
+            </h2>
           </div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
-            Nhật Ký Hàng Ngày
-          </h2>
-        </div>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleFinish}
-          initialValues={initialValues}
-          className="mb-6"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Form.Item
-              name="date"
-              label="Ngày"
-              rules={[{ required: true, message: "Vui lòng chọn ngày" }]}
-            >
-              {" "}
-              <DatePicker
-                className="w-full text-lg"
-                disabledDate={disabledDate}
-                format="DD/MM/YYYY"
-                placeholder="Chọn ngày"
-                suffixIcon={<CalendarOutlined className="text-purple-500" />}
-                style={{ height: "44px" }}
+        }
+        className="bg-gradient-to-br from-white to-purple-50 border border-purple-200 shadow-md rounded-xl"
+      >
+        {existingEntryForDate && (
+          <Alert
+            message={`Sửa nhật ký ngày ${dayjs(selectedDate).format(
+              "DD/MM/YYYY"
+            )}`}
+            description={`Đã có nhật ký cho ngày này (${
+              existingEntryForDate.cigarettes_smoked || 0
+            } điếu). Bạn đang chỉnh sửa nhật ký hiện có thay vì tạo mới.`}
+            type="warning"
+            showIcon
+            className="mb-6"
+          />
+        )}
+
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Form.Item label="Ngày">
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                max={dayjs().format("YYYY-MM-DD")}
+                className="w-full px-3 py-2 border border-purple-200 rounded-lg"
               />
             </Form.Item>
 
             <Form.Item
-              name="smoked"
-              label="Hôm nay bạn có hút thuốc không?"
+              name="cigarettes"
+              label="Số điếu thuốc đã hút"
               rules={[
-                { required: true, message: "Vui lòng chọn một tùy chọn" },
+                { required: true, message: "Vui lòng nhập số điếu thuốc" },
+                {
+                  type: "number",
+                  min: 0,
+                  max: smokingStatus?.cigarettesPerDay || 100,
+                  message: `Tối đa ${
+                    smokingStatus?.cigarettesPerDay || 100
+                  } điếu`,
+                },
               ]}
+              initialValue={0}
             >
-              <Select
-                onChange={handleSmokedChange}
-                className="text-lg"
-                placeholder="Chọn câu trả lời"
-                style={{ height: "44px" }}
-              >
-                <Select.Option value={false}>
-                  <div className="flex items-center">
-                    <CheckCircleOutlined className="text-green-500 mr-2" />
-                    <span>Không</span>
-                  </div>
-                </Select.Option>
-                <Select.Option value={true}>
-                  <div className="flex items-center">
-                    <CloseCircleOutlined className="text-red-500 mr-2" />
-                    <span>Có</span>
-                  </div>
-                </Select.Option>
-              </Select>
+              <InputNumber
+                min={0}
+                max={smokingStatus?.cigarettesPerDay || 100}
+                placeholder="Ví dụ: 5"
+                className="w-full"
+              />
             </Form.Item>
           </div>
-          <Form.Item noStyle shouldUpdate>
-            {" "}
-            {({ getFieldValue }) =>
-              getFieldValue("smoked") && (
-                <Form.Item
-                  name="cigarettes"
-                  label="Số điếu thuốc đã hút"
-                  rules={[
-                    {
-                      required: true,
-                      type: "number",
-                      min: 1,
-                      message: "Vui lòng nhập số lượng điếu thuốc",
-                    },
-                  ]}
-                >
-                  <InputNumber
-                    min={1}
-                    className="w-full"
-                    placeholder="Nhập số điếu"
-                    style={{ height: "44px" }}
-                    addonBefore={
-                      <div className="bg-red-50 py-1 px-2 flex items-center">
-                        <Cigarette className="w-5 h-5 text-red-500" />
-                      </div>
-                    }
-                  />
-                </Form.Item>
-              )
-            }
-          </Form.Item>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
-            <Form.Item
-              name="mood"
-              label={
-                <div className="flex items-center">
-                  <SmileOutlined className="mr-2 text-yellow-500" />
-                  <span>Tâm trạng (1-10)</span>
-                </div>
-              }
-              rules={[
-                { required: true, message: "Vui lòng đánh giá tâm trạng" },
-              ]}
-            >
-              <Rate count={10} className="text-yellow-500" />
-            </Form.Item>
 
-            <Form.Item
-              name="health"
-              label={
-                <div className="flex items-center">
-                  <HeartOutlined className="mr-2 text-red-500" />
-                  <span>Sức khỏe (1-10)</span>
-                </div>
-              }
-              rules={[
-                { required: true, message: "Vui lòng đánh giá sức khỏe" },
-              ]}
-            >
-              <Rate count={10} className="text-red-500" />
-            </Form.Item>
-          </div>
-          <Form.Item
-            name="symptoms"
-            label={
-              <div className="flex items-center">
-                <MessageOutlined className="mr-2 text-blue-500" />
-                <span>Triệu chứng / Ghi chú</span>
-              </div>
-            }
-          >
+          <Form.Item name="symptoms" label="Triệu chứng sức khỏe">
             <TextArea
-              rows={3}
-              placeholder="VD: căng thẳng, đau đầu, v.v."
-              className="text-base"
+              rows={4}
+              placeholder="Mô tả cảm giác, triệu chứng..."
+              maxLength={500}
+              showCount
             />
-          </Form.Item>{" "}
+          </Form.Item>
+
           <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-none shadow-md hover:shadow-lg"
-              loading={submitting || isLoading}
+              loading={submitting}
+              icon={<PlusOutlined />}
               size="large"
-              icon={<SaveOutlined />}
+              className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-blue-600"
             >
-              Lưu Nhật Ký
+              {existingEntryForDate ? "Cập nhật nhật ký" : "Ghi nhật ký"}
             </Button>
           </Form.Item>
         </Form>
-      </div>
-      <div className="bg-gradient-to-b from-white to-green-50 shadow-md border border-green-200 p-8 rounded-xl">
-        <div className="flex items-center mb-6 border-b border-green-200 pb-4">
-          <div className="bg-green-100 p-3 rounded-full mr-4">
-            <Clock className="h-6 w-6 text-green-600" />
+      </Card>
+
+      {/* Thống kê */}
+      {entries.length > 0 && smokingStatus && (
+        <Card
+          title={
+            <div className="flex items-center">
+              <TrendingDown className="text-2xl text-green-600 mr-3" />
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-green-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
+                Thống Kê Tiết Kiệm Chi Tiết
+              </h2>
+            </div>
+          }
+          className="bg-gradient-to-br from-white to-green-50 border border-green-200 text-green-900"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Stat
+              label="Số ngày đã ghi nhật ký"
+              value={groupedEntries.length}
+            />
+            <Stat
+              label="Số ngày cai thuốc hoàn toàn"
+              value={
+                entries.filter((e) => (e.cigarettes_smoked || 0) === 0).length
+              }
+            />
+            <Stat
+              label="Tổng tiền tiết kiệm"
+              value={entries
+                .reduce(
+                  (sum, e) =>
+                    sum +
+                    calculateMoneySaved(
+                      smokingStatus,
+                      e.cigarettes_smoked || 0
+                    ),
+                  0
+                )
+                .toLocaleString("vi-VN")}
+              unit="VND"
+            />
           </div>
-          <h3 className="text-2xl font-bold text-green-800">
-            Nhật Ký Trước Đây
-          </h3>
-        </div>{" "}
-        {entries.length === 0 ? (
-          <Empty
-            description={
-              <span className="text-lg text-gray-500">
-                Chưa có bản ghi nhật ký
-              </span>
-            }
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            className="my-10 bg-white p-8 rounded-lg border border-gray-200 shadow-sm"
-          />
-        ) : (
-          <List
-            dataSource={entries}
-            grid={{ gutter: 24, xs: 1, sm: 1, md: 2, lg: 2, xl: 3, xxl: 3 }}
-            pagination={{
-              pageSize: 6,
-              hideOnSinglePage: true,
-              className: "mt-6",
-            }}
-            renderItem={(item) => {
-              const hasSmoked = getSmokingStatus(item);
-              const cigaretteCount = getCigaretteCount(item);
-              const healthRating = getHealthRating(item);
-              const healthStatus = getHealthStatus(item);
 
-              return (
-                <List.Item>
-                  <Card
-                    title={
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center text-gray-800 font-medium">
-                          <CalendarOutlined className="mr-2 text-blue-500" />
-                          {dayjs(item.date).format("DD/MM/YYYY")}
-                        </span>
-                        {hasSmoked ? (
-                          <Badge.Ribbon text="Đã hút" color="red">
-                            <div className="w-6"></div>
-                          </Badge.Ribbon>
-                        ) : (
-                          <Badge.Ribbon text="Không hút" color="green">
-                            <div className="w-6"></div>
-                          </Badge.Ribbon>
-                        )}
-                      </div>
-                    }
-                    className="bg-white border border-gray-200 text-gray-800 w-full mb-4 hover:shadow-lg transition-all rounded-lg overflow-hidden transform hover:-translate-y-1 hover:border-blue-300"
-                    styles={{
-                      header: {
-                        borderBottom: "1px solid #e6e6e6",
-                        padding: "12px 16px",
-                        backgroundColor: hasSmoked ? "#FFF5F5" : "#F0FFF4",
-                      },
-                    }}
-                  >
-                    <div className="p-2">
-                      <div className="grid grid-cols-2 gap-4 mb-3">
-                        <div
-                          className={`p-3 rounded-lg ${
-                            hasSmoked
-                              ? "bg-red-50 border border-red-200"
-                              : "bg-green-50 border border-green-200"
-                          }`}
-                        >
-                          <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                            Trạng thái
-                          </p>
-                          <p
-                            className={`font-semibold text-base ${
-                              hasSmoked ? "text-red-600" : "text-green-600"
-                            }`}
-                          >
-                            {hasSmoked ? "Đã hút thuốc" : "Không hút thuốc"}
-                          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Stat
+              label="Tổng điếu đã hút"
+              value={entries.reduce(
+                (sum, e) => sum + (e.cigarettes_smoked || 0),
+                0
+              )}
+            />
+            <Stat
+              label="Chuỗi ngày không hút hiện tại"
+              value={calculateSmokeFreeStreak(entries)}
+            />
+          </div>
+        </Card>
+      )}
+
+      {/* Lịch sử */}
+      <Card
+        title={
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <CalendarOutlined className="text-2xl text-purple-600 mr-3" />
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent">
+                Lịch Sử Nhật Ký
+              </h2>
+            </div>
+            <Badge count={groupedEntries.length} showZero />
+          </div>
+        }
+        className="bg-gradient-to-br from-white to-purple-50 border border-purple-200"
+      >
+        <div className="max-h-96 overflow-y-auto">
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Spin size="large" />
+            </div>
+          ) : groupedEntries.length === 0 ? (
+            <Empty description="Chưa có nhật ký nào" className="py-12" />
+          ) : (
+            <List
+              dataSource={groupedEntries}
+              renderItem={([date, entriesForDate]) => {
+                const latestEntry = entriesForDate[entriesForDate.length - 1];
+                return (
+                  <List.Item className="px-0 py-4 border-b border-purple-100 last:border-0">
+                    <Card className="bg-gradient-to-r from-white to-purple-50 border border-purple-200">
+                      <div>
+                        <h3 className="text-lg font-semibold text-purple-800 flex items-center mb-3">
+                          <CalendarOutlined className="mr-2" />
+                          {dayjs(date).format("DD/MM/YYYY")} -{" "}
+                          {dayjs(date).format("dddd")}
+                        </h3>
+
+                        <div className="p-3 bg-white rounded-lg border border-purple-100">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <p className="flex items-center">
+                              <Cigarette className="inline w-4 h-4 mr-2 text-red-500" />
+                              <span className="font-medium">Số điếu: </span>{" "}
+                              {latestEntry.cigarettes_smoked || 0}
+                            </p>
+                            {latestEntry.health_status && (
+                              <p className="flex items-center">
+                                <Heart className="inline w-4 h-4 mr-2 text-pink-500" />
+                                <span className="font-medium">
+                                  Triệu chứng:
+                                </span>{" "}
+                                {latestEntry.health_status}
+                              </p>
+                            )}
+                            <p className="flex items-center">
+                              <TrendingDown className="inline w-4 h-4 mr-2 text-green-500" />
+                              <span className="font-medium">Tiết kiệm:</span>{" "}
+                              <span className="font-semibold text-green-600 ml-1">
+                                {(
+                                  latestEntry.money_saved ||
+                                  calculateMoneySaved(
+                                    smokingStatus,
+                                    latestEntry.cigarettes_smoked || 0
+                                  )
+                                ).toLocaleString("vi-VN")}{" "}
+                                VND
+                              </span>
+                            </p>
+                          </div>
+                          {latestEntry.time && (
+                            <p className="text-sm text-gray-500 mt-2">
+                              Ghi lúc: {latestEntry.time}
+                            </p>
+                          )}
                         </div>
-
-                        {item.mood && (
-                          <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200">
-                            <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                              Tâm trạng
-                            </p>
-                            <div className="flex items-center">
-                              <span className="font-semibold text-base text-yellow-600 mr-1">
-                                {item.mood}
-                              </span>
-                              <span className="text-yellow-500 text-xs">
-                                /10
-                              </span>
-                              <Rate
-                                count={1}
-                                value={1}
-                                disabled
-                                className="ml-1 text-yellow-500 text-xs"
-                              />
-                            </div>
-                          </div>
-                        )}
                       </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        {hasSmoked && cigaretteCount > 0 && (
-                          <div className="p-3 rounded-lg bg-orange-50 border border-orange-200">
-                            <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                              Số điếu
-                            </p>
-                            <p className="font-semibold text-base text-orange-600">
-                              {cigaretteCount}{" "}
-                              <span className="text-xs">điếu</span>
-                            </p>
-                          </div>
-                        )}
-
-                        {healthRating > 0 && (
-                          <div
-                            className={`p-3 rounded-lg bg-blue-50 border border-blue-200 ${
-                              !hasSmoked || cigaretteCount === 0
-                                ? "col-span-2"
-                                : ""
-                            }`}
-                          >
-                            <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                              Sức khỏe
-                            </p>
-                            <div className="flex items-center">
-                              <span className="font-semibold text-base text-blue-600 mr-1">
-                                {healthRating}
-                              </span>
-                              <span className="text-blue-500 text-xs">/10</span>
-                              <HeartOutlined className="ml-1 text-red-500" />
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Display money saved if available */}
-                        {item.money_saved && item.money_saved > 0 && (
-                          <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
-                            <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                              Tiết kiệm
-                            </p>
-                            <p className="font-semibold text-base text-emerald-600">
-                              {new Intl.NumberFormat("vi-VN", {
-                                style: "currency",
-                                currency: "VND",
-                                maximumFractionDigits: 0,
-                              }).format(item.money_saved)}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {healthStatus && (
-                        <div className="mt-4 p-3 rounded-lg bg-gray-50 border border-gray-200">
-                          <p className="text-xs text-gray-500 uppercase mb-1 font-medium">
-                            Ghi chú
-                          </p>
-                          <p className="text-sm text-gray-700">
-                            {healthStatus}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                </List.Item>
-              );
-            }}
-          />
-        )}
-      </div>
-    </>
+                    </Card>
+                  </List.Item>
+                );
+              }}
+            />
+          )}
+        </div>
+      </Card>
+    </div>
   );
 }
+
+const Stat = ({ label, value, unit = "" }) => (
+  <div className="text-center p-4 bg-gray-50 rounded-xl border">
+    <h4 className="text-gray-800 font-medium mb-2">{label}</h4>
+    <p className="text-2xl font-bold text-gray-600">
+      {value} {unit}
+    </p>
+  </div>
+);
 
 export default JournalSection;

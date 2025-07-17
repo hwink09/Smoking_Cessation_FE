@@ -36,7 +36,7 @@ function SidebarCoach() {
     {
       label: "Duyệt Yêu Cầu",
       icon: <CheckCircleOutlined />,
-      path: "/coach/quit-plans-request",
+      path: "/coach/request",
     },
     {
       label: "Giai Đoạn",
@@ -47,11 +47,6 @@ function SidebarCoach() {
       label: "Tiến độ",
       icon: <FieldTimeOutlined />,
       path: "/coach/progress",
-    },
-    {
-      label: "Phản hồi",
-      icon: <MessageOutlined />,
-      path: "/coach/feedbacks",
     },
     {
       label: "Thông báo",

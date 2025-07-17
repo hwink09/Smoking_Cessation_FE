@@ -1,8 +1,8 @@
 import React from "react";
 import CoachQuitPlanTable from "~/components/coach/myUser/CoachQuitPlanTable";
 
-const CoachDashBoard = () => {
+function CoachDashBoardPage() {
   return <CoachQuitPlanTable />;
-};
+}
 
-export default CoachDashBoard;
+export default CoachDashBoardPage;
