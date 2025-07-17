@@ -54,6 +54,7 @@ import SmokingStatusPage from "./pages/user/SmokingStatusPage";
 import UserQuitPlanPage from "./pages/user/UserQuitPlanPage";
 import UserMeetSessionPage from "./pages/user/UserMeetSessionPage";
 
+
 // Coach Pages
 import CoachLayout from "./components/layouts/coach/CoachLayout";
 import CoachProfilePage from "./pages/coach/CoachProfilePage";
@@ -68,13 +69,14 @@ import CoachNotification from "./pages/coach/CoachNotification";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
+import PlanStageView from "./components/generic/quitplan/PlanStageView";
 
 
 // Layout Wrapper
 const Layout = () => {
   const { currentUser } = useAuth();
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen">
       {currentUser ? <UserHeader /> : <Navbar />}
       <main className="mt-16">
         <Outlet />
@@ -122,6 +124,7 @@ function App() {
               path="/quit-plan-detail/:id"
               element={<QuitPlanDetailPage />}
             />
+  <Route path="/stages/:id" element={<PlanStageView />} />
           </Route>
 
           {/* Admin Routes */}
