@@ -1,23 +1,19 @@
 import { Check, Star } from "lucide-react";
-
 import classNames from "classnames";
 import { useAuth } from "~/hooks/useAuth";
 import usePackages from "~/hooks/usePackages";
 import SubscriptionService from "~/services/subscriptionService";
 import PaymentService from "~/services/PaymentService";
-
-
+import { toast } from "react-toastify";
 
 export function Pricing() {
   const { packages, loading, error } = usePackages();
   const { currentUser: user } = useAuth();
 
-  // Sắp xếp packages theo thứ tự mong muốn
   const packageOrder = ["free", "plus", "premium"];
   const sortedPackages = (packages || []).slice().sort((a, b) => {
     const aIndex = packageOrder.indexOf(a.name?.toLowerCase());
     const bIndex = packageOrder.indexOf(b.name?.toLowerCase());
-    // Nếu không tìm thấy, cho xuống cuối
     return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex);
   });
 
@@ -27,41 +23,53 @@ export function Pricing() {
   const isPopular = (plan) => plan.name?.toLowerCase() === "plus";
 
   const handleGetStarted = async (plan) => {
-    console.log("[GetStarted] User:", user);
-    console.log("[GetStarted] Plan:", plan);
+    if (!user) {
+      toast("Vui lòng đăng nhập để đăng ký.");
+      return;
+    }
+
     try {
+      // Kiểm tra xem user đã có subscription đang hoạt động chưa
+      const activeSubscriptions =
+        await SubscriptionService.getMyActiveSubscription();
+
+      if (activeSubscriptions && activeSubscriptions.length > 0) {
+        toast.warn("Bạn đã có gói đăng ký đang hoạt động.");
+        return;
+      }
+
       const subscriptionPayload = {
         package_id: plan._id,
-        user_id: user.userId, // Sửa lại ở đây
+        user_id: user.userId,
         start_date: new Date().toISOString(),
         end_date: "",
         status: "pending",
         name: plan.name,
         price: plan.price,
       };
-      console.log("[GetStarted] Subscription Payload:", subscriptionPayload);
-      const createdSub = await SubscriptionService.createSubscription(subscriptionPayload);
-      console.log("[GetStarted] Created Subscription:", createdSub);
+
+      const createdSub = await SubscriptionService.createSubscription(
+        subscriptionPayload
+      );
 
       const paymentPayload = {
         subscription_id: createdSub.subscription._id,
-        user_id: user.userId, // Sửa lại ở đây
+        user_id: user.userId,
         amount: plan.price,
         description: `Thanh toán cho gói ${plan.name}`,
       };
-      console.log("[GetStarted] Payment Payload:", paymentPayload);
-      const paymentResult = await PaymentService.createPaymentLink(paymentPayload);
-      console.log("[GetStarted] Payment Result:", paymentResult);
+
+      const paymentResult = await PaymentService.createPaymentLink(
+        paymentPayload
+      );
 
       if (paymentResult?.checkoutUrl) {
-        console.log("[GetStarted] Redirecting to:", paymentResult.checkoutUrl);
         window.location.href = paymentResult.checkoutUrl;
       } else {
-        alert("Không thể tạo liên kết thanh toán.");
+        toast("Không thể tạo liên kết thanh toán.");
       }
     } catch (error) {
-      console.error("Lỗi khi tạo đăng ký/thanh toán:", error); 
-      alert("Có lỗi xảy ra. Vui lòng thử lại sau.");
+      toast("Có lỗi xảy ra. Vui lòng thử lại sau.");
     }
   };
 
@@ -83,7 +91,8 @@ export function Pricing() {
             </span>
           </h2>
           <p className="text-lg text-white/70 max-w-2xl mx-auto">
-            Select the perfect support package to help you quit smoking — no hidden costs, just real results.
+            Select the perfect support package to help you quit smoking — no
+            hidden costs, just real results.
           </p>
         </div>
 

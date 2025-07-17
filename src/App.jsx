@@ -69,6 +69,9 @@ import CoachNotification from "./pages/coach/CoachNotification";
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
 
+import PaymentSuccessPage from "./pages/generic/PaymentSuccessPage";
+import PaymentCancelPage from "./pages/generic/PaymentCancelPage";
+
 
 // Layout Wrapper
 const Layout = () => {
@@ -109,6 +112,8 @@ function App() {
           <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="/resset-password/:token" element={<ResetPassword />} />
           <Route path="/verify" element={<VerifyPage />} />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
+          <Route path="/payment-cancel" element={<PaymentCancelPage />} />
 
           {/* Layout Routes */}
           <Route element={<Layout />}>
