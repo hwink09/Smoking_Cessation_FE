@@ -1,15 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  Avatar,
-  Descriptions,
-  Spin,
-  Button,
-  message,
-  Rate,
-  List,
-  Flex,
-} from "antd";
+import { Card, Avatar, Descriptions, Spin, Button, message, Rate } from "antd";
 import { UserOutlined, EditOutlined } from "@ant-design/icons";
 import { useAuth } from "~/hooks/useAuth";
 import useCoachData from "~/hooks/useCoachData";
@@ -20,7 +10,6 @@ const CoachProfile = ({ coachId, isEditable = false }) => {
   const { getCoachById } = useCoachData();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
-  const [feedbacks, setFeedbacks] = useState([]);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
   const targetCoachId = coachId || currentUser?.userId;
@@ -30,9 +19,6 @@ const CoachProfile = ({ coachId, isEditable = false }) => {
       setLoading(true);
       const updatedData = await getCoachById(targetCoachId);
       setProfile(updatedData);
-      if (Array.isArray(updatedData.feedbacks)) {
-        setFeedbacks(updatedData.feedbacks);
-      }
     } catch {
       message.error("Không thể tải lại thông tin hồ sơ.");
     } finally {
@@ -55,9 +41,6 @@ const CoachProfile = ({ coachId, isEditable = false }) => {
         }
 
         setProfile(data);
-        if (Array.isArray(data.feedbacks)) {
-          setFeedbacks(data.feedbacks);
-        }
       } catch {
         message.error("Không thể tải thông tin huấn luyện viên");
         setProfile({});
@@ -153,41 +136,6 @@ const CoachProfile = ({ coachId, isEditable = false }) => {
           </div>
         </div>
       </Card>
-
-      {feedbacks.length > 0 && (
-        <Card title="Đánh giá từ người dùng" className="shadow-md">
-          <List
-            dataSource={feedbacks}
-            itemLayout="horizontal"
-            renderItem={(item) => (
-              <List.Item>
-                <List.Item.Meta
-                  avatar={
-                    <Avatar
-                      src={item.user_id?.avatar_url}
-                      icon={<UserOutlined />}
-                    />
-                  }
-                  title={
-                    <Flex align="center" justify="space-between">
-                      <span>{item.user_id?.name || "Người dùng"}</span>
-                      <span className="text-gray-500">
-                        {new Date(item.createdAt).toLocaleDateString()}
-                      </span>
-                    </Flex>
-                  }
-                  description={
-                    <div>
-                      <p className="mb-2">{item.content}</p>
-                      <Rate disabled value={item.rating} />
-                    </div>
-                  }
-                />
-              </List.Item>
-            )}
-          />
-        </Card>
-      )}
 
       <CoachProfileEditor
         mode="edit"

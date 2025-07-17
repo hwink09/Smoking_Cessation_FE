@@ -53,10 +53,6 @@ const CoachProfilePage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Hồ sơ huấn luyện viên | Smoking Cessation</title>
-      </Helmet>
-
       <div className="container mx-auto py-8 px-4">
         <PageHeader
           className="p-0 mb-6"

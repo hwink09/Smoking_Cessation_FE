@@ -65,14 +65,6 @@ const UserQuitPlanService = {
     return response.data;
   },
 
-  // Hoàn thành một stage
-  completeStage: async (stageId) => {
-    const response = await api.put(`/stages/${stageId}`, {
-      is_completed: true,
-    });
-    return response.data;
-  },
-
   // Lấy danh sách task đã hoàn thành của một stage
   getCompletedTasks: async (stageId) => {
     const response = await api.get(`/tasks/stage/${stageId}/completed`);
@@ -92,14 +84,6 @@ const UserQuitPlanService = {
       ...task,
       is_completed: completedTaskIds.includes(task._id),
     }));
-  },
-
-  // Cập nhật trạng thái quit plan thành "completed"
-  completeQuitPlan: async (planId) => {
-    const response = await api.put(`/quitPlan/${planId}`, {
-      status: "completed",
-    });
-    return response.data;
   },
 };
 

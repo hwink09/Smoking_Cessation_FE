@@ -44,17 +44,22 @@ function SidebarCoach() {
       path: "/coach/stages",
     },
     {
-      label: "Tiến độ",
+      label: "Tiến Độ",
       icon: <FieldTimeOutlined />,
       path: "/coach/progress",
     },
     {
-      label: "Thông báo",
+      label: "Đánh Giá",
+      icon: <FieldTimeOutlined />,
+      path: "/coach/feedback",
+    },
+    {
+      label: "Thông Báo",
       icon: <BellOutlined />,
       path: "/coach/notifications",
     },
     {
-      label: "Yêu cầu tư vấn ",
+      label: "Yêu Cầu Tư Vấn",
       icon: <MessageOutlined />,
       path: "/coach/meet-session",
     },
