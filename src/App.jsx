@@ -67,6 +67,7 @@ import CoachMeetSessionPage from "./pages/coach/CoachMeetSessionPage";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
+import CoachNotification from "./pages/coach/CoachNotification";
 
 // Layout Wrapper
 const Layout = () => {
@@ -237,6 +238,10 @@ function App() {
             <Route
               path="progress"
               element={<CoachRoute element={<CoachProgressPage />} />}
+            />
+            <Route
+              path="notifications"
+              element={<CoachRoute element={<CoachNotification/>} />}
             />
           </Route>
 
