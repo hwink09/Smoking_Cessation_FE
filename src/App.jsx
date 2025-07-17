@@ -70,6 +70,8 @@ import { useAuth } from "./hooks/useAuth";
 import CoachFeedBackPage from "./pages/coach/CoachFeedBackPage";
 import PaymentSuccessPage from "./pages/generic/PaymentSuccessPage";
 import PaymentCancelPage from "./pages/generic/PaymentCancelPage";
+import CoachNotification from "./pages/coach/CoachNotification";
+
 
 // Layout Wrapper
 const Layout = () => {
@@ -246,6 +248,10 @@ function App() {
             <Route
               path="feedback"
               element={<CoachRoute element={<CoachFeedBackPage />} />}
+            />
+            <Route
+              path="notifications"
+              element={<CoachRoute element={<CoachNotification/>} />}
             />
           </Route>
 
