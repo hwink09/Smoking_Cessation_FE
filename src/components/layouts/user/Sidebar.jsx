@@ -32,7 +32,7 @@ const menu = [
   {
     label: "Yêu cầu tư vấn ",
     icon: <MessageOutlined />,
-    path: "/user/user-meet-session",
+    path: "/user/meet-session",
   },
 ];
 

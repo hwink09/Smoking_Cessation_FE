@@ -212,7 +212,7 @@ function App() {
               element={<UserRoute element={<UserQuitPlanPage />} />}
             />
             <Route
-              path="meet-sessions"
+              path="meet-session"
               element={<UserRoute element={<UserMeetSessionPage />} />}
             />
           </Route>
