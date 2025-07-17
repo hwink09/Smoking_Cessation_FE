@@ -60,5 +60,17 @@ export const getUserConsecutiveNoSmokeAPI = async (userId) => {
   return response.data;
 };
 
+// Lấy tổng tiền tiết kiệm và điếu không hút từ tất cả stages trong plan
+export const getTotalMoneySavedInPlanAPI = async (planId) => {
+  const response = await api.get(`/progress/plan/${planId}/money-saved`);
+  return response.data;
+};
+
+// Lấy thống kê hút thuốc của kế hoạch (điếu đã hút, điếu đã giảm)
+export const getPlanSmokingStatsAPI = async (planId) => {
+  const response = await api.get(`/progress/plan/${planId}/smoking-stats`);
+  return response.data;
+};
+
 export const fetchProgressAPI = getAllProgress;
 export const getProgressByStageUserAPI = getSingleStageProgressAPI;
