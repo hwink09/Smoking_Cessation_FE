@@ -1,14 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Avatar, Dropdown, Menu } from "antd";
-import { DashboardOutlined } from "@ant-design/icons";
+import {
+  Avatar,
+  Badge,
+  Button,
+  Dropdown,
+  Menu,
+  Popover,
+  List,
+} from "antd";
+import { BellOutlined, DashboardOutlined } from "@ant-design/icons";
 import { MdLogout } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { useAuth } from "~/hooks/useAuth";
+import NotificationService from "~/services/notificationService";
 
 const UserHeader = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!currentUser?.id && !currentUser?._id && !currentUser?.userId) return;
+      const userId = currentUser?.id || currentUser?._id || currentUser?.userId;
+      try {
+        const response = await NotificationService.getUserNotifications(userId);
+        setNotifications(response);
+      } catch (err) {
+        console.error("Lỗi khi tải thông báo:", err);
+      }
+    };
+    fetchNotifications();
+  }, [currentUser]);
 
   const handleLogout = async () => {
     try {
@@ -17,6 +41,41 @@ const UserHeader = () => {
       console.error("Logout error:", error);
     }
   };
+
+  const notificationTypeVN = {
+    reminder: 'Nhắc nhở',
+    motivation: 'Thông báo',
+  };
+  const notificationTypeColor = {
+    reminder: '#faad14', // orange
+    motivation: '#1890ff', // blue
+  };
+  const notificationContent = (
+    <div style={{ width: 300, maxHeight: 400, overflowY: "auto" }}>
+      <List
+        dataSource={notifications}
+        renderItem={(item) => (
+          <List.Item key={item._id}>
+            <div>
+              <div
+                className="font-semibold"
+                style={{ color: notificationTypeColor[item.type] || '#333' }}
+              >
+                {notificationTypeVN[item.type] || item.type}
+              </div>
+              <div>{item.message}</div>
+              {item.schedule && (
+                <div className="text-xs text-gray-400">
+                  {new Date(item.schedule).toLocaleString()}
+                </div>
+              )}
+            </div>
+          </List.Item>
+        )}
+        locale={{ emptyText: "Không có thông báo" }}
+      />
+    </div>
+  );
 
   const getUserMenuItems = (role) => {
     const baseItems = [
@@ -35,14 +94,10 @@ const UserHeader = () => {
 
           let path = "";
           if (role === "admin") {
-            // Admin xem profile của chính mình
             path = `/admin/profile/${id}`;
           } else if (role === "coach") {
-            // Coach xem profile của chính mình
-            // Dựa theo App.jsx của đệ, route của coach không cần ID
             path = `/coach/profile`;
           } else {
-            // User xem profile của chính mình
             path = `/user/profile/${id}`;
           }
 
@@ -68,7 +123,8 @@ const UserHeader = () => {
               : role === "coach"
               ? "/coach/dashboard"
               : "/user/dashboard"
-          }>
+          }
+        >
           <span className="text-white">Dashboard</span>
         </Link>
       ),
@@ -86,6 +142,7 @@ const UserHeader = () => {
       }}
     />
   );
+
   return (
     <header className="fixed w-full top-0 z-50 bg-gray-900/90 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -110,14 +167,30 @@ const UserHeader = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className="text-white hover:text-purple-400 transition-colors">
+                className="text-white hover:text-purple-400 transition-colors"
+              >
                 {item.name}
               </Link>
             ))}
           </nav>
 
-          {/* User Dropdown */}
+          {/* User Dropdown & Notification */}
           <div className="flex items-center gap-4">
+            <Popover
+              content={notificationContent}
+              title="Thông báo"
+              trigger="click"
+              placement="bottomRight"
+            >
+              <Badge count={notifications.length}>
+                <Button
+                  icon={<BellOutlined />}
+                  className="flex items-center justify-center"
+                  shape="circle"
+                />
+              </Badge>
+            </Popover>
+
             <Dropdown overlay={menu} placement="bottomRight" arrow>
               <div className="flex items-center gap-3 cursor-pointer">
                 <span className="text-white font-medium">
@@ -125,10 +198,10 @@ const UserHeader = () => {
                 </span>
                 <Avatar
                   src={
-                    currentUser.avatar_url ||
+                    currentUser?.avatar_url ||
                     "https://cdn-media.sforum.vn/storage/app/media/ve-capybara-2.jpg"
                   }
-                  className="border-2 "
+                  className="border-2"
                 />
               </div>
             </Dropdown>
