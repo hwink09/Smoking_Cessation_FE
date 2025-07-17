@@ -8,17 +8,28 @@ const FeedbackService = {
       return response.data;
     } catch (error) {
       console.error("Error creating feedback:", error);
+
+      // Cải thiện error handling
+      if (error.response?.status === 401) {
+        throw new Error("Bạn cần đăng nhập để thực hiện chức năng này");
+      } else if (error.response?.status === 500) {
+        throw new Error("Lỗi server. Vui lòng thử lại sau hoặc liên hệ hỗ trợ");
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+
       throw error;
     }
   },
 
-  // GET /api/feedback/user/{id} - Get Feedback of user
-  getUserFeedback: async (userId) => {
+  // GET /api/feedback/user/{id} - Get Feedback of current user
+  getUserFeedback: async (userId = "me") => {
     try {
+      // Backend lấy user_id từ token, nhưng route vẫn cần param
       const response = await api.get(`/feedback/user/${userId}`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching feedback for user ${userId}:`, error);
+      console.error("Error fetching user feedback:", error);
       throw error;
     }
   },

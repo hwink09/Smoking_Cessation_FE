@@ -1,30 +1,16 @@
 import { useState, useCallback } from "react";
 import UserQuitPlanService from "~/services/userQuitPlanService";
 
-// Helper function để xác định current stage
 const determineCurrentStage = (stages) => {
   if (!stages || stages.length === 0) return null;
 
-  // 1. Tìm stage có status "in_progress" (nếu có)
-  let currentStage = stages.find((s) => s.status === "in_progress");
-  if (currentStage) {
-    return currentStage;
-  }
+  const inProgress = stages.find((s) => s.status === "in_progress");
+  if (inProgress) return inProgress;
 
-  // 2. Tìm stage đầu tiên chưa completed (sử dụng is_completed từ backend)
-  currentStage = stages.find((s) => !s.is_completed);
-  if (currentStage) {
-    return currentStage;
-  }
+  const notCompleted = stages.find((s) => !s.is_completed);
+  if (notCompleted) return notCompleted;
 
-  // 3. Nếu tất cả đều completed, trả về null để báo hiệu quit plan đã hoàn thành
-  const allStagesCompleted = stages.every((s) => s.is_completed);
-  if (allStagesCompleted) {
-    return null; // Quit plan đã hoàn thành
-  }
-
-  // 4. Fallback: stage đầu tiên
-  return stages[0];
+  return stages.every((s) => s.is_completed) ? null : stages[0];
 };
 
 export function useUserQuitPlan() {
@@ -35,7 +21,6 @@ export function useUserQuitPlan() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Lấy quit plan của user hiện tại
   const fetchMyQuitPlan = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -44,16 +29,15 @@ export function useUserQuitPlan() {
       setMyQuitPlan(plan);
       return plan;
     } catch (err) {
-      const errorMsg =
-        err?.response?.data?.message || err.message || "Lỗi khi lấy kế hoạch";
-      setError(errorMsg);
+      setError(
+        err?.response?.data?.message || err.message || "Lỗi khi lấy kế hoạch"
+      );
       return null;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Lấy stages của quit plan
   const fetchMyStages = useCallback(async (planId) => {
     if (!planId) return [];
 
@@ -63,22 +47,20 @@ export function useUserQuitPlan() {
       const stages = await UserQuitPlanService.getMyStages(planId);
       setMyStages(stages);
 
-      // Tìm stage hiện tại sử dụng helper function
-      const currentStageData = determineCurrentStage(stages);
-      setCurrentStage(currentStageData);
+      const current = determineCurrentStage(stages);
+      setCurrentStage(current);
 
       return stages;
     } catch (err) {
-      const errorMsg =
-        err?.response?.data?.message || err.message || "Lỗi khi lấy giai đoạn";
-      setError(errorMsg);
+      setError(
+        err?.response?.data?.message || err.message || "Lỗi khi lấy giai đoạn"
+      );
       return [];
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Lấy tasks của stage hiện tại
   const fetchStageTasks = useCallback(async (stageId) => {
     if (!stageId) return [];
 
@@ -89,176 +71,134 @@ export function useUserQuitPlan() {
       setStageTasks(tasks);
       return tasks;
     } catch (err) {
-      const errorMsg =
-        err?.response?.data?.message || err.message || "Lỗi khi lấy nhiệm vụ";
-      setError(errorMsg);
+      setError(
+        err?.response?.data?.message || err.message || "Lỗi khi lấy nhiệm vụ"
+      );
       return [];
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Hoàn thành task
   const completeTask = useCallback(
     async (taskId) => {
       try {
         await UserQuitPlanService.completeTask(taskId);
 
-        // Cập nhật trạng thái local
-        const updatedTasks = stageTasks.map((task) =>
-          task._id === taskId ? { ...task, is_completed: true } : task
+        const updatedTasks = stageTasks.map((t) =>
+          t._id === taskId ? { ...t, is_completed: true } : t
         );
         setStageTasks(updatedTasks);
 
-        // Kiểm tra xem tất cả tasks trong stage hiện tại đã hoàn thành chưa
-        const allTasksCompleted = updatedTasks.every(
-          (task) => task.is_completed
-        );
+        const allCompleted = updatedTasks.every((t) => t.is_completed);
 
-        if (allTasksCompleted && currentStage) {
-          try {
-            // Đánh dấu stage hiện tại là hoàn thành trong database
-            await UserQuitPlanService.completeStage(currentStage._id);
+        if (allCompleted && currentStage) {
+          setCurrentStage((prev) => ({ ...prev, is_completed: true }));
 
-            // Cập nhật trạng thái local của stage hiện tại
-            setCurrentStage((prev) => ({ ...prev, is_completed: true }));
-
-            // Cập nhật myStages để đánh dấu stage hiện tại đã completed
-            setMyStages((prevStages) =>
-              prevStages.map((stage) =>
-                stage._id === currentStage._id
-                  ? { ...stage, is_completed: true }
-                  : stage
-              )
-            );
-          } catch {
-            // Tiếp tục dù lỗi vì có thể backend chưa hỗ trợ API này
-          }
-
-          // Kiểm tra xem có stage tiếp theo không
-          const currentStageIndex = myStages.findIndex(
-            (s) => s._id === currentStage._id
+          setMyStages((prev) =>
+            prev.map((s) =>
+              s._id === currentStage._id ? { ...s, is_completed: true } : s
+            )
           );
-          const nextStage = myStages[currentStageIndex + 1];
 
-          if (nextStage) {
-            // Có stage tiếp theo - không tự động chuyển, để người dùng chọn
+          const index = myStages.findIndex((s) => s._id === currentStage._id);
+          const next = myStages[index + 1];
+
+          if (next) {
             return {
               success: true,
               stageCompleted: true,
               hasNextStage: true,
-              currentStageNumber:
-                currentStage.stage_number || currentStageIndex + 1,
-              nextStageNumber: nextStage.stage_number || currentStageIndex + 2,
-              message: `🎉 Chúc mừng! Bạn đã hoàn thành giai đoạn ${
-                currentStage.stage_number || currentStageIndex + 1
+              currentStageNumber: currentStage.stage_number || index + 1,
+              nextStageNumber: next.stage_number || index + 2,
+              message: `🎉 Bạn đã hoàn thành giai đoạn ${
+                currentStage.stage_number || index + 1
               }!`,
             };
           } else {
-            // Đã hoàn thành tất cả stages - cập nhật trạng thái quit plan
-            try {
-              // Cập nhật trạng thái quit plan thành "completed"
-              await UserQuitPlanService.completeQuitPlan(myQuitPlan._id);
-
-              // Cập nhật trạng thái local
-              setMyQuitPlan((prev) => ({ ...prev, status: "completed" }));
-
-              // Đặt currentStage về null vì đã hoàn thành hết
-              setCurrentStage(null);
-            } catch (error) {
-              // Tiếp tục dù lỗi vì có thể backend chưa hỗ trợ API này
-            }
+            setMyStages((prev) =>
+              prev.map((s) => ({ ...s, is_completed: true }))
+            );
+            setMyQuitPlan((prev) => ({ ...prev, status: "completed" }));
+            setCurrentStage(null);
+            setStageTasks([]);
 
             return {
               success: true,
               allStagesCompleted: true,
               planCompleted: true,
               message:
-                "🏆 Chúc mừng! Bạn đã hoàn thành tất cả các giai đoạn trong kế hoạch cai thuốc!",
+                "🏆 Bạn đã hoàn thành tất cả các giai đoạn trong kế hoạch!",
             };
           }
         }
 
         return { success: true };
       } catch (err) {
-        const errorMsg =
-          err?.response?.data?.message ||
-          err.message ||
-          "Lỗi khi hoàn thành nhiệm vụ";
-        return { success: false, error: errorMsg };
+        return {
+          success: false,
+          error:
+            err?.response?.data?.message ||
+            err.message ||
+            "Lỗi khi hoàn thành nhiệm vụ",
+        };
       }
     },
-    [stageTasks, currentStage, myStages, myQuitPlan]
+    [stageTasks, currentStage, myStages]
   );
 
-  // Chuyển sang stage tiếp theo thủ công
   const moveToNextStage = useCallback(async () => {
     if (!currentStage || !myStages.length) {
-      return { success: false, error: "Không có thông tin stage hiện tại" };
+      return { success: false, error: "Không có giai đoạn hiện tại" };
     }
 
     try {
       setLoading(true);
 
-      // Tìm stage tiếp theo
-      const currentStageIndex = myStages.findIndex(
-        (s) => s._id === currentStage._id
-      );
-      const nextStage = myStages[currentStageIndex + 1];
+      const index = myStages.findIndex((s) => s._id === currentStage._id);
+      const next = myStages[index + 1];
 
-      if (!nextStage) {
-        return {
-          success: false,
-          error: "Bạn đã ở giai đoạn cuối cùng",
-        };
+      if (!next) {
+        return { success: false, error: "Bạn đã ở giai đoạn cuối" };
       }
 
-      // Chuyển sang stage tiếp theo
-      setCurrentStage(nextStage);
-
-      // Cập nhật trạng thái stages trong local state
-      setMyStages((prevStages) =>
-        prevStages.map((stage) => {
-          if (stage._id === currentStage._id) {
-            return { ...stage, is_completed: true };
-          } else if (stage._id === nextStage._id) {
-            return { ...stage, status: "in_progress" };
-          }
-          return stage;
+      setCurrentStage(next);
+      setMyStages((prev) =>
+        prev.map((s) => {
+          if (s._id === currentStage._id) return { ...s, is_completed: true };
+          if (s._id === next._id) return { ...s, status: "in_progress" };
+          return s;
         })
       );
 
-      // Tải tasks của stage mới
-      const nextStageTasks = await UserQuitPlanService.getTasksWithCompletion(
-        nextStage._id
-      );
-      setStageTasks(nextStageTasks);
+      const tasks = await UserQuitPlanService.getTasksWithCompletion(next._id);
+      setStageTasks(tasks);
 
       return {
         success: true,
-        message: `Đã chuyển sang giai đoạn ${
-          nextStage.stage_number || currentStageIndex + 2
-        }: ${nextStage.title}`,
-        nextStage: nextStage,
+        message: `Đã chuyển sang giai đoạn ${next.stage_number || index + 2}: ${
+          next.title
+        }`,
+        nextStage: next,
       };
     } catch (err) {
-      const errorMsg =
-        err?.response?.data?.message ||
-        err.message ||
-        "Lỗi khi chuyển giai đoạn";
-      return { success: false, error: errorMsg };
+      return {
+        success: false,
+        error:
+          err?.response?.data?.message ||
+          err.message ||
+          "Lỗi khi chuyển giai đoạn",
+      };
     } finally {
       setLoading(false);
     }
   }, [currentStage, myStages]);
 
-  // Lấy toàn bộ dữ liệu (quit plan + stages + tasks)
   const fetchAllUserData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // 1. Lấy quit plan
       const plan = await UserQuitPlanService.getMyQuitPlan();
       if (!plan) {
         setMyQuitPlan(null);
@@ -270,7 +210,6 @@ export function useUserQuitPlan() {
 
       setMyQuitPlan(plan);
 
-      // 2. Lấy stages
       const stages = await UserQuitPlanService.getMyStages(plan._id);
       setMyStages(stages);
 
@@ -280,62 +219,44 @@ export function useUserQuitPlan() {
         return { plan, stages: [], tasks: [] };
       }
 
-      // 3. Tìm stage hiện tại sử dụng helper function
-      const currentStageData = determineCurrentStage(stages);
-      setCurrentStage(currentStageData);
+      const current = determineCurrentStage(stages);
+      setCurrentStage(current);
 
-      // 4. Nếu currentStageData là null, có nghĩa là tất cả stages đã hoàn thành
-      if (!currentStageData) {
-        // Kiểm tra xem quit plan đã được đánh dấu completed chưa
+      if (!current) {
         if (plan.status !== "completed") {
-          try {
-            // Cập nhật trạng thái quit plan thành "completed"
-            await UserQuitPlanService.completeQuitPlan(plan._id);
-
-            // Cập nhật trạng thái local
-            const completedPlan = { ...plan, status: "completed" };
-            setMyQuitPlan(completedPlan);
-
-            return { plan: completedPlan, stages, tasks: [], completed: true };
-          } catch (error) {
-            // Tiếp tục dù lỗi
-          }
+          const updatedPlan = { ...plan, status: "completed" };
+          setMyQuitPlan(updatedPlan);
+          return { plan: updatedPlan, stages, tasks: [], completed: true };
         }
-
         setStageTasks([]);
         return { plan, stages, tasks: [], completed: true };
       }
 
-      // 5. Lấy tasks của stage hiện tại
       const tasks = await UserQuitPlanService.getTasksWithCompletion(
-        currentStageData._id
+        current._id
       );
       setStageTasks(tasks);
       return { plan, stages, tasks };
     } catch (err) {
-      const errorMsg =
-        err?.response?.data?.message || err.message || "Lỗi khi tải dữ liệu";
-      setError(errorMsg);
+      setError(
+        err?.response?.data?.message || err.message || "Lỗi khi tải dữ liệu"
+      );
       return { plan: null, stages: [], tasks: [] };
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Tính toán progress
-  const progress =
-    stageTasks.length > 0
-      ? Math.round(
-          (stageTasks.filter((t) => t.is_completed).length /
-            stageTasks.length) *
-            100
-        )
-      : 0;
+  const progress = stageTasks.length
+    ? Math.round(
+        (stageTasks.filter((t) => t.is_completed).length / stageTasks.length) *
+          100
+      )
+    : 0;
 
   const completedCount = stageTasks.filter((t) => t.is_completed).length;
 
   return {
-    // Data
     myQuitPlan,
     myStages,
     currentStage,
@@ -345,7 +266,6 @@ export function useUserQuitPlan() {
     progress,
     completedCount,
 
-    // Actions
     fetchMyQuitPlan,
     fetchMyStages,
     fetchStageTasks,
@@ -353,7 +273,6 @@ export function useUserQuitPlan() {
     fetchAllUserData,
     moveToNextStage,
 
-    // Utilities
     clearError: () => setError(null),
     refetch: fetchAllUserData,
   };
