@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import QuitPlanService from "~/services/quitPlanService";
 import StageService from "~/services/stageService";
 
-const useStages = () => {
+const useStages = (planId) => {
   const [stages, setStages] = useState([]);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -48,7 +48,12 @@ const useStages = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await StageService.getAllStages();
+      let data;
+      if (planId) {
+        data = await StageService.getStagesByPlanId(planId);
+      } else {
+        data = await StageService.getAllStages();
+      }
       setStages(data);
     } catch (err) {
       setError(
@@ -62,7 +67,7 @@ const useStages = () => {
   useEffect(() => {
     fetchStages();
     fetchPlans();
-  }, []);
+  }, [planId]);
 
   // Modal handlers
   const openEditModal = (stage) => {
@@ -86,7 +91,7 @@ const useStages = () => {
   const openNewModal = () => {
     setIsNew(true);
     setEditedStage({
-      plan_id: "",
+      plan_id: planId || "",
       title: "",
       description: "",
       stage_number: "",
@@ -99,16 +104,32 @@ const useStages = () => {
 
   // Validate form
   const validate = () => {
+    let prevEndDate = null;
+    if (isNew && stages.length > 0) {
+      // Lấy ngày kết thúc lớn nhất của các stage hiện tại
+      const sortedStages = [...stages].sort((a, b) => new Date(a.end_date) - new Date(b.end_date));
+      prevEndDate = sortedStages[sortedStages.length - 1].end_date;
+    }
     const newErrors = {
       plan_id: !editedStage.plan_id ? "Vui lòng chọn một kế hoạch" : "",
       title: !editedStage.title ? "Vui lòng nhập tiêu đề" : "",
       description: !editedStage.description ? "Vui lòng nhập mô tả" : "",
-      stage_number: !editedStage.stage_number
-        ? "Vui lòng nhập số thứ tự giai đoạn"
-        : "",
+      stage_number: !editedStage.stage_number ? "Vui lòng nhập số thứ tự giai đoạn" : "",
       start_date: !editedStage.start_date ? "Vui lòng chọn ngày bắt đầu" : "",
       end_date: !editedStage.end_date ? "Vui lòng chọn ngày kết thúc" : "",
     };
+    // Validate ngày bắt đầu phải sau ngày kết thúc của giai đoạn trước
+    if (isNew && prevEndDate && editedStage.start_date) {
+      if (new Date(editedStage.start_date) <= new Date(prevEndDate)) {
+        newErrors.start_date = `Ngày bắt đầu phải sau ngày kết thúc của giai đoạn trước (${prevEndDate})`;
+      }
+    }
+    // Validate ngày kết thúc phải sau ngày bắt đầu
+    if (editedStage.start_date && editedStage.end_date) {
+      if (new Date(editedStage.end_date) <= new Date(editedStage.start_date)) {
+        newErrors.end_date = "Ngày kết thúc phải sau ngày bắt đầu";
+      }
+    }
     setErrors(newErrors);
     return !Object.values(newErrors).some((error) => error !== "");
   };

@@ -1,9 +1,12 @@
 import React from "react";
-import { Table, Button, Modal, Input, Select, Tag, Spin } from "antd";
+import { Table, Button, Modal, Input, Select, Tag, Spin, Switch, message, Drawer } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
-import useQuitPlans from "~/hooks/useQuitPlans";
 
+import Stage from "./Stage";
+import { Modal as AntdModal } from "antd";
+import useQuitPlans from "~/hooks/useQuitPlans";
+import { useNavigate } from "react-router-dom";
+import QuitPlanService from "~/services/quitPlanService";
 
 const { Option } = Select;
 
@@ -11,7 +14,7 @@ const QuitPlans = () => {
   const navigate = useNavigate();
   const {
     plans,
-    users,
+
     loading,
     error,
     editingPlan,
@@ -22,17 +25,46 @@ const QuitPlans = () => {
     setShowConfirm,
     planToDelete,
     setPlanToDelete,
-    selectedUser,
+
     formData,
     setFormData,
     errors,
     handleNew,
     handleEdit,
-    handleUserChange,
     handleDateChange,
     handleSave,
     handleDelete,
+    fetchPlans,
   } = useQuitPlans();
+
+  React.useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
+
+  const [stageModalOpen, setStageModalOpen] = React.useState(false);
+  const [selectedPlanId, setSelectedPlanId] = React.useState(null);
+
+  // Add handler for toggling public status
+  const handleTogglePublic = async (plan, isPublic) => {
+    await handleSavePublicStatus(plan, isPublic);
+  };
+
+  // Save public status to backend
+  const handleSavePublicStatus = async (plan, isPublic) => {
+    await QuitPlanService.togglePlanPublicStatus(plan._id, isPublic);
+    await fetchPlans();
+  };
+
+  const handleOpenStageModal = (planId) => {
+    setSelectedPlanId(planId);
+    setStageModalOpen(true);
+  };
+  const handleCloseStageModal = () => {
+    setStageModalOpen(false);
+    setSelectedPlanId(null);
+  };
 
   // Table columns
   const columns = [
@@ -59,16 +91,30 @@ const QuitPlans = () => {
       render: (date) => new Date(date).toLocaleDateString('vi-VN'),
     },
     {
-      title: "ID Người Dùng",
-      dataIndex: "user_id",
-      key: "user_id",
-      render: (user_id) => typeof user_id === 'object' ? user_id._id : user_id || "Không có",
+      title: "Công Khai",
+      dataIndex: "is_public",
+      key: "is_public",
+      render: (is_public, record) => (
+        <Switch
+          checked={!!is_public}
+          checkedChildren=""
+          unCheckedChildren=""
+          onClick={async (checked, e) => {
+            e.stopPropagation();
+            await handleTogglePublic(record, checked);
+            message.success(checked ? "Đã công khai kế hoạch" : "Đã chuyển về riêng tư");
+          }}
+        />
+      ),
     },
     {
       title: "Hành Động",
       key: "action",
       render: (_, record) => (
         <>
+          <Button type="link" onClick={e => { e.stopPropagation(); handleOpenStageModal(record._id); }}>
+          Thêm giai đoạn
+          </Button>
           <Button type="link" icon={<EditOutlined />} onClick={e => { e.stopPropagation(); handleEdit(record); }}>
             Sửa
           </Button>
@@ -83,24 +129,7 @@ const QuitPlans = () => {
   // Modal form content
   const modalForm = (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <Select
-        placeholder="Chọn người dùng"
-        value={formData.user || ""}
-        onChange={handleUserChange}
-        status={errors.user ? "error" : ""}
-      >
-        {users.map(user => (
-          <Option key={user.id} value={user.id}>
-            {user.responses?.name || user.name} ({user.responses?.email || user.email})
-          </Option>
-        ))}
-      </Select>
-      {errors.user && <div style={{ color: "#ff4d4f" }}>{errors.user}</div>}
-      {selectedUser && (
-        <div style={{ color: "#888", fontSize: 13 }}>
-          Đã chọn: {selectedUser.responses?.name || selectedUser.name} ({selectedUser.responses?.email || selectedUser.email})
-        </div>
-      )}
+  
       <Input
         placeholder="Tên kế hoạch"
         value={formData.name}
@@ -129,6 +158,15 @@ const QuitPlans = () => {
         status={errors.target_quit_date ? "error" : ""}
       />
       {errors.target_quit_date && <div style={{ color: "#ff4d4f" }}>{errors.target_quit_date}</div>}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span>Công khai:</span>
+        <Switch
+          checked={formData.is_public || false}
+          checkedChildren="Công khai"
+          unCheckedChildren="Riêng tư"
+          onChange={checked => setFormData({ ...formData, is_public: checked })}
+        />
+      </div>
     </div>
   );
 
@@ -141,78 +179,85 @@ const QuitPlans = () => {
     );
   }
 
-  // Error
-  if (error) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ color: "#ff4d4f", fontSize: 18, background: "#fff1f0", padding: 24, borderRadius: 8, border: "1px solid #ffa39e" }}>{error}</div>
-      </div>
-    );
-  }
-
   return (
-    <section style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto 32px auto", display: "flex", justifyContent: "flex-start" }}>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          shape="round"
-          size="large"
-          onClick={handleNew}
-        >
-          Thêm Kế Hoạch
-        </Button>
-      </div>
-      <div style={{ maxWidth: 1200, margin: "0 auto", background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 2px 8px #f0f1f2" }}>
-        <Table
-          columns={columns}
-          dataSource={plans}
-          rowKey="_id"
-          pagination={{ pageSize: 10 }}
-          locale={{
-            emptyText: "Không có kế hoạch nào.",
+    <>
+      <section style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}>
+
+        <div style={{ maxWidth: 1200, margin: "0 auto 32px auto", display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            shape="round"
+            size="large"
+            onClick={handleNew}
+          >
+            Thêm Kế Hoạch
+          </Button>
+        </div>
+        <div style={{ maxWidth: 1200, margin: "0 auto", background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 2px 8px #f0f1f2" }}>
+          <Table
+            columns={columns}
+            dataSource={plans}
+            rowKey="_id"
+            pagination={{ pageSize: 10 }}
+            locale={{
+              emptyText: "Không có kế hoạch nào.",
+            }}
+            onRow={(record) => ({
+              onClick: () => navigate(`/admin/quit-plans/${record._id}`, { state: { plan: record } }),
+            })}
+          />
+        </div>
+        <Modal
+          open={!!editingPlan}
+          title={isNew ? "Thêm Kế Hoạch Cai Thuốc Mới" : "Chỉnh Sửa Kế Hoạch Cai Thuốc"}
+          onCancel={() => {
+            setEditingPlan(null);
+            setIsNew(false);
           }}
-          onRow={(record) => ({
-            onClick: () => navigate(`/admin/quit-plans/${record._id}`, { state: { plan: record } }),
-          })}
-        />
-      </div>
-      <Modal
-        open={!!editingPlan}
-        title={isNew ? "Thêm Kế Hoạch Cai Thuốc Mới" : "Chỉnh Sửa Kế Hoạch Cai Thuốc"}
-        onCancel={() => {
-          setEditingPlan(null);
-          setIsNew(false);
-        }}
-        onOk={handleSave}
-        confirmLoading={loading}
-        okText={isNew ? "Thêm" : "Lưu"}
-        cancelText="Hủy"
+          onOk={handleSave}
+          confirmLoading={loading}
+          okText={isNew ? "Thêm" : "Lưu"}
+          cancelText="Hủy"
+          destroyOnClose
+        >
+          {modalForm}
+        </Modal>
+        <Modal
+          open={showConfirm}
+          title="Xác nhận xoá"
+          onCancel={() => {
+            setShowConfirm(false);
+            setPlanToDelete(null);
+          }}
+          onOk={() => {
+            handleDelete(planToDelete);
+            setShowConfirm(false);
+            setPlanToDelete(null);
+          }}
+          okText="Xóa"
+          okButtonProps={{ danger: true }}
+          cancelText="Hủy"
+          icon={<ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />}
+          destroyOnClose
+        >
+          Bạn có chắc chắn muốn xóa kế hoạch cai thuốc này không?
+        </Modal>
+      </section>
+      <AntdModal
+        open={stageModalOpen}
+        onCancel={handleCloseStageModal}
+        footer={null}
+        width={900}
+        title="Quản lý giai đoạn cho kế hoạch"
         destroyOnClose
+        style={{ top: 32 }}
       >
-        {modalForm}
-      </Modal>
-      <Modal
-        open={showConfirm}
-        title="Xác nhận xoá"
-        onCancel={() => {
-          setShowConfirm(false);
-          setPlanToDelete(null);
-        }}
-        onOk={() => {
-          handleDelete(planToDelete);
-          setShowConfirm(false);
-          setPlanToDelete(null);
-        }}
-        okText="Xóa"
-        okButtonProps={{ danger: true }}
-        cancelText="Hủy"
-        icon={<ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />}
-        destroyOnClose
-      >
-        Bạn có chắc chắn muốn xóa kế hoạch cai thuốc này không?
-      </Modal>
-    </section>
+        {stageModalOpen && (
+          <Stage planId={selectedPlanId} />
+        )}
+      </AntdModal>
+    </>
   );
 };
 
