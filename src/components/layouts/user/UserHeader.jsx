@@ -157,12 +157,12 @@ const UserHeader = () => {
           {/* Navigation links */}
           <nav className="hidden md:flex space-x-8">
             {[
-              { name: "Home", path: "/" },
-              { name: "Blog", path: "/blog" },
+              { name: "Trang Chủ", path: "/" },
+              { name: "Bài Viết", path: "/blog" },
               { name: "Kế Hoạch", path: "/quit-plan" },
               { name: "Community", path: "/community" },
-              { name: "Ranking", path: "/ranking" },
-              { name: "Premium", path: "/premium" },
+              { name: "Bảng Xếp Hạng", path: "/ranking" },
+              { name: "Gói", path: "/premium" },
             ].map((item) => (
               <Link
                 key={item.name}

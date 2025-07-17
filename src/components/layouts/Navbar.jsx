@@ -24,17 +24,17 @@ export function Navbar() {
             <Link
               to="/"
               className="text-white/80 hover:text-white transition-colors">
-              Home
+              Trang Chủ
             </Link>
             <Link
               to="*"
               className="text-white/80 hover:text-white transition-colors">
-              Blog
+              Bài Viết
             </Link>
             <Link
               to="*"
               className="text-white/80 hover:text-white transition-colors">
-              Plan
+              Kế Hoạch
             </Link>
             <Link
               to="/community"
@@ -44,12 +44,12 @@ export function Navbar() {
             <Link
               to="/ranking"
               className="text-white/80 hover:text-white transition-colors">
-              Ranking
+              Bảng Xếp Hạng
             </Link>
             <Link
               to="/premium"
               className="text-white/80 hover:text-white transition-colors">
-              Premium
+              Gói
             </Link>
             <Link
               to="/login"
