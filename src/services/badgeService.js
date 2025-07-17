@@ -51,6 +51,10 @@ const badgeService = {
       return [];
     }
   },
+    getRankingBadges: async (type) => {
+    const response = await api.get(`/badges/leaderboard?type=${type}`);
+    return response.data;
+  },
 };
 
 // API functions với suffix API
