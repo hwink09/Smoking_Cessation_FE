@@ -4,6 +4,7 @@ import { useAuth } from "~/hooks/useAuth";
 import usePackages from "~/hooks/usePackages";
 import SubscriptionService from "~/services/subscriptionService";
 import PaymentService from "~/services/PaymentService";
+import { toast } from "react-toastify";
 
 export function Pricing() {
   const { packages, loading, error } = usePackages();
@@ -23,21 +24,17 @@ export function Pricing() {
 
   const handleGetStarted = async (plan) => {
     if (!user) {
-      alert("Vui lòng đăng nhập để đăng ký.");
+      toast("Vui lòng đăng nhập để đăng ký.");
       return;
     }
 
     try {
-      const existing = await SubscriptionService.getUserSubscription(
-        user.userId
-      );
+      // Kiểm tra xem user đã có subscription đang hoạt động chưa
+      const activeSubscriptions =
+        await SubscriptionService.getMyActiveSubscription();
 
-      const activeSub = Array.isArray(existing?.subscriptions)
-        ? existing.subscriptions.find((sub) => sub.status === "active")
-        : null;
-
-      if (activeSub) {
-        alert("Người dùng đã có gói đăng ký đang hoạt động.");
+      if (activeSubscriptions && activeSubscriptions.length > 0) {
+        toast.warn("Bạn đã có gói đăng ký đang hoạt động.");
         return;
       }
 
@@ -69,11 +66,10 @@ export function Pricing() {
       if (paymentResult?.checkoutUrl) {
         window.location.href = paymentResult.checkoutUrl;
       } else {
-        alert("Không thể tạo liên kết thanh toán.");
+        toast("Không thể tạo liên kết thanh toán.");
       }
     } catch (error) {
-      console.error(error);
-      alert("Có lỗi xảy ra. Vui lòng thử lại sau.");
+      toast("Có lỗi xảy ra. Vui lòng thử lại sau.");
     }
   };
 

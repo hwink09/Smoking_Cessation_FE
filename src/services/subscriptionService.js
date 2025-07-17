@@ -66,6 +66,17 @@ const SubscriptionService = {
       throw error;
     }
   },
+
+  // GET /api/subscriptions/my-active-subscription - Get user's active subscription
+  getMyActiveSubscription: async () => {
+    try {
+      const response = await api.get("/subscriptions/my-active-subscription");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user's active subscription:", error);
+      throw error;
+    }
+  },
 };
 
 export default SubscriptionService;
