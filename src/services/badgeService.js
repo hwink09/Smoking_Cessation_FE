@@ -1,72 +1,66 @@
 import api from "./api";
 
 const badgeService = {
-  createBadge: async (badgeData) => {
+  // Lấy tất cả badge kèm trạng thái của user (dành cho user)
+  getAllBadgesWithUserStatus: async (userId) => {
+    const response = await api.get(`/badges/user/${userId}`);
+    return response.data;
+  },
+
+  // Lấy bảng xếp hạng badge (public)
+  getBadgeLeaderBoard: async (type = "points", limit = 10) => {
     try {
-      const response = await api.post("/badges/create", badgeData);
+      const params = new URLSearchParams();
+      if (type) params.append("type", type);
+      if (limit) params.append("limit", limit.toString());
+
+      const response = await api.get(`/badges/leaderboard?${params}`);
       return response.data;
     } catch (error) {
-      console.error("Lỗi tạo badge:", error);
-      throw error;
+      return [];
     }
   },
 
+  // === ADMIN/COACH ONLY FUNCTIONS ===
+
+  createBadge: async (badgeData) => {
+    const response = await api.post("/badges/create", badgeData);
+    return response.data;
+  },
+
   getAllBadges: async () => {
-    const token = JSON.parse(localStorage.getItem("user") || "{}").token;
-    const response = await api.get("/badges", {
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    });
+    const response = await api.get("/badges");
     return response.data;
   },
 
   updateBadge: async (id, badgeData) => {
-    try {
-      const response = await api.put(`/badges/${id}`, badgeData);
-      return response.data;
-    } catch (error) {
-      console.error(`Lỗi cập nhật badge id=${id}:`, error);
-      throw error;
-    }
+    const response = await api.put(`/badges/${id}`, badgeData);
+    return response.data;
   },
 
   deleteBadge: async (id) => {
-    try {
-      const response = await api.delete(`/badges/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Lỗi xóa badge id=${id}:`, error);
-      throw error;
-    }
+    const response = await api.delete(`/badges/${id}`);
+    return response.data;
   },
 
-  getAllBadgesWithUserStatus: async (userId) => {
-    try {
-      const response = await api.get(`/badges/user/${userId}`);
-      return response.data;
-    } catch {
-      const fallback = await api.get(`/badges`);
-      return fallback.data;
-    }
-  },
-
-  getBadgesLeaderBoard: async () => {
-    try {
-      const response = await api.get("/badges/leaderboard");
-      return response.data;
-    } catch {
-      return [];
-    }
-  },
-
-  getBadgeUserStats: async () => {
+  getBadgeStats: async () => {
     try {
       const response = await api.get("/badges/user-stats");
       return response.data;
     } catch (error) {
-      console.error("Lỗi lấy bảng xếp hạng badge:", error);
       return [];
     }
   },
 };
+
+// API functions với suffix API
+export const getAllBadgesWithUserStatusAPI =
+  badgeService.getAllBadgesWithUserStatus;
+export const getBadgeLeaderBoardAPI = badgeService.getBadgeLeaderBoard;
+export const createBadgeAPI = badgeService.createBadge;
+export const getAllBadgesAPI = badgeService.getAllBadges;
+export const updateBadgeAPI = badgeService.updateBadge;
+export const deleteBadgeAPI = badgeService.deleteBadge;
+export const getBadgeStatsAPI = badgeService.getBadgeStats;
 
 export default badgeService;
