@@ -67,6 +67,7 @@ import CoachMeetSessionPage from "./pages/coach/CoachMeetSessionPage";
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
+import CoachFeedBackPage from "./pages/coach/CoachFeedBackPage";
 import CoachNotification from "./pages/coach/CoachNotification";
 
 // Layout Wrapper
@@ -238,6 +239,10 @@ function App() {
             <Route
               path="progress"
               element={<CoachRoute element={<CoachProgressPage />} />}
+            />
+            <Route
+              path="feedback"
+              element={<CoachRoute element={<CoachFeedBackPage />} />}
             />
             <Route
               path="notifications"
