@@ -20,7 +20,6 @@ import Register from "./pages/auth/RegisterPage";
 import ForgotPassword from "./pages/auth/ForgotPasswordPage";
 import ResetPassword from "./pages/auth/ResetPasswordPage";
 import CommunityPage from "./pages/generic/community/CommunityPage";
-import RankingPage from "./pages/generic/ranking/RankingPage";
 import PremiumPage from "./pages/generic/premium/PremiumPage";
 import VerifyPage from "./pages/auth/VerifyPage";
 import NotFoundPage from "./pages/error/404Page";
@@ -29,6 +28,7 @@ import BlogPage from "./pages/generic/BlogPage";
 import QuitPlanPage from "./pages/generic/QuitPlanPage";
 import QuitPlanDetailPage from "./pages/generic/QuitPlanDetailPage";
 import BlogDetail from "./components/generic/blog/BlogDetail";
+import RankingPage from "./pages/generic/RankingPage";
 
 // Admin Pages
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
@@ -62,12 +62,13 @@ import RequestQuitPlanPage from "./pages/coach/RequestQuitPlanPage";
 import StagesCoachPage from "./pages/coach/StagesCoachPage";
 import CoachDashBoardPage from "./pages/coach/CoachDashBoardPage";
 import CoachMeetSessionPage from "./pages/coach/CoachMeetSessionPage";
+import CoachFeedBackPage from "./pages/coach/CoachFeedBackPage";
+import CoachNotification from "./pages/coach/CoachNotification";
 
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
 import { useAuth } from "./hooks/useAuth";
-import CoachFeedBackPage from "./pages/coach/CoachFeedBackPage";
-import CoachNotification from "./pages/coach/CoachNotification";
+
 
 // Layout Wrapper
 const Layout = () => {
