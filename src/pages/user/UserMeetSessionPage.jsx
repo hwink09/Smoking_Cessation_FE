@@ -5,7 +5,7 @@ import UserSessionModalAll from "~/components/user/meetSession/UserSessionModalA
 import BookSessionModal from "~/components/user/meetSession/BookSessionModal";
 import CoachCard from "~/components/user/meetSession/CoachCard";
 
-const MeetSessionPage = () => {
+const UserMeetSessionPage = () => {
   const { getAllCoaches, loading } = useCoachData();
   const [coaches, setCoaches] = useState([]);
   const [selectedCoach, setSelectedCoach] = useState(null);
@@ -65,4 +65,4 @@ const MeetSessionPage = () => {
   );
 };
 
-export default MeetSessionPage;
+export default UserMeetSessionPage;

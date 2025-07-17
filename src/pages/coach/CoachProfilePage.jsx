@@ -5,7 +5,6 @@ import { useAuth } from "~/hooks/useAuth";
 import useCoachData from "~/hooks/useCoachData";
 import CoachProfile from "~/components/coach/profile/CoachProfile";
 import CoachProfileForm from "~/components/coach/profile/CoachProfileEditor";
-import { Helmet } from "react-helmet-async";
 
 const CoachProfilePage = () => {
   const { currentUser } = useAuth();

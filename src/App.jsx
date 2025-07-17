@@ -5,7 +5,6 @@ import {
   Route,
   Outlet,
 } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
 import AuthProvider from "./contexts/AuthProvider";
 
 // Layouts
@@ -19,7 +18,7 @@ import HomePages from "./pages/generic/home/HomePages";
 import Login from "./pages/auth/LoginPage";
 import Register from "./pages/auth/RegisterPage";
 import ForgotPassword from "./pages/auth/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import ResetPassword from "./pages/auth/ResetPasswordPage";
 import CommunityPage from "./pages/generic/community/CommunityPage";
 import RankingPage from "./pages/generic/ranking/RankingPage";
 import PremiumPage from "./pages/generic/premium/PremiumPage";
@@ -44,7 +43,7 @@ import ProgressManagement from "./pages/admin/ProgressManagement";
 import QuitPlanDetailPageAdmin from "./components/admin/quitPlan/QuitPlansDetail";
 import NotificationManagement from "./pages/admin/NotificationManagement";
 import PackageManagement from "./pages/admin/PackageManagement";
-import Feedbacks from "./pages/admin/FeedbackPage";
+import FeedbackPage from "./pages/admin/FeedbackPage";
 
 // User Pages
 import UserDashboard from "./pages/user/UserDashBoard";
@@ -55,15 +54,16 @@ import UserProfilePage from "./pages/user/UserProfilePage";
 import UserBlogPage from "./pages/user/UserBlogPage";
 import SmokingStatusPage from "./pages/user/SmokingStatusPage";
 import UserQuitPlanPage from "./pages/user/UserQuitPlanPage";
-import MeetSessionPage from "./pages/user/MeetSessionPage";
+import UserMeetSessionPage from "./pages/user/UserMeetSessionPage";
 
 // Coach Pages
 import CoachLayout from "./components/layouts/coach/CoachLayout";
-import CoachQuitPlan from "./pages/coach/CoachDashBoard";
-import RequestQuitPlan from "./pages/coach/RequestQuitPlanPage";
-import StagesCoach from "./pages/coach/StagesCoachPage";
 import CoachProfilePage from "./pages/coach/CoachProfilePage";
-import MeetSessionManagement from "./pages/coach/MeetSessionManagement";
+import CoachProgressPage from "./pages/coach/CoachProgressPage";
+import RequestQuitPlanPage from "./pages/coach/RequestQuitPlanPage";
+import StagesCoachPage from "./pages/coach/StagesCoachPage";
+import CoachDashBoardPage from "./pages/coach/CoachDashBoardPage";
+import CoachMeetSessionPage from "./pages/coach/CoachMeetSessionPage";
 
 // PrivateRoute component
 import PrivateRoute from "./PrivateRouter";
@@ -97,161 +97,160 @@ const CoachRoute = ({ element }) => (
 
 function App() {
   return (
-    <HelmetProvider>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/login/:token" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/fogot-password" element={<ForgotPassword />} />
-              <Route path="/blog/:id" element={<BlogDetail />} />
-            <Route
-              path="/resset-password/:token"
-              element={<ResetPasswordPage />}
-            />
-            <Route path="/verify" element={<VerifyPage />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/login/:token" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/fogot-password" element={<ForgotPassword />} />
+          <Route path="/blog/:id" element={<BlogDetail />} />
+          <Route path="/resset-password/:token" element={<ResetPassword />} />
+          <Route path="/verify" element={<VerifyPage />} />
 
-            {/* Layout Routes */}
-            <Route element={<Layout />}>
-              <Route path="/" element={<HomePages />} />
-              <Route path="/community" element={<CommunityPage />} />
-              <Route path="/ranking" element={<RankingPage />} />
-              <Route path="/premium" element={<PremiumPage />} />
-              <Route path="/blog" element={<BlogPage />} />
-              <Route path="/quit-plan" element={<QuitPlanPage />} />
-              <Route
-                path="/quit-plan-detail/:id"
-                element={<QuitPlanDetailPage />}
-              />
-            </Route>
+          {/* Layout Routes */}
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomePages />} />
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/ranking" element={<RankingPage />} />
+            <Route path="/premium" element={<PremiumPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/quit-plan" element={<QuitPlanPage />} />
+            <Route
+              path="/quit-plan-detail/:id"
+              element={<QuitPlanDetailPage />}
+            />
+          </Route>
 
-            {/* Admin Routes */}
-            <Route
-              path="/admin/dashboard"
-              element={<AdminRoute element={<DashboardAdmin />} />}
-            />
-            <Route
-              path="/admin/dashboard/user-management"
-              element={<AdminRoute element={<UserManagement />} />}
-            />
-            <Route
-              path="/admin/dashboard/badge-management"
-              element={<AdminRoute element={<BadgeManagement />} />}
-            />
-            <Route
-              path="/admin/feedback-management"
-              element={<AdminRoute element={<Feedbacks/>} />}
-            />
-            <Route
-              path="/admin/profile/:userId"
-              element={<AdminRoute element={<ProfilePage />} />}
-            />
-            <Route
-              path="/admin/blogs"
-              element={<AdminRoute element={<BlogManagement />} />}
-            />
-            <Route
-              path="/admin/notifications"
-              element={<AdminRoute element={<NotificationManagement />} />}
-            />
-            <Route
-              path="/admin/subscriptions"
-              element={<AdminRoute element={<SubscriptionsManagement />} />}
-            />
-            <Route
-              path="/admin/quit-plans"
-              element={<AdminRoute element={<QuitPlanManagement />} />}
-            />
-            <Route
-              path="/admin/quit-plans/:id"
-              element={<AdminRoute element={<QuitPlanDetailPageAdmin />} />}
-            />
-            <Route
-              path="/admin/stages"
-              element={<AdminRoute element={<StageMangement />} />}
-            />
-            <Route
-              path="/admin/progress"
-              element={<AdminRoute element={<ProgressManagement />} />}
-            />
-            <Route
-              path="/admin/package"
-              element={<AdminRoute element={<PackageManagement />} />}
-            />
+          {/* Admin Routes */}
+          <Route
+            path="/admin/dashboard"
+            element={<AdminRoute element={<DashboardAdmin />} />}
+          />
+          <Route
+            path="/admin/dashboard/user-management"
+            element={<AdminRoute element={<UserManagement />} />}
+          />
+          <Route
+            path="/admin/dashboard/badge-management"
+            element={<AdminRoute element={<BadgeManagement />} />}
+          />
+          <Route
+            path="/admin/feedback-management"
+            element={<AdminRoute element={<FeedbackPage />} />}
+          />
+          <Route
+            path="/admin/profile/:userId"
+            element={<AdminRoute element={<ProfilePage />} />}
+          />
+          <Route
+            path="/admin/blogs"
+            element={<AdminRoute element={<BlogManagement />} />}
+          />
+          <Route
+            path="/admin/notifications"
+            element={<AdminRoute element={<NotificationManagement />} />}
+          />
+          <Route
+            path="/admin/subscriptions"
+            element={<AdminRoute element={<SubscriptionsManagement />} />}
+          />
+          <Route
+            path="/admin/quit-plans"
+            element={<AdminRoute element={<QuitPlanManagement />} />}
+          />
+          <Route
+            path="/admin/quit-plans/:id"
+            element={<AdminRoute element={<QuitPlanDetailPageAdmin />} />}
+          />
+          <Route
+            path="/admin/stages"
+            element={<AdminRoute element={<StageMangement />} />}
+          />
+          <Route
+            path="/admin/progress"
+            element={<AdminRoute element={<ProgressManagement />} />}
+          />
+          <Route
+            path="/admin/package"
+            element={<AdminRoute element={<PackageManagement />} />}
+          />
 
-            {/* User Routes */}
-            <Route path="/user" element={<UserLayout />}>
-              <Route
-                path="dashboard"
-                element={<UserRoute element={<UserDashboard />} />}
-              />
-              <Route
-                path="progress"
-                element={<UserRoute element={<UserProgress />} />}
-              />
-              <Route
-                path="achievements"
-                element={<UserRoute element={<UserAchievement />} />}
-              />
-              <Route
-                path="support"
-                element={<UserRoute element={<UserSupport />} />}
-              />
-              <Route
-                path="profile/:id"
-                element={<UserRoute element={<UserProfilePage />} />}
-              />
-              <Route
-                path="blog"
-                element={<UserRoute element={<UserBlogPage />} />}
-              />
-              <Route
-                path="smoking-status"
-                element={<UserRoute element={<SmokingStatusPage />} />}
-              />
-              <Route
-                path="quitplan"
-                element={<UserRoute element={<UserQuitPlanPage />} />}
-              />
-              <Route
-                path="user-meet-session"
-                element={<UserRoute element={<MeetSessionPage />} />}
-              />
-            </Route>
+          {/* User Routes */}
+          <Route path="/user" element={<UserLayout />}>
+            <Route
+              path="dashboard"
+              element={<UserRoute element={<UserDashboard />} />}
+            />
+            <Route
+              path="progress"
+              element={<UserRoute element={<UserProgress />} />}
+            />
+            <Route
+              path="achievements"
+              element={<UserRoute element={<UserAchievement />} />}
+            />
+            <Route
+              path="support"
+              element={<UserRoute element={<UserSupport />} />}
+            />
+            <Route
+              path="profile/:id"
+              element={<UserRoute element={<UserProfilePage />} />}
+            />
+            <Route
+              path="blog"
+              element={<UserRoute element={<UserBlogPage />} />}
+            />
+            <Route
+              path="smoking-status"
+              element={<UserRoute element={<SmokingStatusPage />} />}
+            />
+            <Route
+              path="quitplan"
+              element={<UserRoute element={<UserQuitPlanPage />} />}
+            />
+            <Route
+              path="meet-sessions"
+              element={<UserRoute element={<UserMeetSessionPage />} />}
+            />
+          </Route>
 
-            {/* Coach Routes */}
-            <Route path="/coach" element={<CoachLayout />}>
-              <Route
-                path="dashboard"
-                element={<CoachRoute element={<CoachQuitPlan />} />}
-              />
-              <Route
-                path="quit-plans-request"
-                element={<CoachRoute element={<RequestQuitPlan />} />}
-              />
-              <Route
-                path="stages"
-                element={<CoachRoute element={<StagesCoach />} />}
-              />
-              <Route
-                path="profile"
-                element={<CoachRoute element={<CoachProfilePage />} />}
-              />
-              <Route
-                path="meet-session"
-                element={<CoachRoute element={<MeetSessionManagement />} />}
-              />
-            </Route>
+          {/* Coach Routes */}
+          <Route path="/coach" element={<CoachLayout />}>
+            <Route
+              path="dashboard"
+              element={<CoachRoute element={<CoachDashBoardPage />} />}
+            />
+            <Route
+              path="request"
+              element={<CoachRoute element={<RequestQuitPlanPage />} />}
+            />
+            <Route
+              path="stages"
+              element={<CoachRoute element={<StagesCoachPage />} />}
+            />
+            <Route
+              path="profile"
+              element={<CoachRoute element={<CoachProfilePage />} />}
+            />
+            <Route
+              path="meet-sessions"
+              element={<CoachRoute element={<CoachMeetSessionPage />} />}
+            />
+            <Route
+              path="progress"
+              element={<CoachRoute element={<CoachProgressPage />} />}
+            />
+          </Route>
 
-            {/* Error pages */}
-            <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </HelmetProvider>
+          {/* Error pages */}
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

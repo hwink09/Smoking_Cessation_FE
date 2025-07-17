@@ -4,7 +4,7 @@ import { validatePassword, passwordsMatch } from "~/utils/authValidation";
 import { toast } from "react-toastify";
 import api from "~/services/api";
 
-function ResetPasswordPage() {
+function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
@@ -212,4 +212,4 @@ function ResetPasswordPage() {
   );
 }
 
-export default ResetPasswordPage;
+export default ResetPassword;

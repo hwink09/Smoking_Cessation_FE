@@ -29,11 +29,7 @@ export default function SmokingStatusPage() {
     }
 
     // Validate values
-    if (
-      !values.cigarettes_per_day ||
-      !values.cost_per_pack ||
-      !values.start_date
-    ) {
+    if (!values.cigarettes_per_day || !values.cost_per_pack) {
       message.error("Please fill in all required fields.");
       return;
     }
@@ -41,7 +37,6 @@ export default function SmokingStatusPage() {
     const recordData = {
       cigarettes_per_day: Number(values.cigarettes_per_day),
       cost_per_pack: Number(values.cost_per_pack),
-      start_date: values.start_date.toISOString(),
       frequency: values.frequency || "daily", // Include frequency field
     };
 

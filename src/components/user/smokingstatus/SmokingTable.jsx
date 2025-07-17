@@ -1,25 +1,7 @@
 import { Table, Card, Button, Space, Popconfirm } from "antd";
-import {
-  Trash2,
-  Calendar,
-  BarChart3,
-  Cigarette,
-  DollarSign,
-} from "lucide-react";
+import { Trash2, BarChart3, Cigarette, DollarSign, Clock } from "lucide-react";
 
 const iconColor = "#d9d9d9";
-
-const formatDateTime = (dateTimeString) => {
-  const date = new Date(dateTimeString);
-  return {
-    date: date.toLocaleDateString("vi-VN"),
-    time: date.toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }),
-  };
-};
 
 export default function SmokingTable({ records, onDelete }) {
   const columns = [
@@ -32,45 +14,38 @@ export default function SmokingTable({ records, onDelete }) {
       ),
       dataIndex: "cigarettes_per_day",
       align: "center",
-      width: 150,
+      width: 120,
       render: (value) => `${value} điếu`,
     },
     {
       title: (
         <Space>
           <DollarSign size={14} />
-          Giá / bao (20 điếu)
+          Giá / bao (VND)
         </Space>
       ),
       dataIndex: "cost_per_pack",
       align: "center",
-      width: 200,
-      render: (value) => `${value.toLocaleString("vi-VN")} VNĐ`,
+      width: 150,
+      render: (value) => `${value.toLocaleString("vi-VN")}`,
     },
     {
       title: (
         <Space>
-          <Calendar size={14} />
-          Ngày bắt đầu cai thuốc
+          <Clock size={14} />
+          Tần suất
         </Space>
       ),
-      dataIndex: "start_date",
+      dataIndex: "frequency",
       align: "center",
-      width: 220,
-      render: (date) => {
-        const { date: d, time } = formatDateTime(date);
-        return (
-          <div style={{ lineHeight: "1.4" }}>
-            <div>{d}</div>
-            <small style={{ color: "#666" }}>{time}</small>
-          </div>
-        );
-      },
+      width: 100,
+      render: (value) =>
+        value === "daily" ? "Hàng ngày" : value || "Hàng ngày",
     },
     {
       title: "Thao tác",
       align: "center",
-      width: 120,
+      width: 100,
       render: (_, record) => (
         <Popconfirm
           title="Bạn có chắc chắn muốn xóa bản ghi này không?"

@@ -6,10 +6,9 @@ import {
   Button,
   Space,
   Typography,
-  DatePicker,
+  Input,
 } from "antd";
-import { Plus, Cigarette, DollarSign, Calendar } from "lucide-react";
-import dayjs from "dayjs";
+import { Plus, Cigarette, DollarSign } from "lucide-react";
 
 const { Paragraph } = Typography;
 const iconColor = "#d9d9d9";
@@ -27,10 +26,14 @@ export default function SmokingModal({
       form.setFieldsValue({
         cigarettes_per_day: editingRecord.cigarettes_per_day,
         cost_per_pack: editingRecord.cost_per_pack,
-        start_date: dayjs(editingRecord.start_date),
+        frequency: editingRecord.frequency || "daily",
       });
     } else if (visible) {
       form.resetFields();
+      // Set default values when opening modal for new record
+      form.setFieldsValue({
+        frequency: "daily",
+      });
     }
   }, [visible, editingRecord, form]);
 
@@ -102,7 +105,7 @@ export default function SmokingModal({
           label={
             <Space>
               <DollarSign size={14} />
-              Giá tiền / bao thuốc (VND)
+              Giá tiền / bao thuốc (20 điếu / bao)
             </Space>
           }
           name="cost_per_pack"
@@ -128,22 +131,11 @@ export default function SmokingModal({
         </Form.Item>
 
         <Form.Item
-          label={
-            <Space>
-              <Calendar size={14} />
-              Ngày bắt đầu cai thuốc
-            </Space>
-          }
-          name="start_date"
-          rules={[{ required: true, message: "Vui lòng chọn ngày bắt đầu!" }]}
+          name="frequency"
+          initialValue="daily"
+          style={{ display: "none" }}
         >
-          <DatePicker
-            style={{ width: "100%" }}
-            size="large"
-            format="YYYY-MM-DD"
-            placeholder="Chọn ngày bắt đầu"
-            suffixIcon={<Calendar size={14} style={{ color: iconColor }} />}
-          />
+          <Input />
         </Form.Item>
 
         <Form.Item style={{ marginTop: 24 }}>
