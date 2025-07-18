@@ -14,13 +14,11 @@ import UserLayout from "./components/layouts/user/UserLayout";
 import UserHeader from "./components/layouts/user/UserHeader";
 
 // Pages
-import HomePages from "./pages/generic/home/HomePages";
+import HomePages from "./pages/generic/HomePages";
 import Login from "./pages/auth/LoginPage";
 import Register from "./pages/auth/RegisterPage";
 import ForgotPassword from "./pages/auth/ForgotPasswordPage";
 import ResetPassword from "./pages/auth/ResetPasswordPage";
-import CommunityPage from "./pages/generic/community/CommunityPage";
-import PremiumPage from "./pages/generic/premium/PremiumPage";
 import VerifyPage from "./pages/auth/VerifyPage";
 import NotFoundPage from "./pages/error/404Page";
 import UnauthorizedPage from "./pages/error/UnauthorizedPage";
@@ -54,7 +52,6 @@ import SmokingStatusPage from "./pages/user/SmokingStatusPage";
 import UserQuitPlanPage from "./pages/user/UserQuitPlanPage";
 import UserMeetSessionPage from "./pages/user/UserMeetSessionPage";
 
-
 // Coach Pages
 import CoachLayout from "./components/layouts/coach/CoachLayout";
 import CoachProfilePage from "./pages/coach/CoachProfilePage";
@@ -73,7 +70,6 @@ import PlanStageView from "./components/generic/quitplan/PlanStageView";
 
 import PaymentSuccessPage from "./pages/generic/PaymentSuccessPage";
 import PaymentCancelPage from "./pages/generic/PaymentCancelPage";
-
 
 // Layout Wrapper
 const Layout = () => {
@@ -120,16 +116,14 @@ function App() {
           {/* Layout Routes */}
           <Route element={<Layout />}>
             <Route path="/" element={<HomePages />} />
-            <Route path="/community" element={<CommunityPage />} />
             <Route path="/ranking" element={<RankingPage />} />
-            <Route path="/premium" element={<PremiumPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/quit-plan" element={<QuitPlanPage />} />
             <Route
               path="/quit-plan-detail/:id"
               element={<QuitPlanDetailPage />}
             />
-  <Route path="/stages/:id" element={<PlanStageView />} />
+            <Route path="/stages/:id" element={<PlanStageView />} />
           </Route>
 
           {/* Admin Routes */}
@@ -250,7 +244,7 @@ function App() {
             />
             <Route
               path="notifications"
-              element={<CoachRoute element={<CoachNotification/>} />}
+              element={<CoachRoute element={<CoachNotification />} />}
             />
           </Route>
 
