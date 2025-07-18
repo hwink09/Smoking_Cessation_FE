@@ -39,7 +39,12 @@ function Login() {
   const verificationAttemptedRef = useRef(false);
   const tokenVerificationAttemptedRef = useRef(false);
 
-  // Xác minh email (qua query param hoặc token URL)
+  const getRedirectPath = (role) => {
+    if (role === "admin") return "/admin/dashboard";
+    if (role === "coach") return "/coach/dashboard";
+    return "/";
+  };
+
   useEffect(() => {
     if (verificationAttemptedRef.current) return;
     verificationAttemptedRef.current = true;
@@ -65,13 +70,10 @@ function Login() {
 
       const verifyEmailToken = async () => {
         try {
-          console.log("Đang xác minh email với token...");
-          const result = await verifyEmail(token); // ✅ dùng context API
-          console.log("Kết quả xác minh:", result);
+          const result = await verifyEmail(token);
           toast.success(result.message || "Xác minh email thành công.");
           setEmailVerified(true);
         } catch (error) {
-          console.error("Lỗi xác minh email:", error);
           const errorMsg =
             error?.error ||
             error?.message ||
@@ -89,28 +91,17 @@ function Login() {
 
   useEffect(() => {
     if (currentUser?.userId) {
-      let targetPath = "/";
-
-      if (currentUser.role === "admin") {
-        targetPath = "/admin/dashboard";
-      } else if (currentUser.role === "coach") {
-        targetPath = "/coach/dashboard";
-      } else {
-        targetPath = "/user/dashboard";
-      }
-
+      const targetPath = getRedirectPath(currentUser.role);
       navigate(targetPath);
     }
   }, [currentUser, navigate]);
 
-  // Hiển thị message chuyển hướng (nếu có)
   useEffect(() => {
     if (location.state?.message) {
       setRedirectMessage(location.state.message);
     }
   }, [location]);
 
-  // Xử lý thay đổi input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -122,7 +113,6 @@ function Login() {
     }
   };
 
-  // Submit login form
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -135,51 +125,27 @@ function Login() {
 
     setIsSubmitting(true);
     try {
-      console.log("LoginPage: Gửi yêu cầu đăng nhập với:", formData.email);
       const result = await login({
         email: formData.email.trim(),
         password: formData.password,
       });
 
-      console.log("LoginPage: Kết quả:", result); // Check for success with valid user object
       if (result.success && result.user?.userId) {
         toast.success(result.message || "Đăng nhập thành công!");
-        const targetPath =
-          result.user.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
-        navigate(targetPath);
-      }
-      // Handle case where success is true but user is null/invalid
-      else if (result.success && !result.user?.userId) {
-        // The login was technically successful but we couldn't get a valid user object
-        console.error(
-          "LoginPage: Đăng nhập thành công nhưng không có thông tin người dùng:",
-          result
-        );
-
-        // Try getting the user from localStorage as a last resort
+        navigate(getRedirectPath(result.user.role));
+      } else if (result.success && !result.user?.userId) {
         const localUser = JSON.parse(localStorage.getItem("user") || "{}");
 
         if (localUser && localUser.userId) {
-          // We found a user in localStorage, try to use it
-          console.log(
-            "LoginPage: Sử dụng thông tin người dùng từ localStorage:",
-            localUser
-          );
           toast.success("Đăng nhập thành công!");
-          const targetPath =
-            localUser.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
-          navigate(targetPath);
+          navigate(getRedirectPath(localUser.role));
         } else {
-          // No valid user anywhere - show error and clear password
           toast.error(
             "Đăng nhập thành công nhưng không thể lấy thông tin người dùng. Vui lòng thử lại."
           );
           setFormData((prev) => ({ ...prev, password: "" }));
         }
-      }
-      // Handle general failure
-      else {
-        console.error("LoginPage: Đăng nhập thất bại:", result);
+      } else {
         toast.error(
           formatAuthError(
             result.error || "Đăng nhập thất bại vì lý do không xác định"
@@ -188,7 +154,6 @@ function Login() {
         setFormData((prev) => ({ ...prev, password: "" }));
       }
     } catch (error) {
-      console.error("LoginPage: Lỗi ngoại lệ:", error);
       toast.error(
         formatAuthError(error?.message || "Lỗi đăng nhập không xác định")
       );
@@ -198,7 +163,6 @@ function Login() {
     }
   };
 
-  // Google login handler
   const handleGoogleLogin = async (response) => {
     if (!response?.credential) {
       toast.error("Đăng nhập Google thất bại: Thiếu thông tin xác thực.");
@@ -206,23 +170,18 @@ function Login() {
     }
     setIsSubmitting(true);
     try {
-      console.log("Xử lý đăng nhập Google...");
       const result = await loginWithGoogle(response.credential);
 
       if (result.success && result.user?.role) {
         toast.success("Đăng nhập Google thành công!");
-        const targetPath =
-          result.user.role === "admin" ? "/admin/dashboard" : "/";
-        navigate(targetPath);
+        navigate(getRedirectPath(result.user.role));
       } else {
         const errorMessage = formatAuthError(
           result.error || "Không thể xác thực với Google"
         );
-        console.error("Lỗi Google login:", errorMessage);
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.error("Exception Google login:", error);
       const errorMessage = formatAuthError(
         error?.message || "Đăng nhập Google thất bại"
       );

@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Avatar,
-  Badge,
-  Button,
-  Dropdown,
-  Menu,
-  Popover,
-  List,
-} from "antd";
+import { Avatar, Badge, Button, Dropdown, Menu, Popover, List } from "antd";
 import { BellOutlined, DashboardOutlined } from "@ant-design/icons";
 import { MdLogout } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
@@ -43,12 +35,12 @@ const UserHeader = () => {
   };
 
   const notificationTypeVN = {
-    reminder: 'Nhắc nhở',
-    motivation: 'Thông báo',
+    reminder: "Nhắc nhở",
+    motivation: "Thông báo",
   };
   const notificationTypeColor = {
-    reminder: '#faad14', // orange
-    motivation: '#1890ff', // blue
+    reminder: "#faad14", // orange
+    motivation: "#1890ff", // blue
   };
   const notificationContent = (
     <div style={{ width: 300, maxHeight: 400, overflowY: "auto" }}>
@@ -59,7 +51,7 @@ const UserHeader = () => {
             <div>
               <div
                 className="font-semibold"
-                style={{ color: notificationTypeColor[item.type] || '#333' }}
+                style={{ color: notificationTypeColor[item.type] || "#333" }}
               >
                 {notificationTypeVN[item.type] || item.type}
               </div>
@@ -160,9 +152,7 @@ const UserHeader = () => {
               { name: "Trang Chủ", path: "/" },
               { name: "Bài Viết", path: "/blog" },
               { name: "Kế Hoạch", path: "/quit-plan" },
-              { name: "Community", path: "/community" },
               { name: "Bảng Xếp Hạng", path: "/ranking" },
-              { name: "Gói", path: "/premium" },
             ].map((item) => (
               <Link
                 key={item.name}
