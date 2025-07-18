@@ -1,30 +1,28 @@
 import {
-  UserOutlined,
   DashboardOutlined,
   TeamOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  SettingOutlined,
   CreditCardOutlined,
   CheckCircleOutlined,
   FieldTimeOutlined,
   FileTextOutlined,
   BellOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Dropdown, Space } from "antd";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { MdOutlineFeedback, MdLogout } from "react-icons/md";
 import { HiOutlineDocumentReport } from "react-icons/hi";
 import { FaBoxOpen, FaUser } from "react-icons/fa";
-import { useEffect } from "react";
 import { SlBadge } from "react-icons/sl";
-import { IoIosArrowBack } from "react-icons/io";
-import { toast } from "react-toastify";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuth } from "~/hooks/useAuth";
+import { toast } from "react-toastify";
+import ColourfulText from "~/components/ui/colourful-text";
 
-const menu = [
-  { label: "Overview", icon: <DashboardOutlined />, path: "/admin/dashboard" },
+const menuItems = [
+  { label: "Tổng quan", icon: <DashboardOutlined />, path: "/admin/dashboard" },
   {
     label: "Người dùng",
     icon: <TeamOutlined />,
@@ -54,179 +52,138 @@ const menu = [
   { label: "Bài viết blog", icon: <FileTextOutlined />, path: "/admin/blogs" },
   { label: "Thông báo", icon: <BellOutlined />, path: "/admin/notifications" },
   { label: "Quản lý gói", icon: <FaBoxOpen />, path: "/admin/package" },
-  { label: "Report", icon: <HiOutlineDocumentReport />, path: "#" },
+  { label: "Báo cáo", icon: <HiOutlineDocumentReport />, path: "#" },
 ];
 
-export default function Sidebar({ admin }) {
-  const { logout, currentUser } = useAuth();
+const AdminSidebar = ({ admin }) => {
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(() => {
-    // Lấy trạng thái từ localStorage khi khởi tạo
-    const saved = localStorage.getItem("sidebar-collapsed");
-    return saved === "true";
-  });
-
-  // Sử dụng currentUser nếu admin không được truyền vào
-  const userData = admin || currentUser || {};
-  console.log(userData);
-
   const navigate = useNavigate();
+  const { logout, currentUser } = useAuth();
+
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem("sidebar-collapsed") === "true"
+  );
+
+  const user = admin || currentUser || {};
 
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", collapsed);
   }, [collapsed]);
 
-  const items = [
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Đăng xuất thành công!");
+      navigate("/");
+    } catch (err) {
+      console.error("Đăng xuất lỗi:", err);
+      toast.error("Lỗi khi đăng xuất!");
+    }
+  };
+
+  const dropdownItems = [
+    { key: "name", label: user?.name || "Admin", disabled: true },
+    { type: "divider" },
     {
-      key: "1",
-      label: "My Account",
-      disabled: true,
-    },
-    {
-      type: "divider",
-    },
-    {
-      key: "2",
-      label: "Profile",
+      key: "profile",
+      label: "Trang cá nhân",
       icon: <FaUser />,
       onClick: () => {
-        // Đảm bảo có ID trước khi điều hướng
-        if (userData?.userId) {
-          navigate(`/admin/profile/${userData.userId}`); // <--- ĐÃ SỬA LẠI
-        } else {
-          toast.error("Không thể xác định ID của Admin!");
-        }
+        if (user?.userId) navigate(`/admin/profile/${user.userId}`);
+        else toast.error("Không xác định được ID admin.");
       },
     },
     {
-      key: "3",
-      label: "Settings",
-      icon: <SettingOutlined />,
-    },
-    {
-      key: "4",
-      label: "Logout",
+      key: "logout",
+      label: "Đăng xuất",
       icon: <MdLogout />,
-      onClick: () => {
-        try {
-          const result = logout();
-          toast.success(result?.message || "Đăng xuất thành công!");
-          navigate("/");
-        } catch (error) {
-          console.error("Lỗi khi đăng xuất:", error);
-          toast.error("Có lỗi xảy ra khi đăng xuất");
-          // Vẫn chuyển hướng về trang chủ ngay cả khi gặp lỗi
-          navigate("/");
-        }
-      },
+      onClick: handleLogout,
     },
   ];
 
+  const renderMenuItem = ({ label, icon, path }) => {
+    const isActive = location.pathname === path;
+    return (
+      <Link
+        key={path}
+        to={path}
+        className={`mt-1 flex items-center rounded-2xl transition-all duration-200
+          ${collapsed ? "justify-center w-12 h-12" : "px-6 py-2 w-11/12"}
+          ${
+            isActive
+              ? "bg-gray-200 text-[#232042]"
+              : "text-white hover:bg-[#232042] hover:text-[#1ecbe1]"
+          }`}
+        style={{ minHeight: collapsed ? 48 : undefined }}
+      >
+        <span className={`text-lg`}>{icon}</span>
+        {!collapsed && <span className="font-medium ml-3">{label}</span>}
+      </Link>
+    );
+  };
+
   return (
     <div
-      className={`h-screen sticky top-0 ${
-        collapsed ? "w-20" : "w-64"
-      } bg-gradient-to-b from-[#1a1333] via-[#2b2256] to-[#1a2a3a] flex flex-col  transition-all duration-300`}
+      className={`h-screen sticky top-0 flex flex-col transition-all duration-300
+        ${collapsed ? "w-20" : "w-64"}
+        bg-gradient-to-b from-[#1a1333] via-[#2b2256] to-[#1a2a3a]`}
     >
-      {/* Collapse button */}
-
+      {/* Toggle button */}
       <div
-        className={`${
-          !collapsed
-            ? "flex justify-between items-center border-b"
-            : "flex items-center"
-        } `}
-      >
-        <div className="">
-          <Button
-            type="text"
-            className="text-white"
-            icon={<IoIosArrowBack />}
-            onClick={() => {
-              navigate("/");
-            }}
-          ></Button>
-        </div>
-        {!collapsed && (
-          <div className="text-xs uppercase text-gray-500 mt-4 mb-2 px-4">
-            Platform
-          </div>
-        )}
-        <div className="flex items-center justify-end p-2">
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            className="text-white"
-          />
-        </div>
-      </div>
-
-      {/* Profile */}
-      <div
-        className={`${
-          !collapsed
-            ? "px-4 py-3 border-b border-[#1f1f1f] flex items-center gap-3 hover:bg-[#232042] hover:cursor-pointer transition-colors duration-200"
-            : "px-4 py-3 border-b border-[#1f1f1f] flex items-center gap-3 hover:bg-[#232042] hover:cursor-pointer transition-colors duration-200 flex-col justify-center"
+        className={`border-b border-[#1f1f1f] p-2 ${
+          collapsed
+            ? "flex justify-center"
+            : "flex justify-between items-center"
         }`}
       >
-        <Dropdown menu={{ items }}>
+        {!collapsed && (
+          <Link to="/" className="absolute left-1/2 transform -translate-x-1/2">
+            <div className="text-xl font-semibold whitespace-nowrap">
+              <ColourfulText text="EXHELA" />
+            </div>
+          </Link>
+        )}
+        <Button
+          type="text"
+          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          onClick={() => setCollapsed(!collapsed)}
+          className="text-white"
+        />
+      </div>
+
+      {/* Admin profile */}
+      <div
+        className={`border-b border-[#1f1f1f] py-3 px-4 flex transition-colors duration-200 hover:bg-[#232042] hover:cursor-pointer
+          ${collapsed ? "flex-col items-center gap-3" : "items-center gap-3"}`}
+      >
+        <Dropdown menu={{ items: dropdownItems }}>
           <a onClick={(e) => e.preventDefault()}>
             <Space>
               <Avatar
                 size={collapsed ? 32 : 40}
-                src={userData?.avatar_url || userData?.avatar}
+                src={user?.avatar_url}
                 icon={<UserOutlined />}
               />
+
               {!collapsed && (
                 <div>
                   <div className="text-sm font-semibold">
-                    {userData?.name || "Admin"}
+                    {user?.name || "Admin"}
                   </div>
-                  <div className="text-xs text-gray-400">
-                    {userData?.role || "Administrator"}
-                  </div>
+                  <div className="text-xs text-gray-400">{user?.email}</div>
                 </div>
               )}
             </Space>
           </a>
         </Dropdown>
       </div>
-      {/* Menu */}
+
+      {/* Sidebar menu */}
       <nav className="flex-1 mt-4 flex flex-col items-center">
-        {menu.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`
-                                        flex items-center transition-all duration-200 active-menu mt-1
-                                        ${
-                                          collapsed
-                                            ? "justify-center w-12 h-12"
-                                            : "px-6 py-2 w-11/12"
-                                        }
-                                        ${
-                                          isActive
-                                            ? `bg-gray-200 text-[#232042]  rounded-2xl`
-                                            : "text-white hover:bg-[#232042]  hover:text-[#1ecbe1] rounded-2xl"
-                                        }
-                                    `}
-              style={{
-                minHeight: collapsed ? 48 : undefined,
-              }}
-            >
-              <span className={`text-lg ${isActive ? "text-[#232042]" : ""}`}>
-                {item.icon}
-              </span>
-              {!collapsed && (
-                <span className="font-medium ml-3">{item.label}</span>
-              )}
-            </Link>
-          );
-        })}
+        {menuItems.map(renderMenuItem)}
       </nav>
     </div>
   );
-}
+};
+
+export default AdminSidebar;

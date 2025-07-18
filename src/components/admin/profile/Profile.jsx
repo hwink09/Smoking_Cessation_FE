@@ -1,8 +1,15 @@
-// src/components/admin/profile/Profile.jsx
-
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Spin, Alert, Tag, Button, message, Avatar } from "antd"; // Thêm Avatar
+import {
+  Spin,
+  Alert,
+  Tag,
+  Button,
+  Avatar,
+  message,
+  Descriptions,
+  Card,
+} from "antd";
 import {
   UserOutlined,
   MailOutlined,
@@ -10,24 +17,13 @@ import {
   KeyOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-} from "@ant-design/icons"; // Thêm icon cho đẹp
+  EditOutlined,
+} from "@ant-design/icons";
 import AdminService from "~/services/adminService";
 import EditUserModal from "~/components/admin/userManager/EditUserModal";
 
-// Một component nhỏ để hiển thị từng dòng thông tin, giúp code gọn hơn
-const InfoRow = ({ icon, label, children }) => (
-  <div className="flex items-center py-4 border-b border-gray-200">
-    <div className="flex items-center text-gray-500 w-1/3">
-      {icon}
-      <span className="ml-2 font-semibold">{label}</span>
-    </div>
-    <div className="w-2/3 text-gray-800">{children}</div>
-  </div>
-);
-
 const Profile = () => {
   const { userId } = useParams();
-
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,7 +38,6 @@ const Profile = () => {
         setUser(response.data.data);
       } catch (err) {
         setError("Không thể tải thông tin người dùng.");
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -59,14 +54,12 @@ const Profile = () => {
       message.success("Cập nhật trạng thái tài khoản thành công!");
     } catch (err) {
       message.error("Cập nhật trạng thái thất bại.");
-      console.error(err);
     }
   };
 
-  // --- Giao diện hiển thị ---
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
+      <div className="flex justify-center items-center h-64">
         <Spin size="large" />
       </div>
     );
@@ -95,104 +88,103 @@ const Profile = () => {
     );
   }
 
-  // --- Giao diện chính đã được lột xác ---
   return (
-    <>
-      <div className="bg-white rounded-2xl shadow-xl p-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* CỘT BÊN TRÁI: AVATAR VÀ THÔNG TIN CƠ BẢN */}
-          <div className="md:col-span-1 flex flex-col items-center text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl">
+    <div className="max-w-4xl mx-auto">
+      <Card
+        className="shadow-md mb-6"
+        extra={
+          <Button
+            icon={<EditOutlined />}
+            type="primary"
+            onClick={() => setIsEditModalOpen(true)}
+          >
+            Chỉnh sửa
+          </Button>
+        }
+      >
+        <div className="flex flex-col md:flex-row">
+          {/* Cột avatar */}
+          <div className="flex flex-col items-center mb-6 md:mb-0 md:mr-8">
             <Avatar
               size={120}
-              icon={<UserOutlined />}
               src={user.avatar}
-              className="border-4 border-white shadow-lg mb-4"
+              icon={<UserOutlined />}
+              className="mb-3"
             />
-            <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
-            <p className="text-gray-500">{user.email}</p>
-            <div className="mt-4">
+            <h2 className="text-xl font-bold">{user.name}</h2>
+            <div className="flex items-center mt-1 gap-2">
               <Tag
                 color={user.role === "admin" ? "volcano" : "geekblue"}
-                className="text-sm px-3 py-1">
+                className="px-3 py-1 text-sm"
+              >
                 {user.role?.toUpperCase()}
               </Tag>
+              {user.isActive ? (
+                <Tag color="green">Active</Tag>
+              ) : (
+                <Tag color="red">Passive</Tag>
+              )}
             </div>
           </div>
 
-          {/* CỘT BÊN PHẢI: THÔNG TIN CHI TIẾT VÀ HÀNH ĐỘNG */}
-          <div className="md:col-span-2">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">
-              Information Profile
-            </h3>
+          {/* Cột chi tiết */}
+          <div className="flex-1">
+            <Descriptions
+              title="Thông tin quản trị viên"
+              column={1}
+              bordered
+              size="middle"
+            >
+              <Descriptions.Item label="ID">
+                <span className="font-mono text-sm">{user._id}</span>
+              </Descriptions.Item>
+              <Descriptions.Item label="Email">
+                {user.email || (
+                  <span className="italic text-gray-400">Chưa cập nhật</span>
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Số điện thoại">
+                {user.phoneNumber || (
+                  <span className="italic text-gray-400">Chưa cập nhật</span>
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Trạng thái">
+                {user.isActive ? "Hoạt động" : "Đã khóa"}
+              </Descriptions.Item>
+            </Descriptions>
 
-            <InfoRow icon={<KeyOutlined />} label="ID ">
-              <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                {user._id}
-              </span>
-            </InfoRow>
-
-            <InfoRow icon={<PhoneOutlined />} label="Phone">
-              {user.phoneNumber || (
-                <span className="text-gray-400 italic">No updates</span>
-              )}
-            </InfoRow>
-
-            <InfoRow
-              icon={
-                user.isActive ? (
-                  <CheckCircleOutlined className="text-green-500" />
-                ) : (
-                  <CloseCircleOutlined className="text-red-500" />
-                )
-              }
-              label="Status">
-              {user.isActive ? (
-                <Tag color="success">Active</Tag>
-              ) : (
-                <Tag color="error">Passive</Tag>
-              )}
-            </InfoRow>
-
-            {/* KHU VỰC CÁC NÚT BẤM HÀNH ĐỘNG */}
-            <div className="mt-8 flex flex-wrap gap-4">
-              {user.isActive ? (
-                <Button
-                  type="primary"
-                  danger
-                  icon={<CloseCircleOutlined />}
-                  onClick={() => handleSetStatus(false)}>
-                  Passive Account
-                </Button>
-              ) : (
-                <Button
-                  type="primary"
-                  icon={<CheckCircleOutlined />}
-                  style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
-                  onClick={() => handleSetStatus(true)}>
-                  Active Account
-                </Button>
-              )}
-              <Button onClick={() => setIsEditModalOpen(true)}>
-                Edit Information
+            {/* Nút hành động */}
+            <div className="mt-6 flex gap-4 flex-wrap">
+              <Button
+                danger={user.isActive}
+                type="primary"
+                icon={
+                  user.isActive ? (
+                    <CloseCircleOutlined />
+                  ) : (
+                    <CheckCircleOutlined />
+                  )
+                }
+                onClick={() => handleSetStatus(!user.isActive)}
+              >
+                {user.isActive ? "Khóa tài khoản" : "Kích hoạt tài khoản"}
               </Button>
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
-      {/* Modal chỉnh sửa vẫn được giữ nguyên, không thay đổi */}
-      {user && (
-        <EditUserModal
-          open={isEditModalOpen}
-          user={user}
-          onClose={() => setIsEditModalOpen(false)}
-          onUpdateSuccess={(updatedData) => {
-            setUser(updatedData);
-            setIsEditModalOpen(false);
-          }}
-        />
-      )}
-    </>
+      {/* Modal chỉnh sửa */}
+      <EditUserModal
+        open={isEditModalOpen}
+        user={user}
+        onClose={() => setIsEditModalOpen(false)}
+        onUpdateSuccess={(updatedData) => {
+          setUser(updatedData);
+          setIsEditModalOpen(false);
+        }}
+      />
+    </div>
   );
 };
 

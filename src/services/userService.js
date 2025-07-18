@@ -61,6 +61,28 @@ const userService = {
       throw error;
     }
   },
+
+  // Lấy thông tin profile của user hiện tại
+  getMyProfile: async () => {
+    try {
+      const response = await api.get("/user/me");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching my profile:", error);
+      throw error;
+    }
+  },
+
+  // Cập nhật profile của user hiện tại
+  updateMyProfile: async (profileData) => {
+    try {
+      const response = await api.put("/user/me", profileData);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating my profile:", error);
+      throw error;
+    }
+  },
 };
 
 export default userService;
