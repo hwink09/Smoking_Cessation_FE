@@ -8,7 +8,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <GoogleOAuthProvider
-      clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}
+      clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
       onScriptLoadError={(error) => {
         console.warn("Google OAuth script failed to load:", error);
 
