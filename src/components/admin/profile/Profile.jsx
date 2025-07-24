@@ -12,9 +12,6 @@ import {
 } from "antd";
 import {
   UserOutlined,
-  MailOutlined,
-  PhoneOutlined,
-  KeyOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   EditOutlined,

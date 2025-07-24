@@ -1,11 +1,6 @@
 import React from "react";
-import { Table, Button, Modal, Input, Select, Tag, Spin } from "antd";
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons";
+import { Table, Button, Modal, Select, Tag, Spin } from "antd";
+import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import useSubscriptions from "~/hooks/useSubscriptions";
 
 const { Option } = Select;
@@ -39,7 +34,9 @@ const Subscriptions = () => {
       dataIndex: "user_id",
       key: "user_id",
       render: (userId) => {
-        const user = Array.isArray(users) ? users.find((u) => u.id === userId) : null;
+        const user = Array.isArray(users)
+          ? users.find((u) => u.id === userId)
+          : null;
         return user ? user.name : "Không rõ";
       },
     },
@@ -72,19 +69,21 @@ const Subscriptions = () => {
         if (pkg.name === "plus") color = "#1890ff";
         if (pkg.name === "premium") color = "#faad14";
         return (
-          <span style={{
-            border: `2px solid ${color}`,
-            color: color,
-            padding: "2px 12px",
-            borderRadius: 8,
-            fontWeight: 600,
-            textTransform: "capitalize",
-            background: "#fff"
-          }}>
+          <span
+            style={{
+              border: `2px solid ${color}`,
+              color: color,
+              padding: "2px 12px",
+              borderRadius: 8,
+              fontWeight: 600,
+              textTransform: "capitalize",
+              background: "#fff",
+            }}
+          >
             {pkg.name}
           </span>
         );
-      }
+      },
     },
     {
       title: "Trạng thái",

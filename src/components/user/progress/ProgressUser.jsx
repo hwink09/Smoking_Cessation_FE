@@ -4,9 +4,7 @@ import JournalSection from "./JournalSection";
 import useProgress from "~/hooks/useProgress";
 import UserQuitPlanService from "~/services/userQuitPlanService";
 import SmokingStatusService from "~/services/SmokingStatusService";
-import { Card, Spin, Alert } from "antd";
-import { CheckCircleOutlined } from "@ant-design/icons";
-import { TrendingUp } from "lucide-react";
+import { Spin, Alert } from "antd";
 
 function ProgressUser() {
   // Initial state

@@ -1,9 +1,7 @@
 import React from "react";
-import { Table, Button, Modal, Input, Select, Tag, Spin } from "antd";
-import {  ExclamationCircleOutlined } from "@ant-design/icons";
+import { Table, Modal, Input, Select, Tag, Spin } from "antd";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import useProgressAdmin from "~/hooks/useProgressAdmin";
-
-
 
 const { Option } = Select;
 
@@ -35,7 +33,7 @@ const Progress = () => {
       title: "Ngày",
       dataIndex: "date",
       key: "date",
-      render: (date) => new Date(date).toLocaleDateString('vi-VN'),
+      render: (date) => new Date(date).toLocaleDateString("vi-VN"),
     },
     {
       title: "Số điếu thuốc đã hút",
@@ -68,63 +66,99 @@ const Progress = () => {
       <Select
         placeholder="Chọn một giai đoạn"
         value={editedProgress.stage_id}
-        onChange={value => setEditedProgress({ ...editedProgress, stage_id: value })}
+        onChange={(value) =>
+          setEditedProgress({ ...editedProgress, stage_id: value })
+        }
         status={errors.stage_id ? "error" : ""}
       >
-        {stages.map(stage => (
-          <Option key={stage._id} value={stage._id}>{stage.title} - Giai đoạn {stage.stage_number}</Option>
+        {stages.map((stage) => (
+          <Option key={stage._id} value={stage._id}>
+            {stage.title} - Giai đoạn {stage.stage_number}
+          </Option>
         ))}
       </Select>
-      {errors.stage_id && <div style={{ color: "#ff4d4f" }}>{errors.stage_id}</div>}
+      {errors.stage_id && (
+        <div style={{ color: "#ff4d4f" }}>{errors.stage_id}</div>
+      )}
       <Select
         placeholder="Chọn một người dùng"
         value={editedProgress.user_id}
-        onChange={value => setEditedProgress({ ...editedProgress, user_id: value })}
+        onChange={(value) =>
+          setEditedProgress({ ...editedProgress, user_id: value })
+        }
         status={errors.user_id ? "error" : ""}
       >
-        {users.map(user => (
-          <Option key={user.id} value={user.id}>{user.name} ({user.email})</Option>
+        {users.map((user) => (
+          <Option key={user.id} value={user.id}>
+            {user.name} ({user.email})
+          </Option>
         ))}
       </Select>
-      {errors.user_id && <div style={{ color: "#ff4d4f" }}>{errors.user_id}</div>}
+      {errors.user_id && (
+        <div style={{ color: "#ff4d4f" }}>{errors.user_id}</div>
+      )}
       <Input
         type="date"
         placeholder="Ngày"
         value={editedProgress.date}
-        onChange={e => setEditedProgress({ ...editedProgress, date: e.target.value })}
+        onChange={(e) =>
+          setEditedProgress({ ...editedProgress, date: e.target.value })
+        }
         status={errors.date ? "error" : ""}
       />
       {errors.date && <div style={{ color: "#ff4d4f" }}>{errors.date}</div>}
       <Input
         placeholder="Trạng thái hút thuốc ban đầu"
         value={editedProgress.health_stat || ""}
-        onChange={e => setEditedProgress({ ...editedProgress, health_stat: e.target.value })}
+        onChange={(e) =>
+          setEditedProgress({ ...editedProgress, health_stat: e.target.value })
+        }
         status={errors.health_stat ? "error" : ""}
       />
-      {errors.health_stat && <div style={{ color: "#ff4d4f" }}>{errors.health_stat}</div>}
+      {errors.health_stat && (
+        <div style={{ color: "#ff4d4f" }}>{errors.health_stat}</div>
+      )}
       <Input
         type="number"
         placeholder="Số điếu thuốc đã hút"
         value={editedProgress.cigarettes_smoked}
-        onChange={e => setEditedProgress({ ...editedProgress, cigarettes_smoked: e.target.value })}
+        onChange={(e) =>
+          setEditedProgress({
+            ...editedProgress,
+            cigarettes_smoked: e.target.value,
+          })
+        }
         status={errors.cigarettes_smoked ? "error" : ""}
       />
-      {errors.cigarettes_smoked && <div style={{ color: "#ff4d4f" }}>{errors.cigarettes_smoked}</div>}
+      {errors.cigarettes_smoked && (
+        <div style={{ color: "#ff4d4f" }}>{errors.cigarettes_smoked}</div>
+      )}
       <Input
         type="number"
         placeholder="Số tiền tiết kiệm (VND)"
         value={editedProgress.money_saved}
-        onChange={e => setEditedProgress({ ...editedProgress, money_saved: e.target.value })}
+        onChange={(e) =>
+          setEditedProgress({ ...editedProgress, money_saved: e.target.value })
+        }
         status={errors.money_saved ? "error" : ""}
       />
-      {errors.money_saved && <div style={{ color: "#ff4d4f" }}>{errors.money_saved}</div>}
+      {errors.money_saved && (
+        <div style={{ color: "#ff4d4f" }}>{errors.money_saved}</div>
+      )}
     </div>
   );
 
   // Loading
   if (loading && progress.length === 0) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Spin size="large" tip="Đang tải..." />
       </div>
     );
@@ -133,15 +167,44 @@ const Progress = () => {
   // Error
   if (error) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ color: "#ff4d4f", fontSize: 18, background: "#fff1f0", padding: 24, borderRadius: 8, border: "1px solid #ffa39e" }}>{error}</div>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            color: "#ff4d4f",
+            fontSize: 18,
+            background: "#fff1f0",
+            padding: 24,
+            borderRadius: 8,
+            border: "1px solid #ffa39e",
+          }}
+        >
+          {error}
+        </div>
       </div>
     );
   }
 
   return (
-    <section style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 2px 8px #f0f1f2" }}>
+    <section
+      style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}
+    >
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          background: "#fff",
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: "0 2px 8px #f0f1f2",
+        }}
+      >
         <Table
           columns={columns}
           dataSource={progress}
@@ -182,7 +245,7 @@ const Progress = () => {
         okText="Xóa"
         okButtonProps={{ danger: true }}
         cancelText="Hủy"
-        icon={<ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />}
+        icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
         destroyOnClose
       >
         Bạn có chắc chắn muốn xóa bản ghi tiến trình này không?

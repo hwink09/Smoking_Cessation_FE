@@ -4,10 +4,8 @@ import AuthContext from "./AuthContext";
 import authService from "~/services/authService";
 import {
   validateLoginForm,
-  validateRegisterForm,
   validateRegistrationForm,
   validateForgotPasswordForm,
-  validateEmail,
   isFormValid,
   formatAuthError,
 } from "~/utils/authValidation";

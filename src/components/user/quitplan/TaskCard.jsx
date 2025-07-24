@@ -3,7 +3,7 @@ import { Typography, Button, Checkbox } from "antd";
 const { Title, Paragraph, Text } = Typography;
 
 const TaskCard = ({ task, index, onComplete }) => {
-  const isLocked = false; // Trong tương lai có thể thêm logic lock task
+  const isLocked = false;
 
   return (
     <div

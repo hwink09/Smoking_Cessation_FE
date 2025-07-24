@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import {
   Clock,
-  Heart,
   CalendarClock,
   Cigarette,
   TrendingUp,

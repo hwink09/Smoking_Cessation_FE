@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Typography, Button } from "antd";
+import { Card, Typography } from "antd";
 import CoachCard from "./CoachCard";
 import QuitPlanModal from "./QuitPlanModal";
 

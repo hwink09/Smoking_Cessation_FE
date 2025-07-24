@@ -1,15 +1,29 @@
 import React from "react";
-import { Table, Button, Modal, Input, Select, Tag, Spin, Rate } from "antd";
-import { EditOutlined, DeleteOutlined, ExclamationCircleOutlined, MessageOutlined, UserOutlined, StarOutlined, EyeInvisibleOutlined, FilterOutlined, SearchOutlined, PlusOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { Table, Button, Modal, Input, Select, Spin, Rate } from "antd";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+  MessageOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import useFeedbacks from "~/hooks/useFeedbacks";
-
 
 const { Option } = Select;
 
 const feedbackTypeLabels = {
-  user_to_coach: { label: "Phản hồi Huấn luyện viên", icon: <UserOutlined style={{ color: '#60a5fa' }} /> },
-  user_to_plan: { label: "Phản hồi Kế hoạch", icon: <MessageOutlined style={{ color: '#34d399' }} /> },
-  user_to_system: { label: "Phản hồi Hệ thống", icon: <MessageOutlined style={{ color: '#a78bfa' }} /> },
+  user_to_coach: {
+    label: "Phản hồi Huấn luyện viên",
+    icon: <UserOutlined style={{ color: "#60a5fa" }} />,
+  },
+  user_to_plan: {
+    label: "Phản hồi Kế hoạch",
+    icon: <MessageOutlined style={{ color: "#34d399" }} />,
+  },
+  user_to_system: {
+    label: "Phản hồi Hệ thống",
+    icon: <MessageOutlined style={{ color: "#a78bfa" }} />,
+  },
 };
 
 const FeedbackManagement = () => {
@@ -51,13 +65,22 @@ const FeedbackManagement = () => {
       title: "Ngày",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date) => new Date(date || Date.now()).toLocaleDateString('vi-VN'),
+      render: (date) =>
+        new Date(date || Date.now()).toLocaleDateString("vi-VN"),
     },
     {
       title: "Đánh giá",
       dataIndex: "rating",
       key: "rating",
-      render: (rating) => <Rate disabled value={rating || 0} count={5} allowHalf style={{ fontSize: 16 }} />,
+      render: (rating) => (
+        <Rate
+          disabled
+          value={rating || 0}
+          count={5}
+          allowHalf
+          style={{ fontSize: 16 }}
+        />
+      ),
     },
     {
       title: "Nội dung",
@@ -69,13 +92,14 @@ const FeedbackManagement = () => {
       title: "Người gửi",
       dataIndex: ["user_id", "name"],
       key: "user_id",
-      render: (_, record) => record.user_id?.name || record.user_id?.email || 'N/A',
+      render: (_, record) =>
+        record.user_id?.name || record.user_id?.email || "N/A",
     },
     {
       title: "Huấn luyện viên",
       dataIndex: ["coach_id", "name"],
       key: "coach_id",
-      render: (_, record) => record.coach_id?.name || 'N/A',
+      render: (_, record) => record.coach_id?.name || "N/A",
     },
     {
       title: "Trạng thái",
@@ -84,7 +108,7 @@ const FeedbackManagement = () => {
       render: (status, record) => (
         <Select
           value={status || "pending"}
-          onChange={value => handleStatusUpdate(record._id, value)}
+          onChange={(value) => handleStatusUpdate(record._id, value)}
           style={{ width: 120 }}
         >
           <Option value="pending">Chờ duyệt</Option>
@@ -98,10 +122,22 @@ const FeedbackManagement = () => {
       key: "action",
       render: (_, record) => (
         <>
-          <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          >
             Sửa
           </Button>
-          <Button type="link" danger icon={<DeleteOutlined />} onClick={() => { setFeedbackToDelete(record._id); setShowConfirm(true); }}>
+          <Button
+            type="link"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => {
+              setFeedbackToDelete(record._id);
+              setShowConfirm(true);
+            }}
+          >
             Xóa
           </Button>
         </>
@@ -114,7 +150,7 @@ const FeedbackManagement = () => {
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <Rate
         value={newData.rating}
-        onChange={value => setNewData({ ...newData, rating: value })}
+        onChange={(value) => setNewData({ ...newData, rating: value })}
         count={5}
         allowHalf
       />
@@ -122,26 +158,30 @@ const FeedbackManagement = () => {
       <Input.TextArea
         placeholder="Nội dung phản hồi"
         value={newData.content}
-        onChange={e => setNewData({ ...newData, content: e.target.value })}
+        onChange={(e) => setNewData({ ...newData, content: e.target.value })}
         rows={4}
         status={errors.content ? "error" : ""}
       />
-      {errors.content && <div style={{ color: "#ff4d4f" }}>{errors.content}</div>}
+      {errors.content && (
+        <div style={{ color: "#ff4d4f" }}>{errors.content}</div>
+      )}
       <Select
         placeholder="Loại phản hồi"
         value={newData.feedback_type}
-        onChange={value => setNewData({ ...newData, feedback_type: value })}
+        onChange={(value) => setNewData({ ...newData, feedback_type: value })}
         status={errors.feedback_type ? "error" : ""}
       >
         <Option value="user_to_system">Phản hồi Hệ thống</Option>
         <Option value="user_to_coach">Phản hồi Huấn luyện viên</Option>
         <Option value="user_to_plan">Phản hồi Kế hoạch</Option>
       </Select>
-      {errors.feedback_type && <div style={{ color: "#ff4d4f" }}>{errors.feedback_type}</div>}
+      {errors.feedback_type && (
+        <div style={{ color: "#ff4d4f" }}>{errors.feedback_type}</div>
+      )}
       <Select
         placeholder="Trạng thái"
         value={newData.status}
-        onChange={value => setNewData({ ...newData, status: value })}
+        onChange={(value) => setNewData({ ...newData, status: value })}
         status={errors.status ? "error" : ""}
       >
         <Option value="pending">Chờ duyệt</Option>
@@ -155,7 +195,14 @@ const FeedbackManagement = () => {
   // Loading
   if (loading && feedbacks.length === 0) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Spin size="large" tip="Đang tải..." />
       </div>
     );
@@ -164,15 +211,44 @@ const FeedbackManagement = () => {
   // Error
   if (error) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ color: "#ff4d4f", fontSize: 18, background: "#fff1f0", padding: 24, borderRadius: 8, border: "1px solid #ffa39e" }}>{error}</div>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            color: "#ff4d4f",
+            fontSize: 18,
+            background: "#fff1f0",
+            padding: 24,
+            borderRadius: 8,
+            border: "1px solid #ffa39e",
+          }}
+        >
+          {error}
+        </div>
       </div>
     );
   }
 
   return (
-    <section style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 2px 8px #f0f1f2" }}>
+    <section
+      style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}
+    >
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          background: "#fff",
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: "0 2px 8px #f0f1f2",
+        }}
+      >
         <Table
           columns={columns}
           dataSource={filteredFeedbacks}
@@ -213,7 +289,7 @@ const FeedbackManagement = () => {
         okText="Xóa"
         okButtonProps={{ danger: true }}
         cancelText="Hủy"
-        icon={<ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />}
+        icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
         destroyOnClose
       >
         Bạn có chắc chắn muốn xóa phản hồi này không?

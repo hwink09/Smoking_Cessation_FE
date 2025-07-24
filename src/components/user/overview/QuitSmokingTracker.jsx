@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  Calendar,
-  DollarSign,
-  Heart,
-  Award,
-  Cigarette,
-  Trophy,
-} from "lucide-react";
+import { Cigarette, Trophy } from "lucide-react";
 import ColourfulText from "~/components/ui/colourful-text";
 
 const QuitSmokingTracker = () => {

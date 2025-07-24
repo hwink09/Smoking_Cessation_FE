@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Table,
-  Button,
-  Spin,
-  Popconfirm,
-} from "antd";
+import { Table, Button, Spin, Popconfirm } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
@@ -12,7 +7,7 @@ import {
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import usePackages from "~/hooks/usePackages";
-import PackageModal from "./PackageModal"; // 👈 import Modal
+import PackageModal from "./PackageModal";
 
 const PackageItem = () => {
   const {
@@ -37,23 +32,25 @@ const PackageItem = () => {
       key: "name",
       render: (name) => {
         let color = "#d9d9d9"; // default
-        if (name === "free") color = "#52c41a";      // xanh lá
-        if (name === "plus") color = "#1890ff";      // xanh dương
-        if (name === "premium") color = "#faad14";   // vàng cam
+        if (name === "free") color = "#52c41a"; // xanh lá
+        if (name === "plus") color = "#1890ff"; // xanh dương
+        if (name === "premium") color = "#faad14"; // vàng cam
         return (
-          <span style={{
-            border: `2px solid ${color}`,
-            color: color,
-            padding: "2px 12px",
-            borderRadius: 8,
-            fontWeight: 600,
-            textTransform: "capitalize",
-            background: "#fff"
-          }}>
+          <span
+            style={{
+              border: `2px solid ${color}`,
+              color: color,
+              padding: "2px 12px",
+              borderRadius: 8,
+              fontWeight: 600,
+              textTransform: "capitalize",
+              background: "#fff",
+            }}
+          >
             {name}
           </span>
         );
-      }
+      },
     },
     {
       title: "Mô tả",
@@ -76,13 +73,23 @@ const PackageItem = () => {
       dataIndex: "features",
       key: "features",
       render: (features) =>
-        features && features.length > 0
-          ? features.map((f, idx) => (
-              <span key={idx} style={{ marginRight: 4, background: "#f0f0f0", padding: "2px 6px", borderRadius: 4 }}>
-                {f}
-              </span>
-            ))
-          : <span style={{ color: "#aaa" }}>Không có</span>,
+        features && features.length > 0 ? (
+          features.map((f, idx) => (
+            <span
+              key={idx}
+              style={{
+                marginRight: 4,
+                background: "#f0f0f0",
+                padding: "2px 6px",
+                borderRadius: 4,
+              }}
+            >
+              {f}
+            </span>
+          ))
+        ) : (
+          <span style={{ color: "#aaa" }}>Không có</span>
+        ),
     },
     {
       title: "Hành động",
@@ -121,11 +128,7 @@ const PackageItem = () => {
           marginBottom: 24,
         }}
       >
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={openNewModal}
-        >
+        <Button type="primary" icon={<PlusOutlined />} onClick={openNewModal}>
           Thêm gói mới
         </Button>
       </div>

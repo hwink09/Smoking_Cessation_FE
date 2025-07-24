@@ -1,5 +1,4 @@
 import React from "react";
-import Cards from "./Cards";
 import { Card } from "antd";
 import { AreaChart } from "../../ui/area-chart";
 import { BarChart } from "../../ui/bar-chart";

@@ -1,9 +1,7 @@
 import React from "react";
-import { Table, Button, Modal, Input, Select, Tag, Spin } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { Table, Modal, Input, Select, Tag, Spin } from "antd";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import useNotifications from "~/hooks/useNotifications";
-
-
 
 const { Option } = Select;
 
@@ -45,7 +43,11 @@ const Notifications = () => {
       title: "Loại",
       dataIndex: "type",
       key: "type",
-      render: (type) => <Tag color={typeLabels[type]?.color}>{typeLabels[type]?.label || type}</Tag>,
+      render: (type) => (
+        <Tag color={typeLabels[type]?.color}>
+          {typeLabels[type]?.label || type}
+        </Tag>
+      ),
     },
     {
       title: "Thời Gian Gửi",
@@ -57,8 +59,12 @@ const Notifications = () => {
       dataIndex: "progress_id",
       key: "progress_id",
       render: (id) => {
-        const progress = progresses.find(p => p._id === id);
-        return progress ? `Giai đoạn ${progress.stage_id} - ${new Date(progress.date).toLocaleDateString('vi-VN')}` : id;
+        const progress = progresses.find((p) => p._id === id);
+        return progress
+          ? `Giai đoạn ${progress.stage_id} - ${new Date(
+              progress.date
+            ).toLocaleDateString("vi-VN")}`
+          : id;
       },
     },
     {
@@ -66,7 +72,9 @@ const Notifications = () => {
       dataIndex: "is_sent",
       key: "is_sent",
       render: (is_sent) => (
-        <Tag color={is_sent ? "green" : "gold"}>{is_sent ? "Đã gửi" : "Chưa gửi"}</Tag>
+        <Tag color={is_sent ? "green" : "gold"}>
+          {is_sent ? "Đã gửi" : "Chưa gửi"}
+        </Tag>
       ),
     },
   ];
@@ -77,28 +85,42 @@ const Notifications = () => {
       <Select
         placeholder="Chọn tiến độ"
         value={editedNotification.progress_id}
-        onChange={value => setEditedNotification({ ...editedNotification, progress_id: value })}
+        onChange={(value) =>
+          setEditedNotification({ ...editedNotification, progress_id: value })
+        }
         status={errors.progress_id ? "error" : ""}
       >
-        {progresses.map(progress => (
+        {progresses.map((progress) => (
           <Option key={progress._id} value={progress._id}>
-            Giai đoạn {progress.stage_id} - {new Date(progress.date).toLocaleDateString('vi-VN')}
+            Giai đoạn {progress.stage_id} -{" "}
+            {new Date(progress.date).toLocaleDateString("vi-VN")}
           </Option>
         ))}
       </Select>
-      {errors.progress_id && <div style={{ color: "#ff4d4f" }}>{errors.progress_id}</div>}
+      {errors.progress_id && (
+        <div style={{ color: "#ff4d4f" }}>{errors.progress_id}</div>
+      )}
       <Input.TextArea
         placeholder="Thông điệp thông báo"
         value={editedNotification.message}
-        onChange={e => setEditedNotification({ ...editedNotification, message: e.target.value })}
+        onChange={(e) =>
+          setEditedNotification({
+            ...editedNotification,
+            message: e.target.value,
+          })
+        }
         rows={3}
         status={errors.message ? "error" : ""}
       />
-      {errors.message && <div style={{ color: "#ff4d4f" }}>{errors.message}</div>}
+      {errors.message && (
+        <div style={{ color: "#ff4d4f" }}>{errors.message}</div>
+      )}
       <Select
         placeholder="Loại thông báo"
         value={editedNotification.type}
-        onChange={value => setEditedNotification({ ...editedNotification, type: value })}
+        onChange={(value) =>
+          setEditedNotification({ ...editedNotification, type: value })
+        }
         status={errors.type ? "error" : ""}
       >
         <Option value="daily">Hàng ngày</Option>
@@ -109,16 +131,28 @@ const Notifications = () => {
       <Input
         type="datetime-local"
         value={editedNotification.schedule}
-        onChange={e => setEditedNotification({ ...editedNotification, schedule: e.target.value })}
+        onChange={(e) =>
+          setEditedNotification({
+            ...editedNotification,
+            schedule: e.target.value,
+          })
+        }
         status={errors.schedule ? "error" : ""}
       />
-      {errors.schedule && <div style={{ color: "#ff4d4f" }}>{errors.schedule}</div>}
+      {errors.schedule && (
+        <div style={{ color: "#ff4d4f" }}>{errors.schedule}</div>
+      )}
       <div>
         <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <input
             type="checkbox"
             checked={editedNotification.is_sent}
-            onChange={e => setEditedNotification({ ...editedNotification, is_sent: e.target.checked })}
+            onChange={(e) =>
+              setEditedNotification({
+                ...editedNotification,
+                is_sent: e.target.checked,
+              })
+            }
             style={{ width: 16, height: 16 }}
           />
           Đánh dấu đã gửi
@@ -130,7 +164,14 @@ const Notifications = () => {
   // Loading
   if (loading && notifications.length === 0) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Spin size="large" tip="Đang tải..." />
       </div>
     );
@@ -139,16 +180,44 @@ const Notifications = () => {
   // Error
   if (error) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ color: "#ff4d4f", fontSize: 18, background: "#fff1f0", padding: 24, borderRadius: 8, border: "1px solid #ffa39e" }}>{error}</div>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            color: "#ff4d4f",
+            fontSize: 18,
+            background: "#fff1f0",
+            padding: 24,
+            borderRadius: 8,
+            border: "1px solid #ffa39e",
+          }}
+        >
+          {error}
+        </div>
       </div>
     );
   }
 
   return (
-    <section style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}>
-
-      <div style={{ maxWidth: 1200, margin: "0 auto", background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 2px 8px #f0f1f2" }}>
+    <section
+      style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}
+    >
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          background: "#fff",
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: "0 2px 8px #f0f1f2",
+        }}
+      >
         <Table
           columns={columns}
           dataSource={notifications}
@@ -189,7 +258,7 @@ const Notifications = () => {
         okText="Xóa"
         okButtonProps={{ danger: true }}
         cancelText="Hủy"
-        icon={<ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />}
+        icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
         destroyOnClose
       >
         Bạn có chắc chắn muốn xóa thông báo này không?

@@ -1,40 +1,44 @@
-import { Search, Filter, X, Plus, FileText, ChevronDown } from "lucide-react"
-import { useState, useRef, useEffect } from "react"
-import ColourfulText from "~/components/ui/colourful-text"
+import { Search, Filter, X, ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import ColourfulText from "~/components/ui/colourful-text";
 
-
-const FilterBar = ({ onFilterChange, tags = [], selectedTags = [], onTagToggle }) => {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [dropdownHeight, setDropdownHeight] = useState(0)
-  const dropdownContentRef = useRef(null)
+const FilterBar = ({
+  onFilterChange,
+  tags = [],
+  selectedTags = [],
+  onTagToggle,
+}) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [dropdownHeight, setDropdownHeight] = useState(0);
+  const dropdownContentRef = useRef(null);
 
   const handleSearch = (value) => {
-    setSearchTerm(value)
+    setSearchTerm(value);
     if (onFilterChange) {
-      onFilterChange({ searchTerm: value })
+      onFilterChange({ searchTerm: value });
     }
-  }
+  };
 
   const clearSearch = () => {
-    setSearchTerm("")
+    setSearchTerm("");
     if (onFilterChange) {
-      onFilterChange({ searchTerm: "" })
+      onFilterChange({ searchTerm: "" });
     }
-  }
+  };
 
   // Tính toán chiều cao của dropdown content khi component mount hoặc tags thay đổi
   useEffect(() => {
     if (dropdownContentRef.current) {
-      setDropdownHeight(dropdownContentRef.current.scrollHeight)
+      setDropdownHeight(dropdownContentRef.current.scrollHeight);
     }
-  }, [tags])
+  }, [tags]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
       <div className="flex flex-col gap-3 items-center justify-center mb-4">
         <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent mb-4">
-          <ColourfulText text="Blog"/>
+          <ColourfulText text="Blog" />
         </h2>
       </div>
 
@@ -66,7 +70,9 @@ const FilterBar = ({ onFilterChange, tags = [], selectedTags = [], onTagToggle }
             <Filter className="h-4 w-4 mr-2" />
             Tags
             <ChevronDown
-              className={`h-4 w-4 ml-2 transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : ""}`}
+              className={`h-4 w-4 ml-2 transition-transform duration-300 ${
+                isDropdownOpen ? "rotate-180" : ""
+              }`}
             />
           </button>
 
@@ -77,26 +83,25 @@ const FilterBar = ({ onFilterChange, tags = [], selectedTags = [], onTagToggle }
                 ? "opacity-100 scale-100 pointer-events-auto"
                 : "opacity-0 scale-95 pointer-events-none"
             }`}
-            style={{ 
+            style={{
               minWidth: "12rem",
-              height: isDropdownOpen ? `${dropdownHeight}px` : '0px'
+              height: isDropdownOpen ? `${dropdownHeight}px` : "0px",
             }}
           >
-            <div 
-              ref={dropdownContentRef}
-              className="p-4"
-            >
+            <div ref={dropdownContentRef} className="p-4">
               <div className="space-y-2">
                 {tags.map((tag, index) => (
                   <label
                     key={tag._id}
                     className={`flex items-center hover:text-purple-600 cursor-pointer text-gray-900 transition-all duration-300 ${
-                      isDropdownOpen 
-                        ? 'translate-y-0 opacity-100' 
-                        : 'translate-y-2 opacity-0'
+                      isDropdownOpen
+                        ? "translate-y-0 opacity-100"
+                        : "translate-y-2 opacity-0"
                     }`}
                     style={{
-                      transitionDelay: isDropdownOpen ? `${index * 50}ms` : '0ms'
+                      transitionDelay: isDropdownOpen
+                        ? `${index * 50}ms`
+                        : "0ms",
                     }}
                   >
                     <input
@@ -105,7 +110,9 @@ const FilterBar = ({ onFilterChange, tags = [], selectedTags = [], onTagToggle }
                       onChange={() => onTagToggle(tag._id)}
                       className="mr-2 transform transition-transform duration-200 hover:scale-110"
                     />
-                    <span className="transition-colors duration-200">{tag.title}</span>
+                    <span className="transition-colors duration-200">
+                      {tag.title}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -117,11 +124,13 @@ const FilterBar = ({ onFilterChange, tags = [], selectedTags = [], onTagToggle }
       {searchTerm && (
         <div className="mt-4 pt-4 border-t border-gray-200 animate-fadeIn">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Đang tìm kiếm:</span>
+            <span className="text-sm font-medium text-gray-700">
+              Đang tìm kiếm:
+            </span>
             <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full transform transition-all duration-300 hover:scale-105">
               "{searchTerm}"
-              <button 
-                onClick={clearSearch} 
+              <button
+                onClick={clearSearch}
                 className="ml-2 text-green-500 hover:text-green-700 transition-colors duration-200 hover:rotate-90 transform"
               >
                 <X className="h-3 w-3" />
@@ -147,7 +156,7 @@ const FilterBar = ({ onFilterChange, tags = [], selectedTags = [], onTagToggle }
         }
       `}</style>
     </div>
-  )
-}
+  );
+};
 
-export default FilterBar
+export default FilterBar;

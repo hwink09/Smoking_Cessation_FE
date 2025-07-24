@@ -1,6 +1,20 @@
 import React from "react";
-import { Table, Button, Modal, Input, Select, Tag, Spin, Switch, message, Drawer } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Button,
+  Modal,
+  Input,
+  Select,
+  Spin,
+  Switch,
+  message,
+} from "antd";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
 
 import Stage from "./Stage";
 import { Modal as AntdModal } from "antd";
@@ -82,13 +96,13 @@ const QuitPlans = () => {
       title: "Ngày Bắt Đầu",
       dataIndex: "start_date",
       key: "start_date",
-      render: (date) => new Date(date).toLocaleDateString('vi-VN'),
+      render: (date) => new Date(date).toLocaleDateString("vi-VN"),
     },
     {
       title: "Ngày Mục Tiêu",
       dataIndex: "target_quit_date",
       key: "target_quit_date",
-      render: (date) => new Date(date).toLocaleDateString('vi-VN'),
+      render: (date) => new Date(date).toLocaleDateString("vi-VN"),
     },
     {
       title: "Công Khai",
@@ -102,7 +116,9 @@ const QuitPlans = () => {
           onClick={async (checked, e) => {
             e.stopPropagation();
             await handleTogglePublic(record, checked);
-            message.success(checked ? "Đã công khai kế hoạch" : "Đã chuyển về riêng tư");
+            message.success(
+              checked ? "Đã công khai kế hoạch" : "Đã chuyển về riêng tư"
+            );
           }}
         />
       ),
@@ -112,13 +128,35 @@ const QuitPlans = () => {
       key: "action",
       render: (_, record) => (
         <>
-          <Button type="link" onClick={e => { e.stopPropagation(); handleOpenStageModal(record._id); }}>
-          Thêm giai đoạn
+          <Button
+            type="link"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenStageModal(record._id);
+            }}
+          >
+            Thêm giai đoạn
           </Button>
-          <Button type="link" icon={<EditOutlined />} onClick={e => { e.stopPropagation(); handleEdit(record); }}>
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit(record);
+            }}
+          >
             Sửa
           </Button>
-          <Button type="link" danger icon={<DeleteOutlined />} onClick={e => { e.stopPropagation(); setPlanToDelete(record._id); setShowConfirm(true); }}>
+          <Button
+            type="link"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              setPlanToDelete(record._id);
+              setShowConfirm(true);
+            }}
+          >
             Xóa
           </Button>
         </>
@@ -129,42 +167,47 @@ const QuitPlans = () => {
   // Modal form content
   const modalForm = (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-  
       <Input
         placeholder="Tên kế hoạch"
         value={formData.name}
-        onChange={e => setFormData({ ...formData, name: e.target.value })}
+        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         status={errors.name ? "error" : ""}
       />
       {errors.name && <div style={{ color: "#ff4d4f" }}>{errors.name}</div>}
       <Input
         placeholder="Lý do"
         value={formData.reason}
-        onChange={e => setFormData({ ...formData, reason: e.target.value })}
+        onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
         status={errors.reason ? "error" : ""}
       />
       {errors.reason && <div style={{ color: "#ff4d4f" }}>{errors.reason}</div>}
       <Input
         type="date"
         value={formData.start_date}
-        onChange={e => handleDateChange('start_date', e.target.value)}
+        onChange={(e) => handleDateChange("start_date", e.target.value)}
         status={errors.start_date ? "error" : ""}
       />
-      {errors.start_date && <div style={{ color: "#ff4d4f" }}>{errors.start_date}</div>}
+      {errors.start_date && (
+        <div style={{ color: "#ff4d4f" }}>{errors.start_date}</div>
+      )}
       <Input
         type="date"
         value={formData.target_quit_date}
-        onChange={e => handleDateChange('target_quit_date', e.target.value)}
+        onChange={(e) => handleDateChange("target_quit_date", e.target.value)}
         status={errors.target_quit_date ? "error" : ""}
       />
-      {errors.target_quit_date && <div style={{ color: "#ff4d4f" }}>{errors.target_quit_date}</div>}
+      {errors.target_quit_date && (
+        <div style={{ color: "#ff4d4f" }}>{errors.target_quit_date}</div>
+      )}
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span>Công khai:</span>
         <Switch
           checked={formData.is_public || false}
           checkedChildren="Công khai"
           unCheckedChildren="Riêng tư"
-          onChange={checked => setFormData({ ...formData, is_public: checked })}
+          onChange={(checked) =>
+            setFormData({ ...formData, is_public: checked })
+          }
         />
       </div>
     </div>
@@ -173,7 +216,14 @@ const QuitPlans = () => {
   // Loading
   if (loading && plans.length === 0) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Spin size="large" tip="Đang tải..." />
       </div>
     );
@@ -181,9 +231,17 @@ const QuitPlans = () => {
 
   return (
     <>
-      <section style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}>
-
-        <div style={{ maxWidth: 1200, margin: "0 auto 32px auto", display: "flex", justifyContent: "flex-end" }}>
+      <section
+        style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}
+      >
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: "0 auto 32px auto",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -194,7 +252,16 @@ const QuitPlans = () => {
             Thêm Kế Hoạch
           </Button>
         </div>
-        <div style={{ maxWidth: 1200, margin: "0 auto", background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 2px 8px #f0f1f2" }}>
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: "0 auto",
+            background: "#fff",
+            borderRadius: 16,
+            padding: 24,
+            boxShadow: "0 2px 8px #f0f1f2",
+          }}
+        >
           <Table
             columns={columns}
             dataSource={plans}
@@ -204,13 +271,20 @@ const QuitPlans = () => {
               emptyText: "Không có kế hoạch nào.",
             }}
             onRow={(record) => ({
-              onClick: () => navigate(`/admin/quit-plans/${record._id}`, { state: { plan: record } }),
+              onClick: () =>
+                navigate(`/admin/quit-plans/${record._id}`, {
+                  state: { plan: record },
+                }),
             })}
           />
         </div>
         <Modal
           open={!!editingPlan}
-          title={isNew ? "Thêm Kế Hoạch Cai Thuốc Mới" : "Chỉnh Sửa Kế Hoạch Cai Thuốc"}
+          title={
+            isNew
+              ? "Thêm Kế Hoạch Cai Thuốc Mới"
+              : "Chỉnh Sửa Kế Hoạch Cai Thuốc"
+          }
           onCancel={() => {
             setEditingPlan(null);
             setIsNew(false);
@@ -238,7 +312,7 @@ const QuitPlans = () => {
           okText="Xóa"
           okButtonProps={{ danger: true }}
           cancelText="Hủy"
-          icon={<ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />}
+          icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
           destroyOnClose
         >
           Bạn có chắc chắn muốn xóa kế hoạch cai thuốc này không?
@@ -253,9 +327,7 @@ const QuitPlans = () => {
         destroyOnClose
         style={{ top: 32 }}
       >
-        {stageModalOpen && (
-          <Stage planId={selectedPlanId} />
-        )}
+        {stageModalOpen && <Stage planId={selectedPlanId} />}
       </AntdModal>
     </>
   );

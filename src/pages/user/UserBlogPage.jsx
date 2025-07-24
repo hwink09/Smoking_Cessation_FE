@@ -1,17 +1,10 @@
 import { useState, useEffect } from "react";
 import CreateBlog from "~/components/user/blog/CreateBlog";
 import MyPosts from "~/components/user/blog/MyPosts";
-
 import { usePostData } from "~/hooks/usePostData";
-// import BlogDetail from "../../components/generic/blog/BlogDetail";
-
 
 function UserBlogPage() {
-  const {
-    createPost,
-    getPostsByUserId,
-    tags = [],
-  } = usePostData();
+  const { createPost, getPostsByUserId, tags = [] } = usePostData();
 
   const [currentView, setCurrentView] = useState("myPosts");
   const [userPosts, setUserPosts] = useState([]);
@@ -84,7 +77,9 @@ function UserBlogPage() {
 
   if (currentView === "create") {
     return (
-      <div style={{ background: '#fff', minHeight: '100vh', padding: '40px 0' }}>
+      <div
+        style={{ background: "#fff", minHeight: "100vh", padding: "40px 0" }}
+      >
         <CreateBlog
           onSubmit={handlePostCreate}
           onCancel={() => setCurrentView("myPosts")}
@@ -95,10 +90,10 @@ function UserBlogPage() {
   }
 
   return (
-    <div style={{ background: '#fff', minHeight: '100vh', padding: '40px 0' }}>
+    <div style={{ background: "#fff", minHeight: "100vh", padding: "40px 0" }}>
       <MyPosts
         posts={userPosts}
-        refetchUserPosts={fetchUserPosts} 
+        refetchUserPosts={fetchUserPosts}
         onPostClick={() => {
           setCurrentView("detail");
         }}

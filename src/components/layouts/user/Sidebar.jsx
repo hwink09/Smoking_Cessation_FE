@@ -64,7 +64,7 @@ function Sidebar() {
       key: "2",
       label: "Trang cá nhân",
       icon: <FaUser />,
-      onClick: () => navigate(`/user/profile/${user.id}`),
+      onClick: () => navigate("/user/profile"),
     },
     {
       key: "3",

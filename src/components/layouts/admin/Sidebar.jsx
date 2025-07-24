@@ -89,7 +89,7 @@ const AdminSidebar = ({ admin }) => {
       label: "Trang cá nhân",
       icon: <FaUser />,
       onClick: () => {
-        if (user?.userId) navigate(`/admin/profile/${user.userId}`);
+        if (user?.userId) navigate("/admin/profile");
         else toast.error("Không xác định được ID admin.");
       },
     },

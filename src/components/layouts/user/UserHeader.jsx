@@ -6,6 +6,7 @@ import { MdLogout } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { useAuth } from "~/hooks/useAuth";
 import NotificationService from "~/services/notificationService";
+import { toast } from "react-toastify";
 
 const UserHeader = () => {
   const { currentUser, logout } = useAuth();
@@ -29,6 +30,8 @@ const UserHeader = () => {
   const handleLogout = async () => {
     try {
       await logout();
+      navigate("/");
+      toast.success("Đăng xuất thành công!");
     } catch (error) {
       console.error("Logout error:", error);
     }

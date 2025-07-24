@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { Table, Avatar, Tag, Card, Typography, Spin } from "antd";
+import { Table, Avatar, Card, Typography, Spin } from "antd";
 import { CrownFilled } from "@ant-design/icons";
 import badgeService from "~/services/badgeService";
 
-
 const { Text } = Typography;
 
-// Hàm chuyển đổi dữ liệu cho từng bảng
 const mapRankingData = (data, type) => {
   return (data || []).map((item, idx) => ({
     key: item.user?._id || idx,
@@ -14,12 +12,14 @@ const mapRankingData = (data, type) => {
     name: item.user?.name,
     email: item.user?.email || "",
     badges: item.badges || [],
-    badgeCount: type === "badge_count" ? item.score : item.badgeCount || item.badges?.length || 0,
+    badgeCount:
+      type === "badge_count"
+        ? item.score
+        : item.badgeCount || item.badges?.length || 0,
     totalPoints: type === "points" ? item.score : undefined,
     noSmokeDays: type === "no_smoke_days" ? item.score : undefined,
     moneySaved: type === "money_saved" ? item.score : undefined,
     score: item.score,
-    // ...các trường khác nếu cần
   }));
 };
 
@@ -29,9 +29,12 @@ const baseColumns = [
     title: "#",
     dataIndex: "rank",
     key: "rank",
-    render: (_, __, idx) => (
-      idx === 0 ? <CrownFilled style={{ color: '#fadb14', fontSize: 22 }} /> : idx + 1
-    ),
+    render: (_, __, idx) =>
+      idx === 0 ? (
+        <CrownFilled style={{ color: "#fadb14", fontSize: 22 }} />
+      ) : (
+        idx + 1
+      ),
     width: 60,
     align: "center",
   },
@@ -44,7 +47,11 @@ const baseColumns = [
         <Avatar size={48} src={record.avatar} />
         <div>
           <div style={{ fontWeight: 600 }}>{record.name}</div>
-          {record.email && <Text type="secondary" style={{ fontSize: 13 }}>{record.email}</Text>}
+          {record.email && (
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              {record.email}
+            </Text>
+          )}
         </div>
       </div>
     ),
@@ -54,7 +61,11 @@ const baseColumns = [
 const getColumns = (type) => {
   let valueCol;
   let valueTitle;
-  let valueRender = (val) => <Text strong style={{ color: '#52c41a', fontSize: 18 }}>{val}</Text>;
+  let valueRender = (val) => (
+    <Text strong style={{ color: "#52c41a", fontSize: 18 }}>
+      {val}
+    </Text>
+  );
   switch (type) {
     case "points":
       valueCol = "totalPoints";
@@ -67,12 +78,20 @@ const getColumns = (type) => {
     case "money_saved":
       valueCol = "moneySaved";
       valueTitle = "Số tiền tiết kiệm";
-      valueRender = (val) => <Text strong style={{ color: '#52c41a', fontSize: 18 }}>{val?.toLocaleString()} đ</Text>;
+      valueRender = (val) => (
+        <Text strong style={{ color: "#52c41a", fontSize: 18 }}>
+          {val?.toLocaleString()} đ
+        </Text>
+      );
       break;
     case "badge_count":
       valueCol = "badgeCount";
       valueTitle = "Số huy hiệu";
-      valueRender = (val) => <Text strong style={{ color: '#faad14', fontSize: 18 }}>{val}</Text>;
+      valueRender = (val) => (
+        <Text strong style={{ color: "#faad14", fontSize: 18 }}>
+          {val}
+        </Text>
+      );
       break;
     default:
       valueCol = "score";
@@ -117,10 +136,28 @@ const Ranking = () => {
   }, []);
 
   return (
-    <div className="bg-white" style={{ margin: "40px auto", padding: 24, backgroundColor: "#fff"}}>
-      <Card bordered={false} style={{ borderRadius: 16, boxShadow: "0 2px 8px #f0f1f2", marginBottom: 32 }}>
-        <h2 style={{ textAlign: "center", fontWeight: 700, fontSize: 32, marginBottom: 24 }}>
-          <CrownFilled style={{ color: '#fadb14', marginRight: 8 }} />Bảng xếp hạng theo tổng điểm
+    <div
+      className="bg-white"
+      style={{ margin: "40px auto", padding: 24, backgroundColor: "#fff" }}
+    >
+      <Card
+        bordered={false}
+        style={{
+          borderRadius: 16,
+          boxShadow: "0 2px 8px #f0f1f2",
+          marginBottom: 32,
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            fontWeight: 700,
+            fontSize: 32,
+            marginBottom: 24,
+          }}
+        >
+          <CrownFilled style={{ color: "#fadb14", marginRight: 8 }} />
+          Bảng xếp hạng theo tổng điểm
         </h2>
         <Spin spinning={loading}>
           <Table
@@ -133,9 +170,24 @@ const Ranking = () => {
           />
         </Spin>
       </Card>
-      <Card bordered={false} style={{ borderRadius: 16, boxShadow: "0 2px 8px #f0f1f2", marginBottom: 32 }}>
-        <h2 style={{ textAlign: "center", fontWeight: 700, fontSize: 32, marginBottom: 24 }}>
-          <CrownFilled style={{ color: '#1890ff', marginRight: 8 }} />Bảng xếp hạng số ngày không hút thuốc
+      <Card
+        bordered={false}
+        style={{
+          borderRadius: 16,
+          boxShadow: "0 2px 8px #f0f1f2",
+          marginBottom: 32,
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            fontWeight: 700,
+            fontSize: 32,
+            marginBottom: 24,
+          }}
+        >
+          <CrownFilled style={{ color: "#1890ff", marginRight: 8 }} />
+          Bảng xếp hạng số ngày không hút thuốc
         </h2>
         <Spin spinning={loading}>
           <Table
@@ -148,9 +200,24 @@ const Ranking = () => {
           />
         </Spin>
       </Card>
-      <Card bordered={false} style={{ borderRadius: 16, boxShadow: "0 2px 8px #f0f1f2", marginBottom: 32 }}>
-        <h2 style={{ textAlign: "center", fontWeight: 700, fontSize: 32, marginBottom: 24 }}>
-          <CrownFilled style={{ color: '#52c41a', marginRight: 8 }} />Bảng xếp hạng số tiền tiết kiệm
+      <Card
+        bordered={false}
+        style={{
+          borderRadius: 16,
+          boxShadow: "0 2px 8px #f0f1f2",
+          marginBottom: 32,
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            fontWeight: 700,
+            fontSize: 32,
+            marginBottom: 24,
+          }}
+        >
+          <CrownFilled style={{ color: "#52c41a", marginRight: 8 }} />
+          Bảng xếp hạng số tiền tiết kiệm
         </h2>
         <Spin spinning={loading}>
           <Table
@@ -163,9 +230,24 @@ const Ranking = () => {
           />
         </Spin>
       </Card>
-      <Card bordered={false} style={{ borderRadius: 16, boxShadow: "0 2px 8px #f0f1f2", marginBottom: 32 }}>
-        <h2 style={{ textAlign: "center", fontWeight: 700, fontSize: 32, marginBottom: 24 }}>
-          <CrownFilled style={{ color: '#faad14', marginRight: 8 }} />Bảng xếp hạng số huy hiệu
+      <Card
+        bordered={false}
+        style={{
+          borderRadius: 16,
+          boxShadow: "0 2px 8px #f0f1f2",
+          marginBottom: 32,
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            fontWeight: 700,
+            fontSize: 32,
+            marginBottom: 24,
+          }}
+        >
+          <CrownFilled style={{ color: "#faad14", marginRight: 8 }} />
+          Bảng xếp hạng số huy hiệu
         </h2>
         <Spin spinning={loading}>
           <Table

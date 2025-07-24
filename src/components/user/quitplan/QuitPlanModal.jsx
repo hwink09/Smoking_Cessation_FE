@@ -8,7 +8,6 @@ import {
   Typography,
 } from "antd";
 import { quitPlanValidationRules } from "~/utils/userValidation";
-import { handleFormSubmit } from "~/utils/formHelpers";
 
 const { Title, Text } = Typography;
 

@@ -144,7 +144,7 @@ function App() {
             element={<AdminRoute element={<FeedbackPage />} />}
           />
           <Route
-            path="/admin/profile/:userId"
+            path="/admin/profile"
             element={<AdminRoute element={<ProfilePage />} />}
           />
           <Route
@@ -191,7 +191,7 @@ function App() {
               element={<UserRoute element={<UserAchievement />} />}
             />
             <Route
-              path="profile/:id"
+              path="profile"
               element={<UserRoute element={<UserProfilePage />} />}
             />
             <Route
