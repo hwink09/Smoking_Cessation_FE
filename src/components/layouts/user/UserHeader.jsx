@@ -42,9 +42,10 @@ const UserHeader = () => {
     motivation: "Thông báo",
   };
   const notificationTypeColor = {
-    reminder: "#faad14", // orange
-    motivation: "#1890ff", // blue
+    reminder: "#faad14",
+    motivation: "#1890ff",
   };
+
   const notificationContent = (
     <div style={{ width: 300, maxHeight: 400, overflowY: "auto" }}>
       <List
@@ -77,7 +78,7 @@ const UserHeader = () => {
       {
         key: "profile",
         icon: <FaUser className="text-purple-400" />,
-        label: <span className="text-white">Profile</span>,
+        label: <span className="text-gray-800">Profile</span>,
         onClick: () => {
           const role = currentUser?.role;
           const id = currentUser?.userId || currentUser?._id || currentUser?.id;
@@ -102,7 +103,7 @@ const UserHeader = () => {
       {
         key: "logout",
         icon: <MdLogout className="text-red-400" />,
-        label: <span className="text-white">Logout</span>,
+        label: <span className="text-gray-800">Logout</span>,
         onClick: handleLogout,
       },
     ];
@@ -120,7 +121,7 @@ const UserHeader = () => {
               : "/user/smoking-status"
           }
         >
-          <span className="text-white">Dashboard</span>
+          <span className="text-gray-800">Dashboard</span>
         </Link>
       ),
     };
@@ -139,7 +140,7 @@ const UserHeader = () => {
   );
 
   return (
-    <header className="fixed w-full top-0 z-50 bg-gray-900/90 backdrop-blur-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#e6f0f8] shadow-md border-b border-blue-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -160,7 +161,7 @@ const UserHeader = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className="text-white hover:text-purple-400 transition-colors"
+                className="text-gray-800 hover:text-purple-600 font-medium transition-colors duration-200"
               >
                 {item.name}
               </Link>
@@ -186,7 +187,7 @@ const UserHeader = () => {
 
             <Dropdown overlay={menu} placement="bottomRight" arrow>
               <div className="flex items-center gap-3 cursor-pointer">
-                <span className="text-white font-medium">
+                <span className="text-gray-800 font-medium">
                   {currentUser?.name || "User"}
                 </span>
                 <Avatar
