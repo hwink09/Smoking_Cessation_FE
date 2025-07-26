@@ -1,7 +1,6 @@
 import {
   AuditOutlined,
   CarryOutOutlined,
-  DashboardOutlined,
   FieldTimeOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -61,14 +60,22 @@ function Sidebar() {
     { type: "divider" },
     {
       key: "2",
-      label: "Trang cá nhân",
-      icon: <FaUser />,
+      label: (
+        <span className="text-gray-800 font-medium hover:text-purple-600">
+          <FaUser className="inline-block mr-2" />
+          Trang cá nhân
+        </span>
+      ),
       onClick: () => navigate("/user/profile"),
     },
     {
       key: "3",
-      label: "Đăng xuất",
-      icon: <MdLogout />,
+      label: (
+        <span className="text-gray-800 font-medium hover:text-red-500">
+          <MdLogout className="inline-block mr-2" />
+          Đăng xuất
+        </span>
+      ),
       onClick: async () => {
         try {
           await logout();
@@ -87,11 +94,11 @@ function Sidebar() {
     <div
       className={`h-screen sticky top-0 flex flex-col transition-all duration-300
         ${collapsed ? "w-20" : "w-64"}
-        bg-gradient-to-b from-[#1a1333] via-[#2b2256] to-[#1a2a3a]`}
+        bg-white border-r border-gray-200`}
     >
       {/* Nút thu gọn sidebar */}
       <div
-        className={`border-b border-[#1f1f1f] p-2
+        className={`border-b border-gray-200 p-2
           ${
             collapsed
               ? "flex justify-center"
@@ -100,7 +107,7 @@ function Sidebar() {
       >
         {!collapsed && (
           <Link to="/" className="absolute left-1/2 transform -translate-x-1/2">
-            <div className="text-xl font-semibold whitespace-nowrap">
+            <div className="text-xl font-semibold whitespace-nowrap text-gray-900">
               <ColourfulText text="EXHELA" />
             </div>
           </Link>
@@ -109,16 +116,16 @@ function Sidebar() {
           type="text"
           icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           onClick={() => setCollapsed(!collapsed)}
-          className="text-white"
+          className="text-gray-800"
         />
       </div>
 
       {/* Hồ sơ người dùng */}
       <div
-        className={`border-b border-[#1f1f1f] py-3 px-4 flex transition-colors duration-200 hover:bg-[#232042] hover:cursor-pointer
+        className={`border-b border-gray-200 py-3 px-4 flex transition-colors duration-200 hover:bg-gray-100 hover:cursor-pointer
           ${collapsed ? "flex-col items-center gap-3" : "items-center gap-3"}`}
       >
-        <Dropdown menu={{ items: dropdownItems }}>
+        <Dropdown menu={{ items: dropdownItems }} trigger={["click"]}>
           <a onClick={(e) => e.preventDefault()}>
             <Space>
               <Avatar
@@ -128,10 +135,10 @@ function Sidebar() {
               />
               {!collapsed && (
                 <div>
-                  <div className="text-sm font-semibold">
+                  <div className="text-sm font-semibold text-gray-900">
                     {user?.name || "Khách"}
                   </div>
-                  <div className="text-xs text-gray-400">{user?.email}</div>
+                  <div className="text-xs text-gray-500">{user?.email}</div>
                 </div>
               )}
             </Space>
@@ -151,12 +158,12 @@ function Sidebar() {
                 ${collapsed ? "justify-center w-12 h-12" : "px-6 py-2 w-11/12"}
                 ${
                   isActive
-                    ? "bg-gray-200 text-[#232042]"
-                    : "text-white hover:bg-[#232042] hover:text-[#1ecbe1]"
+                    ? "bg-gray-200 text-gray-900"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-purple-600"
                 }`}
               style={{ minHeight: collapsed ? 48 : undefined }}
             >
-              <span className={`text-lg ${isActive ? "text-[#232042]" : ""}`}>
+              <span className={`text-lg ${isActive ? "text-gray-900" : ""}`}>
                 {icon}
               </span>
               {!collapsed && <span className="font-medium ml-3">{label}</span>}

@@ -1,5 +1,6 @@
-import { useState } from "react"
-import { ArrowLeft, Save, Eye, ImageIcon, Tag, FileText } from "lucide-react"
+import { useState } from "react";
+import { ArrowLeft, Save, ImageIcon, Tag, FileText } from "lucide-react";
+import { toast } from "react-toastify";
 
 const CreateBlog = ({ onSubmit, onCancel, tags = [] }) => {
   const [formData, setFormData] = useState({
@@ -7,204 +8,187 @@ const CreateBlog = ({ onSubmit, onCancel, tags = [] }) => {
     content: "",
     image: "",
     tag: "",
-  })
-  
-  const [preview, setPreview] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState(null)
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleTagChange = (e) => {
-    setFormData((prev) => ({ ...prev, tag: e.target.value }))
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (formData.content && formData.title) {
-      try {
-        setIsSubmitting(true)
-        setError(null)
-
-        const postData = {
-          title: formData.title,
-          content: formData.content,
-          image: formData.image,
-          tags: formData.tag, 
-        }
-        await onSubmit(postData)
-        onCancel() // Call onCancel to reset the form
-      } catch (err) {
-        setError(err.message || "Failed to create post")
-      } finally {
-        setIsSubmitting(false)
-      }
-    }
-  }
-
-
-  const getTagTitle = (id) => {
-    const found = tags.find(t => t._id === id);
-    return found ? found.title : id;
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  if (preview) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <button onClick={() => setPreview(false)} className="flex items-center text-purple-600 hover:text-purple-700">
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Edit
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Publish
-          </button>
-        </div>
-        <article className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <img
-            src={formData.image || "/placeholder.svg?height=400&width=800"}
-            alt={formData.title}
-            className="w-full h-64 md:h-96 object-cover"
-          />
-          <div className="p-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">{formData.title}</h1>
-            <div className="flex items-center text-gray-600 mb-6">
-              <span className="mr-6">Bạn</span>
-              <span>{new Date().toLocaleDateString("vi-VN")}</span>
-            </div>
-            {formData.tag && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                <span className="inline-flex items-center px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
-                  <Tag className="h-3 w-3 mr-1" />
-                  {getTagTitle(formData.tag)}
-                </span>
-              </div>
-            )}
-            <div className="prose max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: formData.content.replace(/\n/g, "<br>") }} />
-            </div>
-          </div>
-        </article>
-      </div>
-    )
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { title, content, image, tag } = formData;
+
+    if (title && content) {
+      try {
+        setIsSubmitting(true);
+        setError(null);
+
+        await onSubmit({ title, content, image, tags: tag });
+        toast.success("Bài viết đã được tạo thành công!");
+        onCancel(); // Reset form
+      } catch (err) {
+        setError(err.message || "Không thể tạo bài viết");
+        toast.error("Có lỗi xảy ra khi tạo bài viết!");
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      toast.warning("Vui lòng nhập tiêu đề và nội dung bài viết!");
+    }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mb-8">
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6 flex items-center">
+          <div className="p-2 bg-red-100 rounded-lg mr-3">
+            <FileText className="h-5 w-5 text-red-600" />
+          </div>
+          <div>
+            <h4 className="font-medium">Có lỗi xảy ra</h4>
+            <p className="text-sm">{error}</p>
+          </div>
         </div>
       )}
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={onCancel} className="flex items-center text-purple-600 hover:text-purple-700">
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back
-        </button>
-        <div className="flex space-x-3">
-          <button
-            onClick={() => setPreview(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            disabled={!formData.content || !formData.title}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Preview
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400"
-          >
-            {isSubmitting ? (
-              <span className="flex items-center">
-                <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Processing...
-              </span>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Publish
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-          <FileText className="h-6 w-6 mr-2" />
-          Create New Post
-        </h1>
-        {/* Title */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={e => handleInputChange("title", e.target.value)}
-            placeholder="Enter post title..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
-            required
-          />
-        </div>
-        {/* Content */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Post Content *</label>
-          <textarea
-            value={formData.content}
-            onChange={(e) => handleInputChange("content", e.target.value)}
-            placeholder="Write your post content here..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none text-gray-900"
-            rows="15"
-            required
-          />
-        </div>
-        {/* Image URL */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <ImageIcon className="h-4 w-4 inline mr-1" />
-            Image URL
-          </label>
-          <input
-            type="url"
-            value={formData.image}
-            onChange={(e) => handleInputChange("image", e.target.value)}
-            placeholder="https://example.com/image.jpg"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
-          />
-        </div>
-        {/* Tag */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <Tag className="h-4 w-4 inline mr-1" />
-            Tag
-          </label>
-          <select
-            value={formData.tag}
-            onChange={handleTagChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
-            required
-          >
-            <option value="">Select tag...</option>
-            {tags.map((tag) => (
-              <option key={tag._id} value={tag._id}>
-                {tag.title}
-              </option>
-            ))}
-          </select>
-          <p className="text-sm text-gray-500 mt-2">Choose a relevant tag to help readers find your post</p>
-        </div>
-      </form>
-    </div>
-  )
-}
 
-export default CreateBlog
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={onCancel}
+          className="flex items-center text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2 rounded-lg transition"
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Quay lại
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition rounded-lg px-8 py-2 h-10 text-white flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? (
+            <span className="flex items-center">
+              <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              Đang xử lý...
+            </span>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              Xuất bản
+            </>
+          )}
+        </button>
+      </div>
+
+      <div className="transition hover:shadow-lg border border-slate-200 rounded-2xl bg-white overflow-hidden">
+        <div className="p-6 bg-gradient-to-br from-purple-50 via-white to-blue-50 border-b border-blue-200">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <FileText className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent mb-1">
+                Tạo bài viết mới
+              </h1>
+              <p className="text-sm text-gray-500">
+                Chia sẻ kinh nghiệm và câu chuyện của bạn
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          {/* Title */}
+          <div>
+            <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+              <FileText className="h-4 w-4 mr-2 text-blue-500" />
+              Tiêu đề bài viết *
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              placeholder="Nhập tiêu đề bài viết..."
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 transition"
+              required
+            />
+          </div>
+
+          {/* Content */}
+          <div>
+            <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+              <FileText className="h-4 w-4 mr-2 text-purple-500" />
+              Nội dung bài viết *
+            </label>
+            <textarea
+              value={formData.content}
+              onChange={(e) => handleInputChange("content", e.target.value)}
+              placeholder="Viết nội dung bài viết tại đây..."
+              rows="15"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 transition resize-none"
+              required
+            />
+          </div>
+
+          {/* Image */}
+          <div>
+            <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+              <ImageIcon className="h-4 w-4 mr-2 text-green-500" />
+              URL hình ảnh
+            </label>
+            <input
+              type="url"
+              value={formData.image}
+              onChange={(e) => handleInputChange("image", e.target.value)}
+              placeholder="https://example.com/image.jpg"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 transition"
+            />
+          </div>
+
+          {/* Tag */}
+          <div>
+            <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+              <Tag className="h-4 w-4 mr-2 text-orange-500" />
+              Thẻ chủ đề *
+            </label>
+            <select
+              value={formData.tag}
+              onChange={(e) => handleInputChange("tag", e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 transition"
+              required
+            >
+              <option value="">Chọn thẻ chủ đề...</option>
+              {tags.map((tag) => (
+                <option key={tag._id} value={tag._id}>
+                  {tag.title}
+                </option>
+              ))}
+            </select>
+            <p className="text-sm text-gray-500 mt-2 flex items-center">
+              <Tag className="h-3 w-3 mr-1" />
+              Chọn thẻ phù hợp để độc giả dễ tìm thấy bài viết của bạn
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default CreateBlog;

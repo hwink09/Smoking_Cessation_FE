@@ -6,6 +6,7 @@ import useSmokingStatus from "~/hooks/useSmokingStatus";
 import SmokingHeader from "~/components/user/smokingstatus/SmokingHeader";
 import SmokingTable from "~/components/user/smokingstatus/SmokingTable";
 import SmokingModal from "~/components/user/smokingstatus/SmokingModal";
+import ColourfulText from "~/components/ui/colourful-text";
 
 export default function SmokingStatusPage() {
   const {
@@ -24,23 +25,20 @@ export default function SmokingStatusPage() {
 
   const handleSubmit = async (values) => {
     if (!userId) {
-      message.error("User information not loaded yet. Please try again.");
+      message.error("Thông tin người dùng chưa sẵn sàng. Vui lòng thử lại.");
       return;
     }
 
-    // Validate values
     if (!values.cigarettes_per_day || !values.cost_per_pack) {
-      message.error("Please fill in all required fields.");
+      message.error("Vui lòng điền đầy đủ các trường bắt buộc.");
       return;
     }
 
     const recordData = {
       cigarettes_per_day: Number(values.cigarettes_per_day),
       cost_per_pack: Number(values.cost_per_pack),
-      frequency: values.frequency || "daily", // Include frequency field
+      frequency: values.frequency || "daily",
     };
-
-    console.log("Sending data:", recordData);
 
     try {
       if (editingRecord) {
@@ -51,8 +49,7 @@ export default function SmokingStatusPage() {
       await fetchSmokingStatus(userId);
       handleCloseModal();
     } catch (err) {
-      console.error("Error details:", err);
-      // Error messages are already handled in the hook
+      console.error("Đã xảy ra lỗi:", err);
     }
   };
 
@@ -65,8 +62,8 @@ export default function SmokingStatusPage() {
     try {
       await deleteSmokingStatus(userId);
       await fetchSmokingStatus(userId);
-    } catch {
-      // Error messages are already handled in the hook
+    } catch (err) {
+      console.error("Lỗi khi xoá:", err);
     }
   };
 
@@ -81,111 +78,56 @@ export default function SmokingStatusPage() {
     }
   }, [userId, fetchSmokingStatus]);
 
+  const isLoading = !userId;
+  const hasData = Array.isArray(statusData)
+    ? statusData.length > 0
+    : !!statusData;
+
+  const processedRecords = Array.isArray(statusData)
+    ? statusData.map((r) => ({ ...r, id: r._id }))
+    : statusData
+    ? [{ ...statusData, id: statusData._id }]
+    : [];
+
   return (
-    <div
-      style={{
-        padding: "24px",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-        minHeight: "100vh",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          background: "rgba(255, 255, 255, 0.95)",
-          borderRadius: "20px",
-          padding: "32px",
-          boxShadow: "0 10px 40px rgba(0, 0, 0, 0.1)",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-        }}
-      >
-        <SmokingHeader
-          onAddClick={() => setIsModalVisible(true)}
-          hasData={
-            statusData &&
-            (Array.isArray(statusData) ? statusData.length > 0 : true)
-          }
-        />
-        <SmokingTable
-          records={
-            Array.isArray(statusData)
-              ? statusData.map((r) => ({ ...r, id: r._id }))
-              : statusData
-              ? [{ ...statusData, id: statusData._id }]
-              : []
-          }
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+    <div className="min-h-screen text-slate-800 p-4 max-w-6xl mx-auto">
+      {isLoading ? (
+        <div className="flex justify-center items-center mt-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+        </div>
+      ) : (
+        <>
+          <div className="text-center mb-8 bg-gradient-to-br from-purple-50 via-white to-blue-50 p-8 rounded-2xl shadow-md border border-blue-200">
+            <div className="relative mb-10">
+              <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full" />
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 bg-clip-text text-transparent mb-4 pb-2 border-b-2 border-blue-200 inline-block">
+                Tình trạng <ColourfulText text="hút thuốc" />
+              </h1>
+              <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
+                Theo dõi thói quen hút thuốc để có kế hoạch bỏ thuốc hiệu quả!
+              </p>
+            </div>
 
-        <SmokingModal
-          visible={isModalVisible}
-          editingRecord={editingRecord}
-          onSubmit={handleSubmit}
-          onCancel={handleCloseModal}
-        />
-      </div>
+            <SmokingHeader
+              onAddClick={() => setIsModalVisible(true)}
+              hasData={hasData}
+            />
+          </div>
 
-      {/* Custom CSS for enhanced animations */}
-      <style>{`
-        .ant-table-tbody > tr:hover {
-          transform: translateY(-2px) !important;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-          transition: all 0.3s ease !important;
-        }
+          <SmokingTable
+            records={processedRecords}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
 
-        .ant-card {
-          transition: all 0.3s ease !important;
-        }
-
-        .ant-card:hover {
-          transform: translateY(-2px) !important;
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .ant-btn {
-          transition: all 0.3s ease !important;
-        }
-
-        .ant-modal-content {
-          border-radius: 16px !important;
-          overflow: hidden !important;
-        }
-
-        .ant-modal-header {
-          border-radius: 16px 16px 0 0 !important;
-        }
-
-        .ant-form-item-label > label {
-          font-weight: 600 !important;
-        }
-
-        .ant-input-number,
-        .ant-picker {
-          border-radius: 8px !important;
-        }
-
-        .ant-statistic-title {
-          font-size: 14px !important;
-        }
-
-        .ant-statistic-content-value {
-          font-size: 24px !important;
-        }
-
-        /* Responsive improvements */
-        @media (max-width: 768px) {
-          .ant-table-scroll {
-            overflow-x: auto !important;
-          }
-
-          .ant-statistic-content-value {
-            font-size: 20px !important;
-          }
-        }
-      `}</style>
+          <SmokingModal
+            visible={isModalVisible}
+            editingRecord={editingRecord}
+            onSubmit={handleSubmit}
+            onCancel={handleCloseModal}
+          />
+        </>
+      )}
     </div>
   );
 }

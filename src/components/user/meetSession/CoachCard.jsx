@@ -1,80 +1,109 @@
-import { Card, Avatar, Typography, Rate, Tag, Button } from "antd";
-import { InfoBox } from "~/components/common/QuitPlanComponents";
 import React from "react";
+import { Card, Avatar, Typography, Rate, Tag, Button, Space } from "antd";
+import { Star, Calendar, User, Award } from "lucide-react";
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph } = Typography;
 
 const CoachCard = ({ coach, onSelectCoach }) => {
   return (
     <Card
       hoverable
-      className="rounded-lg border-0 shadow-lg bg-white transition-all group overflow-hidden flex flex-col"
+      className="rounded-2xl border-0 shadow-lg bg-white transition-all duration-300 ease-in-out group overflow-hidden flex flex-col hover:shadow-xl hover:scale-105"
       styles={{ body: { padding: 0, height: "100%" } }}
     >
-      <div className="bg-blue-500 p-4 text-white flex items-center min-h-[120px]">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white flex items-center min-h-[140px] relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20" />
         <Avatar
-          size={64}
+          size={80}
           src={coach.coach_id?.avatar_url}
-          className="border-3 border-white shadow-lg group-hover:scale-110 transition-transform"
+          className="border-4 border-white shadow-xl group-hover:scale-110 transition-transform duration-300 relative z-10"
         />
-        <div className="ml-3">
+        <div className="ml-4 relative z-10">
           <Title
-            level={5}
-            className="m-0 mb-2 text-white"
+            level={4}
+            className="m-0 mb-3 text-white font-bold"
             ellipsis={{ rows: 2, tooltip: coach.coach_id?.name }}
           >
             {coach.coach_id?.name || "Ẩn danh"}
           </Title>
-          <Tag className="bg-white bg-opacity-20 border-0 text-white text-xs">
-            {coach.specialization?.length > 20
-              ? `${coach.specialization.slice(0, 20)}...`
+          <Tag className="bg-white/20 backdrop-blur-sm border-0 text-white text-sm px-3 py-1 rounded-full font-medium">
+            {coach.specialization?.length > 25
+              ? `${coach.specialization.slice(0, 25)}...`
               : coach.specialization}
           </Tag>
         </div>
       </div>
 
-      <div className="p-4 flex flex-col flex-1">
-        <div className="space-y-3 mb-4">
-          <InfoBox
-            label="Kinh nghiệm"
-            value={`${coach.experience_years} năm`}
-            color="green"
-          />
-          <InfoBox
-            label="Buổi hỗ trợ"
-            value={coach.total_sessions}
-            color="blue"
-          />
-          <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 flex justify-between items-center">
-            <Text className="text-yellow-800 text-sm">Đánh giá</Text>
-            <div className="flex items-center gap-1">
+      {/* Body */}
+      <div className="p-6 flex flex-col flex-1 bg-gradient-to-b from-white to-gray-50">
+        <div className="space-y-4 mb-6">
+          {/* Experience */}
+          <div className="bg-green-50 p-4 rounded-lg border border-green-100 flex justify-between items-center">
+            <Space className="text-green-800">
+              <Award size={16} className="text-green-600" />
+              <span className="font-medium">Kinh nghiệm</span>
+            </Space>
+            <span className="text-green-700 font-bold text-lg">
+              {coach.experience_years} năm
+            </span>
+          </div>
+
+          {/* Sessions */}
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 flex justify-between items-center">
+            <Space className="text-blue-800">
+              <Calendar size={16} className="text-blue-600" />
+              <span className="font-medium">Buổi hỗ trợ</span>
+            </Space>
+            <span className="text-blue-700 font-bold text-lg">
+              {coach.total_sessions}
+            </span>
+          </div>
+
+          {/* Rating */}
+          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100 flex justify-between items-center">
+            <Space className="text-yellow-800">
+              <Star size={16} className="text-yellow-600" />
+              <span className="font-medium">Đánh giá</span>
+            </Space>
+            <div className="flex items-center gap-2">
               <Rate
                 disabled
                 allowHalf
                 defaultValue={coach.rating_avg}
-                style={{ fontSize: "12px" }}
+                style={{ fontSize: "14px" }}
               />
-              <Text className="text-yellow-600 text-xs">
+              <span className="text-yellow-600 font-bold">
                 ({coach.rating_avg})
-              </Text>
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="mb-4 flex-1">
-          <Text strong className="block mb-2 text-sm">Giới thiệu:</Text>
-          <Paragraph ellipsis={{ rows: 3 }} className="text-xs text-gray-600">
-            {coach.bio}
-          </Paragraph>
+        {/* Bio */}
+        <div className="mb-6 flex-1">
+          <div className="flex items-center space-x-2 mb-3">
+            <User size={16} className="text-gray-600" />
+            <span className="font-semibold text-gray-700">Giới thiệu:</span>
+          </div>
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <Paragraph
+              ellipsis={{ rows: 3 }}
+              className="text-sm text-gray-600 m-0"
+            >
+              {coach.bio}
+            </Paragraph>
+          </div>
         </div>
 
+        {/* Select button */}
         <Button
           type="primary"
           size="large"
-          className="w-full bg-pink-500 hover:bg-pink-600"
+          className="w-full h-12 bg-gradient-to-r from-pink-500 to-purple-600 border-0 hover:from-pink-600 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg font-semibold"
           onClick={() => onSelectCoach(coach)}
         >
-          Chọn tư vấn
+          💬 Chọn tư vấn
         </Button>
       </div>
     </Card>
