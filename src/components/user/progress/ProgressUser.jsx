@@ -67,7 +67,8 @@ function ProgressUser() {
       if (!planData)
         return setUserState((prev) => ({
           ...prev,
-          error: "No approved quit plan found. Please contact your coach.",
+          error:
+            "Không tìm thấy kế hoạch bỏ thuốc nào được chấp thuận. Vui lòng liên hệ với huấn luyện viên của bạn.",
           loading: false,
         }));
 
@@ -186,7 +187,7 @@ function ProgressUser() {
       <div className="w-full bg-gradient-to-br from-purple-50 via-white to-blue-50 min-h-screen py-8">
         <div className="max-w-6xl mx-auto px-4">
           <Alert
-            message="Lỗi tải dữ liệu"
+            message="Bạn cần có gói thành viên để tiếp tục"
             description={userState.error}
             type="error"
             showIcon

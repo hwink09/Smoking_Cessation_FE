@@ -33,7 +33,7 @@ const FilterBar = ({
     <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
       <div className="text-center mb-6">
         <h2 className="text-4xl font-bold mb-2">
-          <ColourfulText text="Blog" />
+          <ColourfulText text="Bài viết" />
         </h2>
       </div>
 

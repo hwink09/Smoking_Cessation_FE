@@ -1,10 +1,15 @@
-import { Card, Avatar, Typography, Rate, Tag, Button } from "antd";
+import { Card, Avatar, Typography, Rate, Tag, Button, Tooltip } from "antd";
 import { InfoBox } from "~/components/common/QuitPlanComponents";
+import { useUserSubscription } from "~/hooks/useUserSubscription";
 import React from "react";
 
 const { Title, Paragraph, Text } = Typography;
 
 const CoachCard = ({ coach, onSelectCoach }) => {
+  const { canAccessCoach, subscription } = useUserSubscription();
+  const hasAccess = canAccessCoach();
+  const isFreePlan = subscription?.name?.toLowerCase() === "free";
+
   return (
     <Card
       hoverable
@@ -70,14 +75,29 @@ const CoachCard = ({ coach, onSelectCoach }) => {
           </Paragraph>
         </div>
 
-        <Button
-          type="primary"
-          size="large"
-          className="w-full bg-pink-500 hover:bg-pink-600"
-          onClick={() => onSelectCoach(coach)}
+        <Tooltip
+          title={
+            !hasAccess
+              ? "Người dùng Free cần mua gói Plus hoặc Premium để được chọn huấn luyện viên"
+              : ""
+          }
         >
-          Chọn làm huấn luyện viên
-        </Button>
+          <Button
+            type="primary"
+            size="large"
+            className={`w-full ${
+              hasAccess
+                ? "bg-pink-500 hover:bg-pink-600"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
+            onClick={() => hasAccess && onSelectCoach(coach)}
+            disabled={!hasAccess}
+          >
+            {hasAccess
+              ? "Chọn làm huấn luyện viên"
+              : "Cần mua gói Plus/Premium"}
+          </Button>
+        </Tooltip>
       </div>
     </Card>
   );

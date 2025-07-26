@@ -3,11 +3,13 @@ import { Typography, Alert, Button, message } from "antd";
 import { StarOutlined } from "@ant-design/icons";
 import { useUserQuitPlan } from "~/hooks/useUserQuitPlan";
 import { useAuth } from "~/hooks/useAuth";
+import { useUserSubscription } from "~/hooks/useUserSubscription";
 import useCoachRating from "~/hooks/useCoachRating";
 import TaskCard from "./TaskCard";
 import ProgressCard from "~/components/common/ProgressCard";
 import StatCard from "~/components/common/StatCard";
 import RatingCoach from "./RatingCoach";
+import SubscriptionUpgradeCard from "~/components/common/SubscriptionUpgradeCard";
 import {
   StageLoadingSkeleton,
   StageErrorCard,
@@ -22,6 +24,13 @@ const { Title, Text, Paragraph } = Typography;
 const UserStageView = () => {
   const { currentUser: user } = useAuth();
   const [showRatingModal, setShowRatingModal] = useState(false);
+
+  // Kiểm tra gói thành viên
+  const {
+    subscription,
+    loading: subscriptionLoading,
+    canAccessCoach,
+  } = useUserSubscription();
 
   const {
     currentStage,
@@ -107,10 +116,22 @@ const UserStageView = () => {
     setShowRatingModal(false);
   }, []);
 
-  if (loading)
+  if (loading || subscriptionLoading)
     return <StageLoadingSkeleton text="Đang tải thông tin giai đoạn..." />;
+
   if (error)
     return <StageErrorCard message="Lỗi tải dữ liệu" description={error} />;
+
+  // Kiểm tra quyền truy cập - nếu có quit plan với coach nhưng không có quyền
+  if (myQuitPlan?.coach_id && !canAccessCoach()) {
+    return (
+      <SubscriptionUpgradeCard
+        title="Gói thành viên đã hết hạn"
+        description="Gói thành viên của bạn đã hết hạn. Vui lòng gia hạn để tiếp tục sử dụng dịch vụ huấn luyện viên."
+        showPricing={false}
+      />
+    );
+  }
 
   if (!currentStage) {
     if (allStagesCompleted) {
@@ -242,6 +263,20 @@ const UserStageView = () => {
           </div>
         )}
 
+        {currentStage.end_date && (
+          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-4">
+            <Text className="text-blue-800 text-sm">
+              📅 <strong>Ngày kết thúc giai đoạn:</strong>{" "}
+              {new Date(currentStage.end_date).toLocaleDateString("vi-VN")}
+              {stageTasks.length > 0 && (
+                <span className="ml-2 text-blue-600">
+                  (Nhiệm vụ này chỉ có thể hoàn thành vào ngày này)
+                </span>
+              )}
+            </Text>
+          </div>
+        )}
+
         <div className="grid md:grid-cols-3 gap-4 mb-6">
           <StatCard
             label="Giai đoạn hiện tại"
@@ -284,6 +319,8 @@ const UserStageView = () => {
                 task={task}
                 index={i}
                 onComplete={handleCompleteTask}
+                currentStage={currentStage}
+                stageTasks={stageTasks}
               />
             ))
           ) : (

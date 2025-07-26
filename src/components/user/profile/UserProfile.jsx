@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { Button, Tag, Card, Space } from "antd";
+import { CrownOutlined, StarOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import userService from "../../../services/userService";
+import { useUserSubscription } from "~/hooks/useUserSubscription";
 
 const formatDate = (dateString) =>
   dateString
@@ -32,6 +36,16 @@ export default function UserProfile() {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  // Hook để lấy thông tin subscription
+  const {
+    subscription,
+    loading: subscriptionLoading,
+    canAccessCoach,
+    hasPlusOrPremium,
+    isSubscriptionActive,
+  } = useUserSubscription();
 
   useEffect(() => {
     (async () => {
@@ -154,20 +168,123 @@ export default function UserProfile() {
             </div>
 
             <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-600">
-                  Gói thành viên
-                </h3>
-                <p className="text-lg text-gray-900 capitalize">
-                  {getMembershipStatus(userProfile?.membership)}
-                </p>
-                {userProfile?.membership?.expiresAt &&
-                  userProfile?.membership?.subscriptionType !== "free" && (
-                    <p className="text-sm text-gray-500">
-                      Hết hạn: {formatDate(userProfile.membership.expiresAt)}
-                    </p>
+              {/* Subscription Info Card */}
+              <Card className="border border-gray-200 shadow-sm">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Gói thành viên
+                    </h3>
+                    {subscription && (
+                      <Tag
+                        color={
+                          subscription.name === "free"
+                            ? "default"
+                            : subscription.name === "plus"
+                            ? "blue"
+                            : subscription.name === "premium"
+                            ? "gold"
+                            : "default"
+                        }
+                        className="text-sm font-medium px-3 py-1"
+                      >
+                        {subscription.name?.toUpperCase() || "FREE"}
+                      </Tag>
+                    )}
+                  </div>
+
+                  {subscription ? (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          Trạng thái:
+                        </span>
+                        <Tag color={isSubscriptionActive() ? "green" : "red"}>
+                          {isSubscriptionActive()
+                            ? "Đang hoạt động"
+                            : "Hết hạn"}
+                        </Tag>
+                      </div>
+
+                      {subscription.end_date &&
+                        subscription.name !== "free" && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">
+                              Hết hạn:
+                            </span>
+                            <span className="text-sm font-medium">
+                              {formatDate(subscription.end_date)}
+                            </span>
+                          </div>
+                        )}
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          Quyền truy cập coach:
+                        </span>
+                        <Tag color={canAccessCoach() ? "green" : "orange"}>
+                          {canAccessCoach() ? "Có quyền" : "Cần nâng cấp"}
+                        </Tag>
+                      </div>
+
+                      {!hasPlusOrPremium() && (
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-blue-800">
+                                Nâng cấp để sử dụng huấn luyện viên
+                              </p>
+                              <p className="text-xs text-blue-600">
+                                Nhận hỗ trợ cá nhân từ chuyên gia
+                              </p>
+                            </div>
+                            <Button
+                              type="primary"
+                              size="small"
+                              icon={<CrownOutlined />}
+                              onClick={() => navigate("/#pricing")}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              Nâng cấp
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {hasPlusOrPremium() && !isSubscriptionActive() && (
+                        <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-orange-800">
+                                Gói đã hết hạn
+                              </p>
+                              <p className="text-xs text-orange-600">
+                                Gia hạn để tiếp tục sử dụng dịch vụ
+                              </p>
+                            </div>
+                            <Button
+                              type="primary"
+                              size="small"
+                              icon={<StarOutlined />}
+                              onClick={() => navigate("/#pricing")}
+                              className="bg-orange-600 hover:bg-orange-700"
+                            >
+                              Gia hạn
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-600">
+                        Đang tải thông tin gói thành viên...
+                      </p>
+                    </div>
                   )}
-              </div>
+                </div>
+              </Card>
+
               <div>
                 <h3 className="text-sm font-medium text-gray-600">
                   Trạng thái tài khoản

@@ -7,14 +7,17 @@ import {
   Avatar,
   Typography,
   Space,
+  Alert,
 } from "antd";
 import { quitPlanValidationRules } from "~/utils/userValidation";
+import { useUserSubscription } from "~/hooks/useUserSubscription";
 import { Calendar, User, FileText } from "lucide-react";
 
 const { Title, Text, Paragraph } = Typography;
 
 const QuitPlanModal = ({ visible, onCancel, onSubmit, coach }) => {
   const [form] = Form.useForm();
+  const { canAccessCoach, subscription } = useUserSubscription();
 
   const handleFinish = (values) => {
     const formatted = {
@@ -63,6 +66,17 @@ const QuitPlanModal = ({ visible, onCancel, onSubmit, coach }) => {
       <Paragraph className="text-gray-600 mb-6 text-center bg-blue-50 p-4 rounded-lg border border-blue-200">
         Vui lòng điền đầy đủ thông tin để tạo kế hoạch cai thuốc phù hợp với bạn
       </Paragraph>
+
+      {/* Cảnh báo về gói thành viên */}
+      {!canAccessCoach() && (
+        <Alert
+          message="Lưu ý về gói thành viên"
+          description="Bạn đang sử dụng gói Free. Yêu cầu này sẽ được gửi nhưng cần nâng cấp lên gói Plus hoặc Premium để huấn luyện viên có thể phản hồi và tạo kế hoạch."
+          type="warning"
+          showIcon
+          className="mb-6"
+        />
+      )}
 
       {coach && (
         <div className="bg-gray-50 p-6 rounded-lg border mb-8 flex items-center">
