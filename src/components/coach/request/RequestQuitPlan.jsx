@@ -1,23 +1,11 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import {
-  Table,
-  Tag,
-  Avatar,
-  Button,
-  Popconfirm,
-  message,
-  Modal,
-  Form,
-  Input,
-  DatePicker,
-  Empty,
-  Typography,
-} from "antd";
+import React, { useEffect, useState, useCallback } from "react";
+import { message, Form } from "antd";
 import dayjs from "dayjs";
 import { useAuth } from "~/hooks/useAuth";
 import { useQuitPlanData } from "~/hooks/useQuitPlanData";
-
-const { Title } = Typography;
+import PageHeader from "./PageHeader";
+import RequestTable from "./RequestTable";
+import CreatePlanModal from "./CreatePlanModal";
 
 const RequestQuitPlan = () => {
   const { currentUser } = useAuth();
@@ -131,184 +119,28 @@ const RequestQuitPlan = () => {
     }
   };
 
-  const columns = useMemo(
-    () => [
-      {
-        title: "Người dùng",
-        key: "user",
-        render: (_, record) => (
-          <div className="flex items-center gap-2">
-            <Avatar src={record.user_id.avatar_url} />
-            <div>
-              <div>{record.user_id.name}</div>
-              <div className="text-gray-400 text-xs">
-                {record.user_id.email}
-              </div>
-            </div>
-          </div>
-        ),
-      },
-      {
-        title: "Tên kế hoạch",
-        dataIndex: "name",
-        key: "name",
-      },
-      {
-        title: "Lý do",
-        dataIndex: "reason",
-        key: "reason",
-      },
-      {
-        title: "Ngày bắt đầu",
-        dataIndex: "start_date",
-        key: "start_date",
-        render: (date) => dayjs(date).format("DD/MM/YYYY"),
-      },
-      {
-        title: "Ngày bỏ thuốc",
-        dataIndex: "target_quit_date",
-        key: "target_quit_date",
-        render: (date) => dayjs(date).format("DD/MM/YYYY"),
-      },
-      {
-        title: "Trạng thái",
-        dataIndex: "status",
-        key: "status",
-        render: (status) => {
-          const colors = {
-            approved: "green",
-            rejected: "red",
-            created: "blue",
-            pending: "orange",
-          };
-          return <Tag color={colors[status]}>{status.toUpperCase()}</Tag>;
-        },
-      },
-      {
-        title: "Hành động",
-        key: "action",
-        render: (_, record) => {
-          const { status, _id } = record;
-          if (status === "pending") {
-            return (
-              <div className="flex gap-2">
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleApprove(_id)}
-                >
-                  Duyệt
-                </Button>
-                <Popconfirm
-                  title="Bạn có chắc muốn từ chối yêu cầu này?"
-                  onConfirm={() => handleReject(_id)}
-                  okText="Từ chối"
-                  cancelText="Hủy"
-                >
-                  <Button danger size="small">
-                    Từ chối
-                  </Button>
-                </Popconfirm>
-              </div>
-            );
-          }
-
-          if (status === "approved") {
-            return (
-              <Button
-                type="primary"
-                size="small"
-                onClick={() => showCreateModal(record)}
-              >
-                Tạo kế hoạch
-              </Button>
-            );
-          }
-
-          if (status === "created") {
-            return (
-              <span className="text-green-600 font-medium">
-                Đã tạo kế hoạch
-              </span>
-            );
-          }
-
-          return <span>-</span>;
-        },
-      },
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [handleApprove, handleReject]
-  );
-
   return (
-    <section className="p-10 bg-gradient-to-b from-gray-900 to-black min-h-screen text-white">
-      <Title level={2} style={{ textAlign: "center", color: "#fff" }}>
-        Danh sách yêu cầu kế hoạch
-      </Title>
-      <div className="mt-6 bg-white rounded-xl shadow-lg p-6">
-        <Table
-          rowKey="_id"
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <PageHeader />
+
+        <RequestTable
+          data={data}
           loading={loading || localLoading}
-          dataSource={data}
-          columns={columns}
-          pagination={{ pageSize: 5 }}
-          locale={{
-            emptyText: (
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description="Không có yêu cầu kế hoạch nào từ người dùng chọn bạn làm huấn luyện viên"
-              />
-            ),
-          }}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          onCreatePlan={showCreateModal}
         />
 
-        <Modal
-          title="Tạo kế hoạch từ yêu cầu"
+        <CreatePlanModal
           open={openModal}
           onCancel={() => setOpenModal(false)}
           onOk={handleCreatePlan}
-          okText="Tạo kế hoạch"
-          cancelText="Hủy"
-        >
-          <Form layout="vertical" form={form}>
-            <Form.Item
-              label="Tên kế hoạch"
-              name="name"
-              rules={[
-                { required: true, message: "Vui lòng nhập tên kế hoạch" },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Lý do"
-              name="reason"
-              rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
-            >
-              <Input.TextArea rows={3} />
-            </Form.Item>
-
-            <Form.Item
-              label="Ngày bắt đầu"
-              name="start_date"
-              rules={[{ required: true, message: "Chọn ngày bắt đầu" }]}
-            >
-              <DatePicker format="DD/MM/YYYY" className="w-full" />
-            </Form.Item>
-
-            <Form.Item
-              label="Ngày bỏ thuốc"
-              name="target_quit_date"
-              rules={[{ required: true, message: "Chọn ngày bỏ thuốc" }]}
-            >
-              <DatePicker format="DD/MM/YYYY" className="w-full" />
-            </Form.Item>
-          </Form>
-        </Modal>
+          form={form}
+          selectedRequest={selectedRequest}
+        />
       </div>
-    </section>
+    </div>
   );
 };
 
