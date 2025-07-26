@@ -1,6 +1,11 @@
 import React from "react";
 import { Table, Button, Modal, Input, Select, Tag, Spin } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
 import useStages from "~/hooks/useStages";
 import { useTaskData } from "~/hooks/useTaskData";
 import ColourfulText from "~/components/ui/colourful-text";
@@ -11,13 +16,15 @@ const { Option } = Select;
 // Tìm ngày kết thúc lớn nhất của các stage hiện tại (chỉ khi tạo mới)
 function getPrevEndDate(stages) {
   if (!stages || stages.length === 0) return null;
-  const sorted = [...stages].sort((a, b) => new Date(a.end_date) - new Date(b.end_date));
+  const sorted = [...stages].sort(
+    (a, b) => new Date(a.end_date) - new Date(b.end_date)
+  );
   return sorted[sorted.length - 1].end_date;
 }
 function getNextDay(dateStr) {
   const d = new Date(dateStr);
   d.setDate(d.getDate() + 1);
-  return d.toISOString().split('T')[0];
+  return d.toISOString().split("T")[0];
 }
 
 const Stage = ({ planId }) => {
@@ -45,12 +52,8 @@ const Stage = ({ planId }) => {
 
   const [taskModalOpen, setTaskModalOpen] = React.useState(false);
   const [selectedStageForTask, setSelectedStageForTask] = React.useState(null);
-  const {
-    fetchTasksByStageId,
-    createTask,
-    updateTask,
-    deleteTask,
-  } = useTaskData();
+  const { fetchTasksByStageId, createTask, updateTask, deleteTask } =
+    useTaskData();
 
   const handleOpenTaskModal = (stage) => {
     setSelectedStageForTask(stage);
@@ -84,19 +87,19 @@ const Stage = ({ planId }) => {
       title: "Kế hoạch",
       dataIndex: "plan_id",
       key: "plan_id",
-      render: (id) => plans.find(p => p._id === id)?.name || id,
+      render: (id) => plans.find((p) => p._id === id)?.name || id,
     },
     {
       title: "Ngày bắt đầu",
       dataIndex: "start_date",
       key: "start_date",
-      render: (date) => new Date(date).toLocaleDateString('vi-VN'),
+      render: (date) => new Date(date).toLocaleDateString("vi-VN"),
     },
     {
       title: "Ngày kết thúc",
       dataIndex: "end_date",
       key: "end_date",
-      render: (date) => new Date(date).toLocaleDateString('vi-VN'),
+      render: (date) => new Date(date).toLocaleDateString("vi-VN"),
     },
     {
       title: "Trạng thái",
@@ -117,10 +120,22 @@ const Stage = ({ planId }) => {
           <Button type="link" onClick={() => handleOpenTaskModal(record)}>
             Nhiệm vụ
           </Button>
-          <Button type="link" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => openEditModal(record)}
+          >
             Sửa
           </Button>
-          <Button type="link" danger icon={<DeleteOutlined />} onClick={() => { setStageToDelete(record._id); setShowConfirm(true); }}>
+          <Button
+            type="link"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => {
+              setStageToDelete(record._id);
+              setShowConfirm(true);
+            }}
+          >
             Xóa
           </Button>
         </>
@@ -147,49 +162,74 @@ const Stage = ({ planId }) => {
       <Input
         placeholder="Tiêu đề giai đoạn"
         value={editedStage.title}
-        onChange={e => setEditedStage({ ...editedStage, title: e.target.value })}
+        onChange={(e) =>
+          setEditedStage({ ...editedStage, title: e.target.value })
+        }
         status={errors.title ? "error" : ""}
       />
       {errors.title && <div style={{ color: "#ff4d4f" }}>{errors.title}</div>}
       <Input.TextArea
         placeholder="Mô tả giai đoạn"
         value={editedStage.description}
-        onChange={e => setEditedStage({ ...editedStage, description: e.target.value })}
+        onChange={(e) =>
+          setEditedStage({ ...editedStage, description: e.target.value })
+        }
         status={errors.description ? "error" : ""}
         rows={4}
       />
-      {errors.description && <div style={{ color: "#ff4d4f" }}>{errors.description}</div>}
+      {errors.description && (
+        <div style={{ color: "#ff4d4f" }}>{errors.description}</div>
+      )}
       <Input
         type="number"
         placeholder="Số thứ tự giai đoạn"
         value={editedStage.stage_number}
-        onChange={e => setEditedStage({ ...editedStage, stage_number: e.target.value })}
+        onChange={(e) =>
+          setEditedStage({ ...editedStage, stage_number: e.target.value })
+        }
         status={errors.stage_number ? "error" : ""}
       />
-      {errors.stage_number && <div style={{ color: "#ff4d4f" }}>{errors.stage_number}</div>}
+      {errors.stage_number && (
+        <div style={{ color: "#ff4d4f" }}>{errors.stage_number}</div>
+      )}
       <Input
         type="date"
         placeholder="Ngày bắt đầu"
         value={editedStage.start_date}
         min={minStartDate}
-        onChange={e => setEditedStage({ ...editedStage, start_date: e.target.value })}
+        onChange={(e) =>
+          setEditedStage({ ...editedStage, start_date: e.target.value })
+        }
         status={errors.start_date ? "error" : ""}
       />
-      {errors.start_date && <div style={{ color: "#ff4d4f" }}>{errors.start_date}</div>}
+      {errors.start_date && (
+        <div style={{ color: "#ff4d4f" }}>{errors.start_date}</div>
+      )}
       <Input
         type="date"
         placeholder="Ngày kết thúc"
         value={editedStage.end_date}
-        onChange={e => setEditedStage({ ...editedStage, end_date: e.target.value })}
+        onChange={(e) =>
+          setEditedStage({ ...editedStage, end_date: e.target.value })
+        }
         status={errors.end_date ? "error" : ""}
       />
-      {errors.end_date && <div style={{ color: "#ff4d4f" }}>{errors.end_date}</div>}
+      {errors.end_date && (
+        <div style={{ color: "#ff4d4f" }}>{errors.end_date}</div>
+      )}
       <Button
         type={editedStage.is_completed ? "default" : "primary"}
-        onClick={() => setEditedStage({ ...editedStage, is_completed: !editedStage.is_completed })}
+        onClick={() =>
+          setEditedStage({
+            ...editedStage,
+            is_completed: !editedStage.is_completed,
+          })
+        }
         style={{ marginTop: 8 }}
       >
-        {editedStage.is_completed ? "Đánh dấu chưa hoàn thành" : "Đánh dấu hoàn thành"}
+        {editedStage.is_completed
+          ? "Đánh dấu chưa hoàn thành"
+          : "Đánh dấu hoàn thành"}
       </Button>
     </div>
   );
@@ -197,8 +237,17 @@ const Stage = ({ planId }) => {
   // Loading
   if (loading && stages.length === 0) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Spin size="large" tip="Đang tải..." />
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Spin size="large" tip="Đang tải...">
+          <div />
+        </Spin>
       </div>
     );
   }
@@ -206,23 +255,57 @@ const Stage = ({ planId }) => {
   // Error
   if (error) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ color: "#ff4d4f", fontSize: 18, background: "#fff1f0", padding: 24, borderRadius: 8, border: "1px solid #ffa39e" }}>{error}</div>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            color: "#ff4d4f",
+            fontSize: 18,
+            background: "#fff1f0",
+            padding: 24,
+            borderRadius: 8,
+            border: "1px solid #ffa39e",
+          }}
+        >
+          {error}
+        </div>
       </div>
     );
   }
 
   return (
-    <section style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}>
+    <section
+      style={{ padding: "40px 0", background: "#f9fafb", minHeight: "100vh" }}
+    >
       <div style={{ textAlign: "center", marginBottom: 40 }}>
-        <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8, color: "black" }}>
+        <h2
+          style={{
+            fontSize: 32,
+            fontWeight: 700,
+            marginBottom: 8,
+            color: "black",
+          }}
+        >
           Quản lý <ColourfulText text="Giai đoạn" />
         </h2>
         <p style={{ color: "#666", fontSize: 18 }}>
           Quản lý và tổ chức các giai đoạn cho các kế hoạch cai thuốc lá
         </p>
       </div>
-      <div style={{ maxWidth: 1200, margin: "0 auto 32px auto", display: "flex", justifyContent: "flex-end" }}>
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto 32px auto",
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -233,7 +316,16 @@ const Stage = ({ planId }) => {
           Thêm giai đoạn
         </Button>
       </div>
-      <div style={{ maxWidth: 1200, margin: "0 auto", background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 2px 8px #f0f1f2" }}>
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          background: "#fff",
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: "0 2px 8px #f0f1f2",
+        }}
+      >
         <Table
           columns={columns}
           dataSource={stages}
@@ -255,7 +347,7 @@ const Stage = ({ planId }) => {
         confirmLoading={loading}
         okText={isNew ? "Thêm" : "Lưu"}
         cancelText="Hủy"
-        destroyOnClose
+        destroyOnHidden
       >
         {modalForm}
       </Modal>
@@ -274,8 +366,8 @@ const Stage = ({ planId }) => {
         okText="Xóa"
         okButtonProps={{ danger: true }}
         cancelText="Hủy"
-        icon={<ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />}
-        destroyOnClose
+        icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
+        destroyOnHidden
       >
         Bạn có chắc chắn muốn xóa giai đoạn này không?
       </Modal>
@@ -284,8 +376,10 @@ const Stage = ({ planId }) => {
         onCancel={handleCloseTaskModal}
         footer={null}
         width={1000}
-        title={`Quản lý nhiệm vụ - Giai đoạn: ${selectedStageForTask?.title || ""}`}
-        destroyOnClose
+        title={`Quản lý nhiệm vụ - Giai đoạn: ${
+          selectedStageForTask?.title || ""
+        }`}
+        destroyOnHidden
       >
         {taskModalOpen && (
           <TasksManager

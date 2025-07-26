@@ -224,7 +224,9 @@ const QuitPlans = () => {
           justifyContent: "center",
         }}
       >
-        <Spin size="large" tip="Đang tải..." />
+        <Spin size="large" tip="Đang tải...">
+          <div />
+        </Spin>
       </div>
     );
   }
@@ -293,7 +295,7 @@ const QuitPlans = () => {
           confirmLoading={loading}
           okText={isNew ? "Thêm" : "Lưu"}
           cancelText="Hủy"
-          destroyOnClose
+          destroyOnHidden
         >
           {modalForm}
         </Modal>
@@ -313,7 +315,7 @@ const QuitPlans = () => {
           okButtonProps={{ danger: true }}
           cancelText="Hủy"
           icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
-          destroyOnClose
+          destroyOnHidden
         >
           Bạn có chắc chắn muốn xóa kế hoạch cai thuốc này không?
         </Modal>
@@ -324,7 +326,7 @@ const QuitPlans = () => {
         footer={null}
         width={900}
         title="Quản lý giai đoạn cho kế hoạch"
-        destroyOnClose
+        destroyOnHidden
         style={{ top: 32 }}
       >
         {stageModalOpen && <Stage planId={selectedPlanId} />}

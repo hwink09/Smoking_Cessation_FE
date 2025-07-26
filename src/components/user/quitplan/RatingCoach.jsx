@@ -94,14 +94,6 @@ const RatingCoach = ({
     }
   };
 
-  const ratingDescriptions = {
-    1: "Rất không hài lòng",
-    2: "Không hài lòng",
-    3: "Bình thường",
-    4: "Hài lòng",
-    5: "Rất hài lòng",
-  };
-
   return (
     <Modal
       open={isVisible}
@@ -112,7 +104,7 @@ const RatingCoach = ({
       className="rating-coach-modal"
       zIndex={1000}
       maskClosable={false}
-      destroyOnClose
+      destroyOnHidden
     >
       <div className="p-6">
         <div className="text-center mb-6">

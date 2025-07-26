@@ -173,7 +173,7 @@ const BlogPosts = () => {
     </div>
   );
 
-  if (loading && blogs.length === 0) {
+  if (loading) {
     return (
       <div
         style={{
@@ -183,7 +183,9 @@ const BlogPosts = () => {
           alignItems: "center",
         }}
       >
-        <Spin size="large" tip="Đang tải..." />
+        <Spin size="large" tip="Đang tải...">
+          <div />
+        </Spin>
       </div>
     );
   }
@@ -351,7 +353,7 @@ const BlogPosts = () => {
         confirmLoading={loading}
         okText={isNew ? "Thêm" : "Lưu"}
         cancelText="Hủy"
-        destroyOnClose
+        destroyOnHidden
       >
         {modalForm}
       </Modal>
@@ -372,7 +374,7 @@ const BlogPosts = () => {
         okButtonProps={{ danger: true }}
         cancelText="Hủy"
         icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
-        destroyOnClose
+        destroyOnHidden
       >
         Bạn có chắc chắn muốn xoá bài viết này không?
       </Modal>

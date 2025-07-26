@@ -189,6 +189,16 @@ export const AuthProvider = ({ children }) => {
     return { success: true, message: "Đăng xuất thành công" };
   };
 
+  const updateUser = (updatedUserData) => {
+    setCurrentUser((prev) => ({ ...prev, ...updatedUserData }));
+    // Cập nhật cả localStorage
+    const currentStoredUser = authService.getCurrentUser();
+    if (currentStoredUser) {
+      const updatedUser = { ...currentStoredUser, ...updatedUserData };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+  };
+
   const clearError = () => setError(null);
 
   const value = {
@@ -203,6 +213,7 @@ export const AuthProvider = ({ children }) => {
     forgotPassword,
     resetPassword,
     logout,
+    updateUser,
     clearError,
     validateLoginForm,
     validateRegistrationForm,
