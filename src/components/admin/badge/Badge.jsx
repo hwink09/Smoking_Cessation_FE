@@ -30,7 +30,7 @@ export default function Badge() {
 
     const fetchUserStats = async () => {
         try {
-            const response = await badgeService.getBadgeUserStats();
+            const response = await badgeService.getBadgeStats();
             setBadgeUserStats(response);
         } catch (error) {
             console.error("Error fetching badge user stats:", error);
