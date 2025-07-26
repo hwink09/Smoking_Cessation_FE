@@ -171,7 +171,14 @@ const TasksManager = ({
     <>
       <Modal
         open={visible}
-        title={`Quản lý nhiệm vụ - Giai đoạn: ${selectedStage?.title || ""}`}
+        title={
+          <div className="flex items-center gap-2">
+            <span>📋 Quản lý nhiệm vụ - Giai đoạn:</span>
+            <span className="text-blue-600 font-semibold">
+              {selectedStage?.title || ""}
+            </span>
+          </div>
+        }
         onCancel={handleCloseModal}
         footer={null}
         width={1000}
@@ -186,20 +193,24 @@ const TasksManager = ({
               children: (
                 <div>
                   {loading ? (
-                    <div className="text-center py-8">
-                      <Spin />
-                      <Text type="secondary">
-                        Đang tải danh sách nhiệm vụ...
-                      </Text>
+                    <div className="flex justify-center items-center py-8">
+                      <Spin size="large">
+                        <div className="pt-8">
+                          <Text type="secondary" className="text-center block">
+                            Đang tải danh sách nhiệm vụ...
+                          </Text>
+                        </div>
+                      </Spin>
                     </div>
                   ) : tasks.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Text type="secondary">
+                    <div className="text-center py-8 bg-gray-50 rounded-lg">
+                      <Text type="secondary" className="text-lg">
                         Chưa có nhiệm vụ nào cho giai đoạn này
                       </Text>
-                      <div className="mt-3">
+                      <div className="mt-4">
                         <Button
                           type="primary"
+                          size="large"
                           onClick={() => setActiveTabKey("2")}
                         >
                           Thêm nhiệm vụ mới
@@ -207,37 +218,50 @@ const TasksManager = ({
                       </div>
                     </div>
                   ) : (
-                    <List
-                      itemLayout="horizontal"
-                      dataSource={tasks}
-                      renderItem={(task) => (
-                        <List.Item
-                          key={task._id}
-                          actions={[
-                            <Button
-                              key="edit"
-                              type="link"
-                              onClick={() => handleEditTask(task)}
-                            >
-                              Chỉnh sửa
-                            </Button>,
-                            <Button
-                              key="delete"
-                              type="link"
-                              danger
-                              onClick={() => handleDeleteTask(task._id)}
-                            >
-                              Xóa
-                            </Button>,
-                          ]}
-                        >
-                          <List.Item.Meta
-                            title={task.title || "Không có tiêu đề"}
-                            description={task.description || "Không có mô tả"}
-                          />
-                        </List.Item>
-                      )}
-                    />
+                    <div className="bg-white border shadow-sm rounded-lg p-4">
+                      <List
+                        itemLayout="horizontal"
+                        dataSource={tasks}
+                        renderItem={(task) => (
+                          <List.Item
+                            key={task._id}
+                            className="border-b last:border-b-0 py-4"
+                            actions={[
+                              <Button
+                                key="edit"
+                                type="primary"
+                                ghost
+                                size="small"
+                                onClick={() => handleEditTask(task)}
+                              >
+                                Chỉnh sửa
+                              </Button>,
+                              <Button
+                                key="delete"
+                                danger
+                                size="small"
+                                onClick={() => handleDeleteTask(task._id)}
+                              >
+                                Xóa
+                              </Button>,
+                            ]}
+                          >
+                            <List.Item.Meta
+                              title={
+                                <div className="font-medium text-gray-800">
+                                  {task.title || "Không có tiêu đề"}
+                                </div>
+                              }
+                              description={
+                                <div className="text-gray-600 mt-1">
+                                  {task.description || "Không có mô tả"}
+                                </div>
+                              }
+                            />
+                          </List.Item>
+                        )}
+                      />
+                    </div>
                   )}
                 </div>
               ),
@@ -246,31 +270,44 @@ const TasksManager = ({
               key: "2",
               label: "Thêm nhiệm vụ mới",
               children: (
-                <div>
+                <div className="bg-white border shadow-sm rounded-lg p-6">
                   <Form form={taskForm} layout="vertical">
                     <Form.Item
                       name="taskTitle"
-                      label="Tiêu đề nhiệm vụ"
+                      label={
+                        <span className="font-medium">Tiêu đề nhiệm vụ</span>
+                      }
                       rules={[
                         { required: true, message: "Vui lòng nhập tiêu đề" },
                       ]}
                     >
-                      <Input />
+                      <Input
+                        placeholder="Nhập tiêu đề nhiệm vụ..."
+                        className="rounded-lg"
+                      />
                     </Form.Item>
                     <Form.Item
                       name="taskDescription"
-                      label="Mô tả nhiệm vụ"
+                      label={
+                        <span className="font-medium">Mô tả nhiệm vụ</span>
+                      }
                       rules={[
                         { required: true, message: "Vui lòng nhập mô tả" },
                       ]}
                     >
-                      <Input.TextArea rows={4} />
+                      <Input.TextArea
+                        rows={4}
+                        placeholder="Nhập mô tả chi tiết về nhiệm vụ..."
+                        className="rounded-lg"
+                      />
                     </Form.Item>
                     <Button
                       type="primary"
                       block
+                      size="large"
                       onClick={handleAddTask}
                       loading={loading}
+                      className="rounded-lg"
                     >
                       Thêm nhiệm vụ mới
                     </Button>
@@ -284,29 +321,43 @@ const TasksManager = ({
 
       <Modal
         open={editTaskModal}
-        title="Chỉnh sửa nhiệm vụ"
+        title={
+          <div className="flex items-center gap-2">
+            <span>✏️ Chỉnh sửa nhiệm vụ</span>
+          </div>
+        }
         onCancel={() => setEditTaskModal(false)}
         onOk={handleSaveTask}
-        okText="Lưu"
+        okText="Lưu thay đổi"
         cancelText="Hủy"
         confirmLoading={loading}
+        width={600}
       >
-        <Form form={editTaskForm} layout="vertical">
-          <Form.Item
-            name="taskTitle"
-            label="Tiêu đề nhiệm vụ"
-            rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="taskDescription"
-            label="Mô tả nhiệm vụ"
-            rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
-          >
-            <Input.TextArea rows={4} />
-          </Form.Item>
-        </Form>
+        <div className="pt-4">
+          <Form form={editTaskForm} layout="vertical">
+            <Form.Item
+              name="taskTitle"
+              label={<span className="font-medium">Tiêu đề nhiệm vụ</span>}
+              rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
+            >
+              <Input
+                placeholder="Nhập tiêu đề nhiệm vụ..."
+                className="rounded-lg"
+              />
+            </Form.Item>
+            <Form.Item
+              name="taskDescription"
+              label={<span className="font-medium">Mô tả nhiệm vụ</span>}
+              rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
+            >
+              <Input.TextArea
+                rows={4}
+                placeholder="Nhập mô tả chi tiết về nhiệm vụ..."
+                className="rounded-lg"
+              />
+            </Form.Item>
+          </Form>
+        </div>
       </Modal>
     </>
   );

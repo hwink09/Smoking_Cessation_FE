@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Table, Button, Form, message, Modal, Typography } from "antd";
+import { Table, Button, Form, message, Modal, Typography, Spin } from "antd";
 import dayjs from "dayjs";
 import api from "~/services/api";
 import { useAuth } from "~/hooks/useAuth";
@@ -282,29 +282,57 @@ const StagesCoach = () => {
     [handleOpenModal, handleViewStages]
   );
 
+  if (loading && plans.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <Spin size="large">
+          <div className="pt-8">
+            <p className="text-center text-gray-500">Đang tải dữ liệu...</p>
+          </div>
+        </Spin>
+      </div>
+    );
+  }
+
   return (
-    <section className="p-10 bg-gradient-to-b from-gray-900 to-black min-h-screen text-white">
-      <Title level={2} style={{ textAlign: "center", color: "#fff" }}>
-        Các kế hoạch bỏ thuốc được giao cho bạn
-      </Title>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Tiêu đề trung tâm */}
+        <div className="text-center mb-6">
+          <Title
+            level={2}
+            className="!m-0 text-gray-800 flex justify-center items-center"
+          >
+            Quản lý giai đoạn bỏ thuốc
+          </Title>
+        </div>
 
-      <div className="mt-6 bg-white rounded-xl shadow-lg p-6">
-        <Table
-          rowKey="key"
-          dataSource={plans}
-          columns={columns}
-          loading={loading}
-          pagination={{ pageSize: 5 }}
-        />
+        {/* Bảng kế hoạch */}
+        <div className="bg-white border shadow-sm rounded-2xl p-4">
+          <Table
+            rowKey="key"
+            dataSource={plans}
+            columns={columns}
+            loading={loading}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showQuickJumper: true,
+            }}
+          />
+        </div>
 
-        <CreateStageModal
-          visible={openModal}
-          onClose={() => setOpenModal(false)}
-          selectedPlan={selectedPlan}
-          stageForm={form}
-          onSubmit={handleSubmit}
-          lastStageInfo={lastStageInfo}
-        />
+        {/* Modals */}
+        {openModal && (
+          <CreateStageModal
+            visible={openModal}
+            onClose={() => setOpenModal(false)}
+            selectedPlan={selectedPlan}
+            stageForm={form}
+            onSubmit={handleSubmit}
+            lastStageInfo={lastStageInfo}
+          />
+        )}
 
         <StagesManager
           visible={viewStagesModal}
@@ -323,7 +351,7 @@ const StagesCoach = () => {
           {...taskServices}
         />
       </div>
-    </section>
+    </div>
   );
 };
 

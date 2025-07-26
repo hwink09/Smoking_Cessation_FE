@@ -1,27 +1,11 @@
 import React, { useState } from "react";
-import {
-  Table,
-  Tag,
-  Button,
-  Modal,
-  Form,
-  Input,
-  message,
-  Space,
-  Typography,
-} from "antd";
-import dayjs from "dayjs";
+import { Form, Typography, Spin } from "antd";
+import { CalendarOutlined } from "@ant-design/icons";
 import { useCoachMeetSessions } from "~/hooks/useCoachMeetSessions";
-
+import MeetSessionTable from "./MeetSessionTable";
+import MeetLinkModal from "./MeetLinkModal";
 
 const { Title } = Typography;
-
-const statusColors = {
-  pending: "orange",
-  accepted: "green",
-  rejected: "red",
-  completed: "blue",
-};
 
 const CoachMeetSession = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -40,141 +24,66 @@ const CoachMeetSession = () => {
     }
   };
 
-  const handleModalOk = async () => {
-    try {
-      const values = await form.validateFields();
-      await updateStatus(selectedSession._id, "accepted", values.meet_link);
-      setModalVisible(false);
-      form.resetFields();
-    } catch (err) {
-      message.error("Vui lòng điền đầy đủ thông tin" ,err);
-    }
+  const handleModalConfirm = async (sessionId, status, meetLink) => {
+    await updateStatus(sessionId, status, meetLink);
+    setModalVisible(false);
+    form.resetFields();
   };
 
-  const columns = [
-    {
-      title: "Học viên",
-      dataIndex: ["user_id", "name"],
-      key: "user",
-    },
-    {
-      title: "Email",
-      dataIndex: ["user_id", "email"],
-      key: "email",
-    },
-    {
-      title: "Mục đích",
-      dataIndex: "purpose",
-      key: "purpose",
-    },
-    {
-      title: "Thời gian",
-      dataIndex: "schedule_at",
-      key: "schedule",
-      render: (date) => dayjs(date).format("DD/MM/YYYY HH:mm"),
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Tag color={statusColors[status] || "default"}>
-          {status.toUpperCase()}
-        </Tag>
-      ),
-    },
-    {
-      title: "Link họp",
-      dataIndex: "meet_link",
-      key: "meet_link",
-      width: 200,
-      render: (link) =>
-        link ? (
-          <a href={link} target="_blank" rel="noopener noreferrer">
-            Google Meet
-          </a>
-        ) : (
-          "-"
-        ),
-    },
-    {
-      title: "Hành động",
-      key: "actions",
-      render: (_, record) => {
-        const actions = [];
+  const handleComplete = (sessionId, status) => {
+    updateStatus(sessionId, status);
+  };
 
-        if (record.status === "pending") {
-          actions.push(
-            <Button
-              type="primary"
-              size="small"
-              onClick={() => handleStatusUpdate(record, "accepted")}
-              key="accept">
-              Chấp nhận
-            </Button>
-          );
-          actions.push(
-            <Button
-              danger
-              size="small"
-              onClick={() => handleStatusUpdate(record, "rejected")}
-              key="reject">
-              Từ chối
-            </Button>
-          );
-        }
-
-        if (record.status === "accepted") {
-          actions.push(
-            <Button
-              size="small"
-              type="dashed"
-              onClick={() => updateStatus(record._id, "completed")}
-              key="complete">
-              Hoàn tất
-            </Button>
-          );
-        }
-
-        return <Space>{actions}</Space>;
-      },
-    },
-  ];
+  // Loading state như progress component
+  if (loading && sessions.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <Spin size="large">
+          <div className="pt-8">
+            <p className="text-center text-gray-500">Đang tải dữ liệu...</p>
+          </div>
+        </Spin>
+      </div>
+    );
+  }
 
   return (
-    <section className="p-10 bg-white min-h-screen text-black">
-      <Title level={2} style={{ textAlign: "center" }}>
-        Buổi Hẹn Với Học Viên
-      </Title>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Tiêu đề trung tâm */}
+        <div className="text-center mb-6">
+          <Title
+            level={2}
+            className="!m-0 text-gray-800 flex justify-center items-center"
+          >
+            <CalendarOutlined className="mr-2" />
+            Buổi Hẹn Với Học Viên
+          </Title>
+        </div>
 
-      <div className="mt-6 bg-white rounded-xl shadow p-6 max-w-7xl mx-auto">
-        <Table
-          columns={columns}
-          dataSource={sessions}
-          rowKey={(record) => record._id}
-          loading={loading}
-          pagination={{ pageSize: 8 }}
-          scroll={{ x: "max-content" }}
-        />
+        {/* Bảng buổi hẹn */}
+        <div className="bg-white border shadow-sm rounded-2xl p-4">
+          <Title level={4} className="mb-4">
+            Danh sách buổi hẹn chi tiết
+          </Title>
+
+          <MeetSessionTable
+            sessions={sessions}
+            loading={loading}
+            onStatusUpdate={handleStatusUpdate}
+            onComplete={handleComplete}
+          />
+        </div>
       </div>
 
-      <Modal
-        title="Xác nhận buổi hẹn"
-        open={modalVisible}
-        onOk={handleModalOk}
+      <MeetLinkModal
+        visible={modalVisible}
         onCancel={() => setModalVisible(false)}
-        okText="Xác nhận"
-        cancelText="Huỷ">
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="meet_link"
-            label="Link cuộc họp (Google Meet, Zoom...)"
-            rules={[{ required: true, message: "Vui lòng nhập link" }]}>
-            <Input placeholder="https://meet.google.com/..." />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </section>
+        onConfirm={handleModalConfirm}
+        selectedSession={selectedSession}
+        form={form}
+      />
+    </div>
   );
 };
 

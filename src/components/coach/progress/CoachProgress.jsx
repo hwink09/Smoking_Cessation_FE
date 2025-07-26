@@ -1,24 +1,19 @@
 import React from "react";
-import { Spin, Typography, Button } from "antd";
-import { TrophyOutlined, ReloadOutlined } from "@ant-design/icons";
-
-// Import components
-import FilterSection from "./FilterSection";
-import OverallStatsCard from "./OverallStatsCard";
-import UserStatsCard from "./UserStatsCard";
-import ProgressTable from "./ProgressTable";
-
-// Import hooks
+import { Spin, Typography } from "antd";
 import {
   useProgressData,
   useOverallStats,
   useUserStats,
 } from "~/hooks/useProgress";
 
+import FilterSection from "./FilterSection";
+import OverallStatsCard from "./OverallStatsCard";
+import UserStatsCard from "./UserStatsCard";
+import ProgressTable from "./ProgressTable";
+
 const { Title } = Typography;
 
 function CoachProgress() {
-  // Sử dụng custom hooks
   const {
     users,
     filteredProgressData,
@@ -26,7 +21,6 @@ function CoachProgress() {
     selectedUser,
     dateRange,
     handleUserSelect,
-    handleRefresh,
     setDateRange,
   } = useProgressData();
 
@@ -35,9 +29,9 @@ function CoachProgress() {
 
   if (loading && users.length === 0) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-[300px]">
         <Spin size="large">
-          <div className="pt-12">
+          <div className="pt-8">
             <p className="text-center text-gray-500">Đang tải dữ liệu...</p>
           </div>
         </Spin>
@@ -46,44 +40,47 @@ function CoachProgress() {
   }
 
   return (
-    <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <Title level={2} className="m-0">
-            <TrophyOutlined className="mr-2" />
-            Tiến độ của học viên
-          </Title>
-          <Button
-            type="primary"
-            icon={<ReloadOutlined />}
-            onClick={handleRefresh}
-            loading={loading}
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Tiêu đề trung tâm */}
+        <div className="text-center mb-6">
+          <Title
+            level={2}
+            className="!m-0 text-gray-800 flex justify-center items-center"
           >
-            Làm mới
-          </Button>
+            Tiến độ học viên
+          </Title>
         </div>
 
-        {/* Filter Section */}
-        <FilterSection
-          users={users}
-          selectedUser={selectedUser}
-          onUserSelect={handleUserSelect}
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
-          filteredDataLength={filteredProgressData.length}
-        />
+        {/* Bộ lọc */}
+        <div className="bg-white border shadow-sm rounded-2xl p-4">
+          <FilterSection
+            users={users}
+            selectedUser={selectedUser}
+            onUserSelect={handleUserSelect}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+            filteredDataLength={filteredProgressData.length}
+          />
+        </div>
 
-        {/* Overall Stats - Hiển thị khi không chọn user cụ thể */}
-        {!selectedUser && filteredProgressData.length > 0 && (
-          <OverallStatsCard overallStats={overallStats} />
+        {/* Thống kê tổng quát hoặc theo học viên */}
+        {filteredProgressData.length > 0 && !selectedUser && (
+          <div className="bg-white border shadow-sm rounded-2xl p-4">
+            <OverallStatsCard overallStats={overallStats} />
+          </div>
         )}
 
-        {/* User Detail Stats - Hiển thị khi chọn user cụ thể */}
-        {selectedUser && <UserStatsCard userStats={userStats} />}
+        {selectedUser && (
+          <div className="bg-white border shadow-sm rounded-2xl p-4">
+            <UserStatsCard userStats={userStats} />
+          </div>
+        )}
 
-        {/* Progress Table */}
-        <ProgressTable data={filteredProgressData} loading={loading} />
+        {/* Bảng tiến độ */}
+        <div className="bg-white border shadow-sm rounded-2xl p-4">
+          <ProgressTable data={filteredProgressData} loading={loading} />
+        </div>
       </div>
     </div>
   );

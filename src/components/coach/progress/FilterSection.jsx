@@ -33,6 +33,12 @@ const FilterSection = ({
             className="w-full"
             allowClear
           >
+            <Option key="all" value={null}>
+              <div className="flex items-center gap-2">
+                <Avatar icon={<UserOutlined />} size={20} />
+                <Text strong>Tất cả người dùng</Text>
+              </div>
+            </Option>
             {users.map((user) => (
               <Option key={user.key} value={user.user_id || user._id}>
                 <div className="flex items-center gap-2">
