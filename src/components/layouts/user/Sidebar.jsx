@@ -19,7 +19,6 @@ import ColourfulText from "~/components/ui/colourful-text";
 import { useAuth } from "~/hooks/useAuth";
 
 const menuItems = [
-  { label: "Trang chủ", icon: <DashboardOutlined />, path: "/user/dashboard" },
   {
     label: "Tình trạng hút thuốc",
     icon: <Cigarette />,

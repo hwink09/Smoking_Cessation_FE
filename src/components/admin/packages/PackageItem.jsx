@@ -135,7 +135,9 @@ const PackageItem = () => {
 
       <div style={{ background: "#fff", padding: 24, borderRadius: 12 }}>
         {loading && packages.length === 0 ? (
-          <Spin tip="Đang tải gói..." />
+          <Spin size="large" tip="Đang tải gói...">
+            <div />
+          </Spin>
         ) : (
           <Table
             dataSource={packages}

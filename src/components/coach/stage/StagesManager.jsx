@@ -165,7 +165,7 @@ const StagesManager = ({
       onCancel={onClose}
       footer={null}
       width={1000}
-      destroyOnClose
+      destroyOnHidden
     >
       {content}
     </Modal>
@@ -207,7 +207,7 @@ const CreateStageModal = ({
       onOk={onSubmit}
       okText="Tạo giai đoạn"
       cancelText="Hủy"
-      destroyOnClose
+      destroyOnHidden
       width={600}
     >
       <div className="mb-4 p-3 bg-yellow-50 rounded-lg">

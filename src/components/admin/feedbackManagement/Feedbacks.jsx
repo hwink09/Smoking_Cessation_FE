@@ -203,7 +203,9 @@ const FeedbackManagement = () => {
           justifyContent: "center",
         }}
       >
-        <Spin size="large" tip="Đang tải..." />
+        <Spin size="large" tip="Đang tải...">
+          <div />
+        </Spin>
       </div>
     );
   }
@@ -270,7 +272,7 @@ const FeedbackManagement = () => {
         confirmLoading={loading}
         okText={isNew ? "Thêm" : "Lưu"}
         cancelText="Hủy"
-        destroyOnClose
+        destroyOnHidden
       >
         {modalForm}
       </Modal>
@@ -290,7 +292,7 @@ const FeedbackManagement = () => {
         okButtonProps={{ danger: true }}
         cancelText="Hủy"
         icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
-        destroyOnClose
+        destroyOnHidden
       >
         Bạn có chắc chắn muốn xóa phản hồi này không?
       </Modal>

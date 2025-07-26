@@ -159,7 +159,9 @@ const Progress = () => {
           justifyContent: "center",
         }}
       >
-        <Spin size="large" tip="Đang tải..." />
+        <Spin size="large" tip="Đang tải...">
+          <div />
+        </Spin>
       </div>
     );
   }
@@ -226,7 +228,7 @@ const Progress = () => {
         confirmLoading={loading}
         okText={isNew ? "Thêm" : "Lưu"}
         cancelText="Hủy"
-        destroyOnClose
+        destroyOnHidden
       >
         {modalForm}
       </Modal>
@@ -246,7 +248,7 @@ const Progress = () => {
         okButtonProps={{ danger: true }}
         cancelText="Hủy"
         icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
-        destroyOnClose
+        destroyOnHidden
       >
         Bạn có chắc chắn muốn xóa bản ghi tiến trình này không?
       </Modal>

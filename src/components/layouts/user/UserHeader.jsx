@@ -89,11 +89,11 @@ const UserHeader = () => {
 
           let path = "";
           if (role === "admin") {
-            path = `/admin/profile/${id}`;
+            path = `/admin/profile/`;
           } else if (role === "coach") {
-            path = `/coach/profile`;
+            path = `/coach/profile/`;
           } else {
-            path = `/user/profile/${id}`;
+            path = `/user/profile/`;
           }
 
           navigate(path);
@@ -117,7 +117,7 @@ const UserHeader = () => {
               ? "/admin/dashboard"
               : role === "coach"
               ? "/coach/dashboard"
-              : "/user/dashboard"
+              : "/user/smoking-status"
           }
         >
           <span className="text-white">Dashboard</span>

@@ -128,7 +128,9 @@ const Subscriptions = () => {
           justifyContent: "center",
         }}
       >
-        <Spin size="large" tip="Đang tải..." />
+        <Spin size="large" tip="Đang tải...">
+          <div />
+        </Spin>
       </div>
     );
   }
@@ -200,7 +202,7 @@ const Subscriptions = () => {
         okButtonProps={{ danger: true }}
         cancelText="Hủy"
         icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
-        destroyOnClose
+        destroyOnHidden
       >
         Bạn có chắc chắn muốn xóa đăng ký này không?
       </Modal>

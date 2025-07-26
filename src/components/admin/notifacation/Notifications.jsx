@@ -172,7 +172,9 @@ const Notifications = () => {
           justifyContent: "center",
         }}
       >
-        <Spin size="large" tip="Đang tải..." />
+        <Spin size="large" tip="Đang tải...">
+          <div />
+        </Spin>
       </div>
     );
   }
@@ -239,7 +241,7 @@ const Notifications = () => {
         confirmLoading={loading}
         okText={isNew ? "Thêm" : "Lưu"}
         cancelText="Hủy"
-        destroyOnClose
+        destroyOnHidden
       >
         {modalForm}
       </Modal>
@@ -259,7 +261,7 @@ const Notifications = () => {
         okButtonProps={{ danger: true }}
         cancelText="Hủy"
         icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
-        destroyOnClose
+        destroyOnHidden
       >
         Bạn có chắc chắn muốn xóa thông báo này không?
       </Modal>

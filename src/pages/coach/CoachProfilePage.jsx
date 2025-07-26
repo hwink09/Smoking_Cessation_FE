@@ -67,7 +67,9 @@ const CoachProfilePage = () => {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <Spin size="large" tip="Đang tải..." />
+          <Spin size="large" tip="Đang tải...">
+            <div />
+          </Spin>
         </div>
       ) : profileExists ? (
         <CoachProfile isEditable />

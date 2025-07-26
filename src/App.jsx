@@ -43,7 +43,6 @@ import PackageManagement from "./pages/admin/PackageManagement";
 import FeedbackPage from "./pages/admin/FeedbackPage";
 
 // User Pages
-import UserDashboard from "./pages/user/UserDashBoard";
 import UserProgress from "./pages/user/UserProgress";
 import UserAchievement from "./pages/user/UserAchievement";
 import UserProfilePage from "./pages/user/UserProfilePage";
@@ -178,10 +177,6 @@ function App() {
 
           {/* User Routes */}
           <Route path="/user" element={<UserLayout />}>
-            <Route
-              path="dashboard"
-              element={<UserRoute element={<UserDashboard />} />}
-            />
             <Route
               path="progress"
               element={<UserRoute element={<UserProgress />} />}
