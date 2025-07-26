@@ -2,10 +2,9 @@ import { Typography, Alert } from "antd";
 import TaskCard from "./TaskCard";
 import { StageEmptyCard } from "./StateFallbacks";
 
-
 const { Title } = Typography;
 
-const StageTaskList = ({ tasks, progress, onComplete }) => {
+const StageTaskList = ({ tasks, progress, onComplete, currentStage }) => {
   return (
     <div>
       <Title level={4} className="mb-4 text-gray-800">
@@ -24,7 +23,14 @@ const StageTaskList = ({ tasks, progress, onComplete }) => {
       <div className="max-h-80 overflow-y-auto">
         {tasks.length > 0 ? (
           tasks.map((task, i) => (
-            <TaskCard key={task._id} task={task} index={i} onComplete={onComplete} />
+            <TaskCard
+              key={task._id}
+              task={task}
+              index={i}
+              onComplete={onComplete}
+              currentStage={currentStage}
+              stageTasks={tasks}
+            />
           ))
         ) : (
           <StageEmptyCard

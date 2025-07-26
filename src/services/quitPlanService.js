@@ -101,8 +101,17 @@ const QuitPlanService = {
   },
 
   getMyQuitPlanRequests: async () => {
-    const response = await api.get("/quitPlan/request/mine");
-    return handleResponse(response);
+    try {
+      const response = await api.get("/quitPlan/request/mine");
+      return handleResponse(response);
+    } catch (error) {
+      // Nếu lỗi 500 hoặc lỗi khác, trả về mảng rỗng thay vì throw error
+      console.warn("Failed to fetch user quit plan requests:", error);
+      if (error.response?.status === 500) {
+        return []; // Trả về mảng rỗng để không crash app
+      }
+      throw error; // Throw lại các lỗi khác
+    }
   },
 
   getRequestsByCoachId: async (coachId) => {

@@ -6,18 +6,17 @@ import {
   Trash2,
   Check,
   X,
-  User,
   Calendar,
 } from "lucide-react";
 
-const CommentsSection = ({ 
-  comments, 
-  newComment, 
-  setNewComment, 
-  onSubmitComment, 
-  onEditComment, 
+const CommentsSection = ({
+  comments,
+  newComment,
+  setNewComment,
+  onSubmitComment,
+  onEditComment,
   onDeleteComment,
-  currentUser 
+  currentUser,
 }) => {
   const [editingComment, setEditingComment] = useState(null);
   const [editText, setEditText] = useState("");
@@ -29,7 +28,7 @@ const CommentsSection = ({
 
   const handleSaveEdit = async (commentId) => {
     if (!editText.trim()) return;
-    
+
     try {
       await onEditComment(commentId, editText.trim());
       setEditingComment(null);
@@ -47,7 +46,7 @@ const CommentsSection = ({
 
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa bình luận này?")) return;
-    
+
     try {
       await onDeleteComment(commentId);
     } catch (err) {
@@ -95,14 +94,16 @@ const CommentsSection = ({
           <div className="text-center py-12">
             <MessageCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">Chưa có bình luận nào</p>
-            <p className="text-gray-400 text-sm">Hãy là người đầu tiên bình luận về bài viết này!</p>
+            <p className="text-gray-400 text-sm">
+              Hãy là người đầu tiên bình luận về bài viết này!
+            </p>
           </div>
         ) : (
           comments.map((comment, index) => (
-            <div 
-              key={comment.id} 
+            <div
+              key={comment.id}
               className={`bg-gradient-to-r from-gray-50 to-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 ${
-                index % 2 === 0 ? 'ml-0' : 'ml-4'
+                index % 2 === 0 ? "ml-0" : "ml-4"
               }`}
             >
               <div className="flex items-start justify-between mb-4">
@@ -111,7 +112,9 @@ const CommentsSection = ({
                     src={comment.avatar || "/default-avatar.png"}
                     alt={comment.author}
                     className="w-12 h-12 rounded-full object-cover mr-4 shadow-md border border-purple-200 bg-white"
-                    onError={e => { e.target.src = "/default-avatar.png"; }}
+                    onError={(e) => {
+                      e.target.src = "/default-avatar.png";
+                    }}
                   />
                   <div>
                     <span className="font-semibold text-gray-800 text-lg">
@@ -120,16 +123,16 @@ const CommentsSection = ({
                     <div className="flex items-center text-gray-500 text-sm mt-1">
                       <Calendar className="h-3 w-3 mr-1" />
                       {new Date(comment.date).toLocaleDateString("vi-VN", {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Action buttons - only show for comment owner */}
                 {isCommentOwner(comment) && (
                   <div className="flex items-center space-x-2">
@@ -171,7 +174,7 @@ const CommentsSection = ({
                   </div>
                 )}
               </div>
-              
+
               {/* Comment content */}
               <div className="ml-16">
                 {editingComment === comment.id ? (

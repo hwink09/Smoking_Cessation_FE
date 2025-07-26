@@ -32,9 +32,15 @@ export function Pricing() {
       const activeSubscriptions =
         await SubscriptionService.getMyActiveSubscription();
 
+      // Chỉ chặn nếu có gói Plus/Premium đang active
       if (activeSubscriptions && activeSubscriptions.length > 0) {
-        toast.warn("Bạn đã có gói đăng ký đang hoạt động.");
-        return;
+        const activeSub = activeSubscriptions[0];
+        const isFreeSub = activeSub.name?.toLowerCase() === "free";
+
+        if (!isFreeSub) {
+          toast.warn("Bạn đã có gói đăng ký cao cấp đang hoạt động.");
+          return;
+        }
       }
 
       const subscriptionPayload = {

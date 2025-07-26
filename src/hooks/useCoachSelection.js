@@ -72,11 +72,24 @@ export const useCoachSelection = () => {
     setIsRefreshing(true);
     setLoading(true);
     try {
-      const [coachList, quitPlans, requests] = await Promise.all([
+      // Gọi coaches và quitPlans trước
+      const [coachList, quitPlans] = await Promise.all([
         serviceRef.current.getAllCoaches(),
         serviceRef.current.getQuitPlanByUserId(userId),
-        serviceRef.current.getMyQuitPlanRequests(),
       ]);
+
+      // Gọi requests riêng và handle lỗi 500
+      let requests = [];
+      try {
+        requests = await serviceRef.current.getMyQuitPlanRequests();
+      } catch (requestError) {
+        console.warn(
+          "Failed to fetch quit plan requests in refresh:",
+          requestError
+        );
+        // Nếu lỗi 500 hoặc lỗi khác, set requests = [] để không crash app
+        requests = [];
+      }
 
       setCoaches(coachList || []);
 
@@ -133,11 +146,21 @@ export const useCoachSelection = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [coachList, quitPlans, requests] = await Promise.all([
+        // Gọi coaches và quitPlans trước
+        const [coachList, quitPlans] = await Promise.all([
           serviceRef.current.getAllCoaches(),
           serviceRef.current.getQuitPlanByUserId(userId),
-          serviceRef.current.getMyQuitPlanRequests(),
         ]);
+
+        // Gọi requests riêng và handle lỗi 500
+        let requests = [];
+        try {
+          requests = await serviceRef.current.getMyQuitPlanRequests();
+        } catch (requestError) {
+          console.warn("Failed to fetch quit plan requests:", requestError);
+          // Nếu lỗi 500 hoặc lỗi khác, set requests = [] để không crash app
+          requests = [];
+        }
 
         if (!isCanceled) {
           setCoaches(coachList || []);

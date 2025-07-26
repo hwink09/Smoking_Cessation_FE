@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import UserQuitPlanService from "~/services/userQuitPlanService";
-import { StageEmptyCard, StageErrorCard, StageLoadingSkeleton } from "./StateFallbacks";
+import {
+  StageEmptyCard,
+  StageErrorCard,
+  StageLoadingSkeleton,
+} from "./StateFallbacks";
 import StageOverview from "./StageOverview";
 import StageHeader from "./StageHeader";
 import StageStats from "./StageStats";
@@ -28,7 +32,7 @@ const PlanStageView = (props) => {
   };
 
   // Hàm fetch lại dữ liệu stage và task
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!quitPlanId) return;
     setLoading(true);
     setError(null);
@@ -38,7 +42,9 @@ const PlanStageView = (props) => {
       const current = determineCurrentStage(stagesData);
       setCurrentStage(current);
       if (current) {
-        const tasks = await UserQuitPlanService.getTasksWithCompletion(current._id);
+        const tasks = await UserQuitPlanService.getTasksWithCompletion(
+          current._id
+        );
         setStageTasks(tasks);
       } else {
         setStageTasks([]);
@@ -48,14 +54,16 @@ const PlanStageView = (props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [quitPlanId]);
 
   useEffect(() => {
     fetchData();
-  }, [quitPlanId]);
+  }, [quitPlanId, fetchData]);
 
-  if (loading) return <StageLoadingSkeleton text="Đang tải thông tin giai đoạn..." />;
-  if (error) return <StageErrorCard message="Lỗi tải dữ liệu" description={error} />;
+  if (loading)
+    return <StageLoadingSkeleton text="Đang tải thông tin giai đoạn..." />;
+  if (error)
+    return <StageErrorCard message="Lỗi tải dữ liệu" description={error} />;
   if (!currentStage)
     return (
       <StageEmptyCard
@@ -65,8 +73,13 @@ const PlanStageView = (props) => {
     );
 
   // Có thể tái sử dụng các props như UserStageView
-  const progress = stageTasks.length ? Math.round((stageTasks.filter(t => t.is_completed).length / stageTasks.length) * 100) : 0;
-  const completedCount = stageTasks.filter(t => t.is_completed).length;
+  const progress = stageTasks.length
+    ? Math.round(
+        (stageTasks.filter((t) => t.is_completed).length / stageTasks.length) *
+          100
+      )
+    : 0;
+  const completedCount = stageTasks.filter((t) => t.is_completed).length;
 
   // Thêm logic hoàn thành task
   const handleCompleteTask = async (taskId) => {
@@ -75,7 +88,9 @@ const PlanStageView = (props) => {
       await UserQuitPlanService.completeTask(taskId);
       // Sau khi hoàn thành, load lại tasks
       if (currentStage) {
-        const tasks = await UserQuitPlanService.getTasksWithCompletion(currentStage._id);
+        const tasks = await UserQuitPlanService.getTasksWithCompletion(
+          currentStage._id
+        );
         setStageTasks(tasks);
       }
     } catch (err) {
@@ -89,7 +104,7 @@ const PlanStageView = (props) => {
   const handleMoveToNextStage = async () => {
     if (!currentStage || !stages.length) return;
 
-    const currentIndex = stages.findIndex(s => s._id === currentStage._id);
+    const currentIndex = stages.findIndex((s) => s._id === currentStage._id);
     const nextStage = stages[currentIndex + 1];
 
     // Cập nhật trạng thái local cho stage hiện tại và stage tiếp theo
@@ -105,7 +120,9 @@ const PlanStageView = (props) => {
       setCurrentStage({ ...nextStage, status: "in_progress" });
       setLoading(true);
       try {
-        const tasks = await UserQuitPlanService.getTasksWithCompletion(nextStage._id);
+        const tasks = await UserQuitPlanService.getTasksWithCompletion(
+          nextStage._id
+        );
         setStageTasks(tasks);
       } catch (err) {
         setError(err.message || "Lỗi khi tải nhiệm vụ giai đoạn mới");
@@ -141,6 +158,7 @@ const PlanStageView = (props) => {
             tasks={stageTasks}
             progress={progress}
             onComplete={handleCompleteTask}
+            currentStage={currentStage}
           />
         </div>
       </div>
@@ -148,4 +166,4 @@ const PlanStageView = (props) => {
   );
 };
 
-export default PlanStageView; 
+export default PlanStageView;

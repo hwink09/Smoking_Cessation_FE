@@ -13,6 +13,21 @@ const CreateBlog = ({ onSubmit, onCancel, tags = [] }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      content: "",
+      image: "",
+      tag: "",
+    });
+    setError(null);
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    onCancel();
+  };
+
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -21,22 +36,43 @@ const CreateBlog = ({ onSubmit, onCancel, tags = [] }) => {
     e.preventDefault();
     const { title, content, image, tag } = formData;
 
-    if (title && content) {
-      try {
-        setIsSubmitting(true);
-        setError(null);
+    // Validation đầy đủ các trường required
+    if (!title.trim()) {
+      toast.warning("Vui lòng nhập tiêu đề bài viết!");
+      return;
+    }
 
-        await onSubmit({ title, content, image, tags: tag });
-        toast.success("Bài viết đã được tạo thành công!");
-        onCancel(); // Reset form
-      } catch (err) {
-        setError(err.message || "Không thể tạo bài viết");
-        toast.error("Có lỗi xảy ra khi tạo bài viết!");
-      } finally {
-        setIsSubmitting(false);
-      }
-    } else {
-      toast.warning("Vui lòng nhập tiêu đề và nội dung bài viết!");
+    if (!content.trim()) {
+      toast.warning("Vui lòng nhập nội dung bài viết!");
+      return;
+    }
+
+    if (!tag) {
+      toast.warning("Vui lòng chọn thẻ chủ đề!");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      // Format data đúng chuẩn - tags phải là array
+      const postData = {
+        title: title.trim(),
+        content: content.trim(),
+        image: image.trim(),
+        tags: [tag], // Chuyển thành array như backend expect
+      };
+
+      await onSubmit(postData);
+      toast.success("Bài viết đã được tạo thành công!");
+      resetForm(); // Reset form trước khi cancel
+      onCancel();
+    } catch (err) {
+      setError(err.message || "Không thể tạo bài viết");
+      toast.error("Có lỗi xảy ra khi tạo bài viết!");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -56,7 +92,7 @@ const CreateBlog = ({ onSubmit, onCancel, tags = [] }) => {
 
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={onCancel}
+          onClick={handleCancel}
           className="flex items-center text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2 rounded-lg transition"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
@@ -165,7 +201,7 @@ const CreateBlog = ({ onSubmit, onCancel, tags = [] }) => {
           <div>
             <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
               <Tag className="h-4 w-4 mr-2 text-orange-500" />
-              Thẻ chủ đề *
+              Thẻ chủ đề
             </label>
             <select
               value={formData.tag}

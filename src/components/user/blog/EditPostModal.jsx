@@ -27,7 +27,7 @@ function EditPostModal({
         title: initialData.title,
         content: initialData.content,
         image: initialData.image,
-        tag: initialData.tag?.join(", ") || "",
+        tags: initialData.tags?.map((tag) => tag.title || tag).join(", ") || "",
       });
     }
   }, [visible, initialData, form]);
@@ -37,7 +37,9 @@ function EditPostModal({
       const values = await form.validateFields();
       const payload = {
         ...values,
-        tag: values.tag.split(",").map((tag) => tag.trim()),
+        tags: values.tags
+          ? values.tags.split(",").map((tag) => tag.trim())
+          : [],
       };
 
       await updatePost(postId, payload);
@@ -148,7 +150,7 @@ function EditPostModal({
         </Form.Item>
 
         <Form.Item
-          name="tag"
+          name="tags"
           label={
             <FormLabel
               icon={Tag}
