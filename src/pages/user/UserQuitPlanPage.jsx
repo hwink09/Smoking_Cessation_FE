@@ -1,9 +1,8 @@
 import CoachCardList from "~/components/user/quitplan/CoachCardList";
 
-
 function UserQuitPlanPage() {
   return (
-    <div>
+    <div className="min-h-screen">
       <CoachCardList />
     </div>
   );

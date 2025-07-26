@@ -1,6 +1,16 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import { Card, Typography, Tag, Button, Result, Image, Row, Col, Space } from "antd";
+import {
+  Card,
+  Typography,
+  Tag,
+  Button,
+  Result,
+  Image,
+  Row,
+  Col,
+  Space,
+} from "antd";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -14,7 +24,9 @@ const BlogDetail = () => {
         status="404"
         title="Không tìm thấy bài viết"
         extra={
-          <Button type="primary" onClick={() => navigate("/admin/blogs")}>Quay lại danh sách Blog</Button>
+          <Button type="primary" onClick={() => navigate("/admin/blogs")}>
+            Quay lại danh sách Blog
+          </Button>
         }
       />
     );
@@ -26,7 +38,7 @@ const BlogDetail = () => {
         <Card
           bordered={false}
           style={{ boxShadow: "0 2px 8px #f0f1f2" }}
-          bodyStyle={{ padding: 32 }}
+          styles={{ body: { padding: 32 } }}
         >
           <Button
             type="link"
@@ -37,15 +49,26 @@ const BlogDetail = () => {
             Quay lại danh sách Blog
           </Button>
 
-          <Title level={2} style={{ marginBottom: 8 }}>{blog.title}</Title>
+          <Title level={2} style={{ marginBottom: 8 }}>
+            {blog.title}
+          </Title>
           <Text type="secondary" style={{ display: "block", marginBottom: 16 }}>
             Tác giả: {blog.user_id?.name || "Không xác định"}
           </Text>
 
           <Image
-            src={blog.image || "https://via.placeholder.com/600x300?text=Không+tìm+thấy+hình+ảnh"}
+            src={
+              blog.image ||
+              "https://via.placeholder.com/600x300?text=Không+tìm+thấy+hình+ảnh"
+            }
             alt="Hình ảnh bài viết"
-            style={{ width: "100%", maxHeight: 300, objectFit: "cover", borderRadius: 8, marginBottom: 24 }}
+            style={{
+              width: "100%",
+              maxHeight: 300,
+              objectFit: "cover",
+              borderRadius: 8,
+              marginBottom: 24,
+            }}
             fallback="https://via.placeholder.com/600x300?text=Không+tìm+thấy+hình+ảnh"
             preview={!!blog.image}
           />
@@ -68,7 +91,10 @@ const BlogDetail = () => {
             <Text type="danger">❤️ {blog.reaction_count || 0}</Text>
             <Text type="secondary">💬 {blog.comment_count || 0}</Text>
             <Text type="success">
-              📅 {blog.post_date ? new Date(blog.post_date).toLocaleDateString("vi-VN") : ""}
+              📅{" "}
+              {blog.post_date
+                ? new Date(blog.post_date).toLocaleDateString("vi-VN")
+                : ""}
             </Text>
           </Space>
         </Card>

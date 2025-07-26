@@ -78,7 +78,7 @@ const UserHeader = () => {
       {
         key: "profile",
         icon: <FaUser className="text-purple-400" />,
-        label: <span className="text-gray-800">Profile</span>,
+        label: <span style={{ color: "#111", fontWeight: 500 }}>Profile</span>,
         onClick: () => {
           const role = currentUser?.role;
           const id = currentUser?.userId || currentUser?._id || currentUser?.id;
@@ -103,7 +103,7 @@ const UserHeader = () => {
       {
         key: "logout",
         icon: <MdLogout className="text-red-400" />,
-        label: <span className="text-gray-800">Logout</span>,
+        label: <span style={{ color: "#111", fontWeight: 500 }}>Logout</span>,
         onClick: handleLogout,
       },
     ];
@@ -121,7 +121,7 @@ const UserHeader = () => {
               : "/user/smoking-status"
           }
         >
-          <span className="text-gray-800">Dashboard</span>
+          <span style={{ color: "#111", fontWeight: 500 }}>Dashboard</span>
         </Link>
       ),
     };
@@ -129,15 +129,7 @@ const UserHeader = () => {
     return [dashboardItem, ...baseItems];
   };
 
-  const menu = (
-    <Menu
-      items={getUserMenuItems(currentUser?.role)}
-      className="rounded-xl border-none bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl p-2"
-      style={{
-        minWidth: "180px",
-      }}
-    />
-  );
+  const menuItems = getUserMenuItems(currentUser?.role);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#e6f0f8] shadow-md border-b border-blue-300">
@@ -185,7 +177,21 @@ const UserHeader = () => {
               </Badge>
             </Popover>
 
-            <Dropdown overlay={menu} placement="bottomRight" arrow>
+            <Dropdown
+              menu={{
+                items: menuItems,
+                className: "rounded-xl shadow-xl",
+                style: {
+                  minWidth: "180px",
+                  backgroundColor: "#fff",
+                  color: "#111",
+                  fontWeight: "500",
+                },
+                theme: "light",
+              }}
+              placement="bottomRight"
+              arrow
+            >
               <div className="flex items-center gap-3 cursor-pointer">
                 <span className="text-gray-800 font-medium">
                   {currentUser?.name || "User"}

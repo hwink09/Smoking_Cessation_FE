@@ -24,7 +24,7 @@ const UserMeetSessionPage = () => {
   }, [getAllCoaches]);
 
   return (
-    <div className="p-6 min-h-screen bg-gray-100">
+    <div className="w-full h-full p-6 min-h-screen bg-gray-100">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-[#6a5af9] to-[#1ecbe1] text-transparent bg-clip-text">
           Yêu cầu tư vấn
@@ -38,8 +38,13 @@ const UserMeetSessionPage = () => {
         <Spin />
       ) : (
         <Row gutter={[16, 16]}>
-          {coaches.map((coach) => (
-            <Col key={coach.id} xs={24} sm={12} md={8}>
+          {coaches.map((coach, index) => (
+            <Col
+              key={coach.id || coach._id || coach.coach_id?.id || index}
+              xs={24}
+              sm={12}
+              md={8}
+            >
               <CoachCard
                 coach={coach}
                 onSelectCoach={() => setSelectedCoach(coach)}
