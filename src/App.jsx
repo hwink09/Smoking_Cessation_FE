@@ -74,9 +74,9 @@ import PaymentCancelPage from "./pages/generic/PaymentCancelPage";
 const Layout = () => {
   const { currentUser } = useAuth();
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       {currentUser ? <UserHeader /> : <Navbar />}
-      <main className="mt-16">
+      <main className="mt-16 bg-white">
         <Outlet />
       </main>
       <Footer />

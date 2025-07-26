@@ -2,47 +2,55 @@ export function WorkProcess() {
   const steps = [
     {
       number: "01",
-      title: "Assessment",
-      description: "We begin by evaluating your smoking habits, triggers, and readiness to quit to create a personalized plan.",
+      title: "Đánh giá",
+      description:
+        "Chúng tôi bắt đầu bằng cách đánh giá thói quen hút thuốc, các yếu tố kích hoạt và mức độ sẵn sàng bỏ thuốc để xây dựng một kế hoạch cá nhân hóa.",
     },
     {
       number: "02",
-      title: "Goal Setting",
-      description: "Together, we define clear, realistic goals and set a quit date that aligns with your lifestyle.",
+      title: "Đặt mục tiêu",
+      description:
+        "Cùng nhau xác định các mục tiêu rõ ràng, thực tế và chọn ngày bắt đầu phù hợp với lối sống của bạn.",
     },
     {
       number: "03",
-      title: "Preparation",
-      description: "We guide you through mental, emotional, and environmental preparations to increase your chances of success.",
+      title: "Chuẩn bị",
+      description:
+        "Hướng dẫn bạn chuẩn bị về mặt tinh thần, cảm xúc và môi trường để tăng khả năng thành công.",
     },
     {
       number: "04",
-      title: "Action",
-      description: "On your quit day, you’ll follow your personalized plan with tools, support, and motivation to stay on track.",
+      title: "Hành động",
+      description:
+        "Vào ngày bỏ thuốc, bạn sẽ thực hiện kế hoạch với sự hỗ trợ, công cụ và động lực cần thiết.",
     },
     {
       number: "05",
-      title: "Support",
-      description: "Ongoing support from professionals and peers helps you navigate cravings and avoid relapse.",
+      title: "Hỗ trợ",
+      description:
+        "Sự đồng hành liên tục từ chuyên gia và cộng đồng giúp bạn vượt qua cơn thèm thuốc và ngăn ngừa tái nghiện.",
     },
     {
       number: "06",
-      title: "Maintenance",
-      description: "We help you build long-term strategies to stay smoke-free and celebrate your milestones along the way.",
+      title: "Duy trì",
+      description:
+        "Chúng tôi giúp bạn xây dựng chiến lược dài hạn để duy trì lối sống không thuốc lá và ăn mừng những cột mốc quan trọng.",
     },
   ];
-  
 
   return (
-    <section id="process" className="py-20 bg-gradient-to-b from-black to-gray-900">
+    <section id="process" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Our{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500">Process</span>
+            Quy trình{" "}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500">
+              hỗ trợ
+            </span>
           </h2>
-          <p className="text-xl text-white/70 max-w-2xl mx-auto">
-          Personalized, proven strategies to support your smoke-free journey.
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Các chiến lược cá nhân hóa, đã được chứng minh để đồng hành cùng bạn
+            trong hành trình bỏ thuốc lá.
           </p>
         </div>
 
@@ -50,17 +58,19 @@ export function WorkProcess() {
           {steps.map((step, index) => (
             <div
               key={index}
-              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:border-cyan-500/50 transition-all"
+              className="bg-gray-50 border border-gray-200 rounded-xl p-6 hover:border-cyan-400 transition-all shadow-sm"
             >
               <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500 mb-4">
                 {step.number}
               </div>
-              <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
-              <p className="text-white/70">{step.description}</p>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                {step.title}
+              </h3>
+              <p className="text-gray-600">{step.description}</p>
             </div>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }

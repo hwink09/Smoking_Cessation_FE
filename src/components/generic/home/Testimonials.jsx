@@ -1,45 +1,35 @@
-
 import { Image } from "antd";
-
 import { Marquee } from "~/components/ui/Marquee";
 import useFeedbacks from "~/hooks/useFeedbacks";
 import React from "react";
 
 const Testimonials = () => {
-  const {
-    feedbacks,
-    loading,
-    error,
-  } = useFeedbacks();
+  const { feedbacks, loading, error } = useFeedbacks();
 
-  // Fetch feedbacks on component mount
-
-  // Show all feedbacks from API (not just those with status 'approved')
   const approvedFeedbacks = (Array.isArray(feedbacks) ? feedbacks : [])
-    // .filter(feedback => feedback.status === 'approved') // Show all feedbacks
-    .slice(0, 6) // Limit to 6 testimonials
-    .map(feedback => ({
+    .slice(0, 6)
+    .map((feedback) => ({
       quote: feedback.content,
-      author: feedback.user_id?.name || feedback.user_id?.email || 'Anonymous',
-      position: "Client",
+      author: feedback.user_id?.name || feedback.user_id?.email || "Ẩn danh",
+      position: "Người dùng",
       avatar: feedback.user_id?.avatar_url || "/default-avatar.png",
-      rating: feedback.rating
+      rating: feedback.rating,
     }));
 
-  // Remove fallback testimonials and all console.log
   const testimonials = approvedFeedbacks;
 
   return (
-    <section id="testimonials" className="py-20 bg-gradient-to-b from-gray-900 to-black">
+    <section id="testimonials" className="py-20 bg-white">
       <div className="container mx-auto px-4 text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          What Our{" "}
+          Khách hàng{" "}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500">
-            Clients Say
+            nói gì
           </span>
         </h2>
-        <p className="text-xl text-white/70 max-w-2xl mx-auto">
-          Our community speaks for itself — read how we've helped people quit smoking for good.
+        <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+          Cộng đồng của chúng tôi chia sẻ trải nghiệm thực tế trong hành trình
+          từ bỏ thuốc lá.
         </p>
       </div>
 
@@ -49,14 +39,14 @@ const Testimonials = () => {
         </div>
       ) : error ? (
         <div className="text-center py-12">
-          <p className="text-white/60">Unable to load testimonials at the moment.</p>
+          <p className="text-gray-500">Không thể tải đánh giá vào lúc này.</p>
         </div>
       ) : testimonials.length === 0 ? null : (
         <Marquee pauseOnHover className="max-w-6xl mx-auto">
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="min-w-[300px] max-w-sm mx-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:border-cyan-500/50 transition-all"
+              className="min-w-[300px] max-w-sm mx-4 bg-gray-50 border border-gray-200 rounded-xl p-6 hover:border-cyan-400 transition-all shadow-sm"
             >
               <div className="mb-6">
                 {/* Rating Stars */}
@@ -65,7 +55,9 @@ const Testimonials = () => {
                     <svg
                       key={i}
                       className={`w-5 h-5 ${
-                        i < testimonial.rating ? 'text-yellow-400' : 'text-gray-400'
+                        i < testimonial.rating
+                          ? "text-yellow-400"
+                          : "text-gray-300"
                       }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
@@ -75,7 +67,7 @@ const Testimonials = () => {
                   ))}
                 </div>
               </div>
-              <p className="text-white/80 mb-6 italic">"{testimonial.quote}"</p>
+              <p className="text-gray-700 mb-6 italic">"{testimonial.quote}"</p>
               <div className="flex items-center">
                 <Image
                   src={testimonial.avatar}
@@ -86,8 +78,12 @@ const Testimonials = () => {
                   fallback="/default-avatar.png"
                 />
                 <div className="ml-2">
-                  <h4 className="font-medium text-white">{testimonial.author}</h4>
-                  <p className="text-white/60 text-sm">{testimonial.position}</p>
+                  <h4 className="font-medium text-gray-900">
+                    {testimonial.author}
+                  </h4>
+                  <p className="text-gray-500 text-sm">
+                    {testimonial.position}
+                  </p>
                 </div>
               </div>
             </div>
@@ -96,6 +92,6 @@ const Testimonials = () => {
       )}
     </section>
   );
-}
+};
 
 export default Testimonials;

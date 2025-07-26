@@ -1,107 +1,82 @@
 import { Link } from "react-router-dom";
 
-
 export function Footer() {
   return (
-    <footer className="bg-black border-t border-white/10 py-12">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <Link href="/" className="inline-block mb-4">
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500">
-                EXHALE
+    <footer className="bg-[#e6f0f8] border-t border-blue-200 py-10 mt-12 font-sans">
+      <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row justify-between gap-8">
+          {/* Logo + mô tả bên trái */}
+          <div className="flex-1 max-w-md">
+            <Link to="/" className="inline-block mb-3">
+              <span className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-cyan-500 tracking-wide">
+                EXHELA
               </span>
             </Link>
-            <p className="text-white/70 mb-4 max-w-xs">
-              We provide effective smoking cessation solutions that support healthier lives and help individuals quit smoking successfully.
+            <p className="text-gray-700 text-[15px] mb-3 leading-relaxed font-medium">
+              Chúng tôi cung cấp các giải pháp bỏ thuốc lá hiệu quả, hỗ trợ cuộc
+              sống khỏe mạnh hơn và giúp mọi người bỏ thuốc thành công.
             </p>
-            <p className="text-white/50 text-sm">© {new Date().getFullYear()} EXHELA. All rights reserved.</p>
+            <p className="text-gray-500 text-sm italic">
+              © {new Date().getFullYear()} EXHELA. Tất cả quyền được bảo lưu.
+            </p>
           </div>
 
-          <div>
-            <h4 className="font-medium text-lg mb-4">Services</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                  Web Development
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                  Mobile App Development
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                Mobile App Development
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                Mobile App Development
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                Mobile App Development
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* Dịch vụ + Liên hệ sát bên phải */}
+          <div className="flex flex-col sm:flex-row gap-10 text-left">
+            {/* Dịch vụ */}
+            <div>
+              <h4 className="text-gray-900 font-bold text-lg mb-4 uppercase tracking-wider">
+                Dịch vụ
+              </h4>
+              <ul className="space-y-2 text-[15px] font-medium">
+                {[
+                  "Kế hoạch bỏ thuốc",
+                  "Bài viết hữu ích",
+                  "Tư vấn cùng huấn luyện viên",
+                  "Theo dõi tiến độ",
+                  "Bảng xếp hạng",
+                ].map((item, idx) => (
+                  <li key={idx}>
+                    <Link
+                      to="/login"
+                      className="text-gray-700 hover:text-purple-600 transition-colors"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div>
-            <h4 className="font-medium text-lg mb-4">Company</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                  Our Team
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                  Careers
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-medium text-lg mb-4">Legal</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-white/70 hover:text-white transition-colors">
-                  Cookie Policy
-                </Link>
-              </li>
-            </ul>
+            {/* Liên hệ */}
+            <div>
+              <h4 className="text-gray-900 font-bold text-lg mb-4 uppercase tracking-wider">
+                Liên hệ
+              </h4>
+              <ul className="space-y-2 text-[15px] text-gray-700 font-medium">
+                <li>
+                  Email:{" "}
+                  <span className="text-purple-600 font-semibold">
+                    help.smokingcessation@gmail.com
+                  </span>
+                </li>
+                <li>
+                  Hotline:{" "}
+                  <span className="text-purple-600 font-semibold">
+                    1900 123 456
+                  </span>
+                </li>
+                <li>
+                  Địa chỉ:{" "}
+                  <span className="text-purple-600 font-semibold">
+                    FPT University
+                  </span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }
