@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import CoachService from "~/services/coachProfileService";
+import FeedbackService from "~/services/feedbackService";
 
 const useCoachData = () => {
   const [loading, setLoading] = useState(false);
@@ -56,6 +57,25 @@ const useCoachData = () => {
     []
   );
 
+  const getCoachRatingInfo = useCallback(async (coachId) => {
+    if (!coachId) return { averageRating: 0, totalFeedbacks: 0 };
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await FeedbackService.getCoachAverageRating(coachId);
+      return {
+        averageRating: data.averageRating || 0,
+        totalFeedbacks: data.totalFeedbacks || 0,
+      };
+    } catch (err) {
+      console.error("Error fetching coach rating info:", err);
+      setError(err);
+      return { averageRating: 0, totalFeedbacks: 0 };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     loading,
     error,
@@ -64,6 +84,7 @@ const useCoachData = () => {
     getCoachById,
     updateCoachProfile,
     deleteCoachProfile,
+    getCoachRatingInfo,
   };
 };
 

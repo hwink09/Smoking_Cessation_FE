@@ -1,10 +1,33 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Avatar, Typography, Rate, Tag, Button, Space } from "antd";
 import { Star, Calendar, User, Award } from "lucide-react";
+import useCoachData from "~/hooks/useCoachData";
 
 const { Title, Paragraph } = Typography;
 
 const CoachCard = ({ coach, onSelectCoach }) => {
+  const { getCoachRatingInfo } = useCoachData();
+  const [ratingInfo, setRatingInfo] = useState({
+    averageRating: 0,
+    totalFeedbacks: 0,
+  });
+
+  // Lấy thông tin đánh giá chi tiết từ API
+  useEffect(() => {
+    const fetchRatingInfo = async () => {
+      if (coach.coach_id?._id) {
+        try {
+          const data = await getCoachRatingInfo(coach.coach_id._id);
+          setRatingInfo(data);
+        } catch (error) {
+          console.error("Error fetching coach rating:", error);
+        }
+      }
+    };
+
+    fetchRatingInfo();
+  }, [coach.coach_id?._id, getCoachRatingInfo]);
+
   return (
     <Card
       hoverable
@@ -66,16 +89,13 @@ const CoachCard = ({ coach, onSelectCoach }) => {
               <Star size={16} className="text-yellow-600" />
               <span className="font-medium">Đánh giá</span>
             </Space>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center mt-1">
               <Rate
                 disabled
                 allowHalf
-                defaultValue={coach.rating_avg}
-                style={{ fontSize: "14px" }}
+                value={Number(ratingInfo.averageRating) || 0}
               />
-              <span className="text-yellow-600 font-bold">
-                ({coach.rating_avg})
-              </span>
+              <span className="ml-2">({ratingInfo.totalFeedbacks || 0})</span>
             </div>
           </div>
         </div>
