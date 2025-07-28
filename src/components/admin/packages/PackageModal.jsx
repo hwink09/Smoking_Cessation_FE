@@ -15,7 +15,7 @@ const PackageModal = ({
   // Đồng bộ lại text mỗi khi mở modal hoặc editedPackage thay đổi
   useEffect(() => {
     if (open) {
-      setRawFeatureText((editedPackage.features || []).join("\n"));
+      setRawFeatureText((editedPackage.features || []).join('\n'));
     }
     // eslint-disable-next-line
   }, [open]);
@@ -54,7 +54,7 @@ const PackageModal = ({
       onOk={handleOk}
       okText={isNew ? "Thêm" : "Lưu"}
       confirmLoading={loading}
-      destroyOnHidden
+      destroyOnClose
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <Select
@@ -71,32 +71,30 @@ const PackageModal = ({
         </Select>
         {editedPackage.name && (
           <div style={{ marginTop: 8 }}>
-            <span
-              style={{
-                border: `2px solid ${
-                  editedPackage.name === "free"
-                    ? "#52c41a"
-                    : editedPackage.name === "plus"
-                    ? "#1890ff"
-                    : editedPackage.name === "premium"
-                    ? "#faad14"
-                    : "#d9d9d9"
-                }`,
-                color:
-                  editedPackage.name === "free"
-                    ? "#52c41a"
-                    : editedPackage.name === "plus"
-                    ? "#1890ff"
-                    : editedPackage.name === "premium"
-                    ? "#faad14"
-                    : "#d9d9d9",
-                padding: "2px 12px",
-                borderRadius: 8,
-                fontWeight: 600,
-                textTransform: "capitalize",
-                background: "#fff",
-              }}
-            >
+            <span style={{
+              border: `2px solid ${
+                editedPackage.name === "free"
+                  ? "#52c41a"
+                  : editedPackage.name === "plus"
+                  ? "#1890ff"
+                  : editedPackage.name === "premium"
+                  ? "#faad14"
+                  : "#d9d9d9"
+              }`,
+              color:
+                editedPackage.name === "free"
+                  ? "#52c41a"
+                  : editedPackage.name === "plus"
+                  ? "#1890ff"
+                  : editedPackage.name === "premium"
+                  ? "#faad14"
+                  : "#d9d9d9",
+              padding: "2px 12px",
+              borderRadius: 8,
+              fontWeight: 600,
+              textTransform: "capitalize",
+              background: "#fff"
+            }}>
               {editedPackage.name}
             </span>
           </div>
@@ -117,14 +115,14 @@ const PackageModal = ({
           placeholder="Nhập mỗi tính năng trên một dòng"
           value={rawFeatureText}
           autoSize={{ minRows: 3 }}
-          onChange={(e) => {
+          onChange={e => {
             setRawFeatureText(e.target.value);
             setEditedPackage({
               ...editedPackage,
               features: e.target.value
                 .split(/\r?\n/)
-                .map((f) => f.trim())
-                .filter((f) => f),
+                .map(f => f.trim())
+                .filter(f => f)
             });
           }}
         />

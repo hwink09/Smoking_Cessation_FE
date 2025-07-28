@@ -1,69 +1,49 @@
 import { Check, Star } from "lucide-react";
 import classNames from "classnames";
-import { useAuth } from "~/hooks/useAuth";
-import usePackages from "~/hooks/usePackages";
+import { usePackageData } from "~/hooks/usePackageData";
 import SubscriptionService from "~/services/subscriptionService";
+import { useAuth } from "~/hooks/useAuth";
 import PaymentService from "~/services/PaymentService";
-import { toast } from "react-toastify";
 
 export function Pricing() {
-  const { packages, loading, error } = usePackages();
+  const { packages, loading, error } = usePackageData();
   const { currentUser: user } = useAuth();
 
+  // Sắp xếp packages theo thứ tự mong muốn
   const packageOrder = ["free", "plus", "premium"];
   const sortedPackages = (packages || []).slice().sort((a, b) => {
     const aIndex = packageOrder.indexOf(a.name?.toLowerCase());
     const bIndex = packageOrder.indexOf(b.name?.toLowerCase());
+    // Nếu không tìm thấy, cho xuống cuối
     return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex);
   });
 
   const formatPrice = (price) =>
-    price === 0 ? "Miễn phí" : `${new Intl.NumberFormat().format(price)}₫`;
+    price === 0 ? "Free" : `${new Intl.NumberFormat().format(price)}`;
 
   const isPopular = (plan) => plan.name?.toLowerCase() === "plus";
 
   const handleGetStarted = async (plan) => {
-    if (!user) {
-      toast("Vui lòng đăng nhập để đăng ký.");
-      return;
-    }
-
     try {
-      const activeSubscriptions =
-        await SubscriptionService.getMyActiveSubscription();
-
-      // Chỉ chặn nếu có gói Plus/Premium đang active
-      if (activeSubscriptions && activeSubscriptions.length > 0) {
-        const activeSub = activeSubscriptions[0];
-        const isFreeSub = activeSub.name?.toLowerCase() === "free";
-
-        if (!isFreeSub) {
-          toast.warn("Bạn đã có gói đăng ký cao cấp đang hoạt động.");
-          return;
-        }
-      }
-
       const subscriptionPayload = {
         package_id: plan._id,
-        user_id: user.userId,
+        user_id: user._id,
         start_date: new Date().toISOString(),
         end_date: "",
         status: "pending",
         name: plan.name,
         price: plan.price,
       };
-
       const createdSub = await SubscriptionService.createSubscription(
         subscriptionPayload
       );
 
       const paymentPayload = {
         subscription_id: createdSub.subscription._id,
-        user_id: user.userId,
+        user_id: user._id,
         amount: plan.price,
         description: `Thanh toán cho gói ${plan.name}`,
       };
-
       const paymentResult = await PaymentService.createPaymentLink(
         paymentPayload
       );
@@ -71,26 +51,30 @@ export function Pricing() {
       if (paymentResult?.checkoutUrl) {
         window.location.href = paymentResult.checkoutUrl;
       } else {
-        toast("Không thể tạo liên kết thanh toán.");
+        alert("Không thể tạo liên kết thanh toán.");
       }
     } catch (error) {
-      toast("Có lỗi xảy ra. Vui lòng thử lại sau.");
+      console.error("Lỗi khi tạo đăng ký/thanh toán:", error);
+      alert("Có lỗi xảy ra. Vui lòng thử lại sau.");
     }
   };
 
   return (
-    <section id="pricing" className="py-20 relative bg-white">
-      <div className="container mx-auto px-4 relative z-10">
+    <section
+      id="pricing"
+      className="py-20 bg-white" // ✅ nền trắng toàn phần
+    >
+      <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Bảng giá{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-cyan-500">
-              hợp lý & rõ ràng
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Thành tựu Đơn giản, Minh bạch{" "}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-500">
+              Giá cả
             </span>
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Chọn gói hỗ trợ phù hợp để giúp bạn cai thuốc lá – không chi phí ẩn,
-            chỉ hiệu quả thật.
+            Chọn gói hỗ trợ hoàn hảo để giúp bạn cai thuốc lá không có chi phí
+            ẩn, chỉ có kết quả thực sự.
           </p>
         </div>
 
@@ -106,11 +90,11 @@ export function Pricing() {
                 <div
                   key={plan._id || index}
                   className={classNames(
-                    "relative border rounded-2xl p-8 transition-all shadow-md hover:scale-[1.02]",
-                    "bg-white text-gray-900",
+                    "relative border rounded-2xl p-8 transition-all shadow-xl hover:scale-[1.02]",
+                    "bg-white text-gray-900", // ✅ thẻ nền trắng, chữ tối
                     popular
-                      ? "border-purple-500 shadow-purple-500/10"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-purple-500 shadow-purple-200"
+                      : "border-gray-200 hover:border-gray-400"
                   )}
                 >
                   {popular && (
@@ -148,10 +132,10 @@ export function Pricing() {
                       "block w-full py-3 rounded-full text-center font-semibold transition-all duration-200",
                       popular
                         ? "bg-gradient-to-r from-purple-600 to-cyan-600 hover:brightness-110 text-white"
-                        : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                        : "bg-gray-100 hover:bg-gray-200 text-gray-800"
                     )}
                   >
-                    {plan.cta || "Đăng ký ngay"}
+                    {plan.cta || "Get Started"}
                   </button>
                 </div>
               );

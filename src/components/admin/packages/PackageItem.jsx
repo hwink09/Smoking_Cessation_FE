@@ -1,13 +1,21 @@
 import React from "react";
-import { Table, Button, Spin, Popconfirm } from "antd";
+import {
+  Table,
+  Button,
+  Spin,
+  Popconfirm,
+  Switch,
+} from "antd";
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import usePackages from "~/hooks/usePackages";
+
 import PackageModal from "./PackageModal";
+import usePackages from "~/hooks/usePackages";
+import ColourfulText from "~/components/ui/colourful-text";
 
 const PackageItem = () => {
   const {
@@ -22,7 +30,7 @@ const PackageItem = () => {
     openNewModal,
     openEditModal,
     handleSaveChanges,
-    handleDelete,
+    handleToggleActive,
   } = usePackages();
 
   const columns = [
@@ -32,25 +40,23 @@ const PackageItem = () => {
       key: "name",
       render: (name) => {
         let color = "#d9d9d9"; // default
-        if (name === "free") color = "#52c41a"; // xanh lá
-        if (name === "plus") color = "#1890ff"; // xanh dương
-        if (name === "premium") color = "#faad14"; // vàng cam
+        if (name === "free") color = "#52c41a";      // xanh lá
+        if (name === "plus") color = "#1890ff";      // xanh dương
+        if (name === "premium") color = "#faad14";   // vàng cam
         return (
-          <span
-            style={{
-              border: `2px solid ${color}`,
-              color: color,
-              padding: "2px 12px",
-              borderRadius: 8,
-              fontWeight: 600,
-              textTransform: "capitalize",
-              background: "#fff",
-            }}
-          >
+          <span style={{
+            border: `2px solid ${color}`,
+            color: color,
+            padding: "2px 12px",
+            borderRadius: 8,
+            fontWeight: 600,
+            textTransform: "capitalize",
+            background: "#fff"
+          }}>
             {name}
           </span>
         );
-      },
+      }
     },
     {
       title: "Mô tả",
@@ -73,29 +79,19 @@ const PackageItem = () => {
       dataIndex: "features",
       key: "features",
       render: (features) =>
-        features && features.length > 0 ? (
-          features.map((f, idx) => (
-            <span
-              key={idx}
-              style={{
-                marginRight: 4,
-                background: "#f0f0f0",
-                padding: "2px 6px",
-                borderRadius: 4,
-              }}
-            >
-              {f}
-            </span>
-          ))
-        ) : (
-          <span style={{ color: "#aaa" }}>Không có</span>
-        ),
+        features && features.length > 0
+          ? features.map((f, idx) => (
+              <span key={idx} style={{ marginRight: 4, background: "#f0f0f0", padding: "2px 6px", borderRadius: 4 }}>
+                {f}
+              </span>
+            ))
+          : <span style={{ color: "#aaa" }}>Không có</span>,
     },
     {
       title: "Hành động",
       key: "actions",
       render: (_, record) => (
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <Button
             icon={<EditOutlined />}
             type="link"
@@ -103,17 +99,13 @@ const PackageItem = () => {
           >
             Sửa
           </Button>
-          <Popconfirm
-            title="Xác nhận xoá?"
-            icon={<ExclamationCircleOutlined style={{ color: "red" }} />}
-            okText="Xoá"
-            cancelText="Huỷ"
-            onConfirm={() => handleDelete(record._id)}
-          >
-            <Button danger type="link" icon={<DeleteOutlined />}>
-              Xoá
-            </Button>
-          </Popconfirm>
+          <Switch
+            checked={record.is_active}
+            checkedChildren="Đang bật"
+            unCheckedChildren="Đang tắt"
+            onChange={() => handleToggleActive(record)}
+            style={{ minWidth: 70 }}
+          />
         </div>
       ),
     },
@@ -121,6 +113,14 @@ const PackageItem = () => {
 
   return (
     <div style={{ padding: 40 }}>
+      <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8, color: "black" }}>
+          Quản lý <ColourfulText text="Gói" />
+        </h2>
+        <p style={{ color: "#666", fontSize: 18 }}>
+          Xem xét và quản lý gói của người dùng nền tảng
+        </p>
+      </div>
       <div
         style={{
           display: "flex",
@@ -128,16 +128,18 @@ const PackageItem = () => {
           marginBottom: 24,
         }}
       >
-        <Button type="primary" icon={<PlusOutlined />} onClick={openNewModal}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={openNewModal}
+        >
           Thêm gói mới
         </Button>
       </div>
 
       <div style={{ background: "#fff", padding: 24, borderRadius: 12 }}>
         {loading && packages.length === 0 ? (
-          <Spin size="large" tip="Đang tải gói...">
-            <div />
-          </Spin>
+          <Spin tip="Đang tải gói..." />
         ) : (
           <Table
             dataSource={packages}
