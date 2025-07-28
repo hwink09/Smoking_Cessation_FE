@@ -19,6 +19,7 @@
     "antd": "^5.26.0",
     "axios": "^1.9.0",
     "client": "file:",
+    "echarts-for-react": "^3.0.2",
     "firebase": "^11.8.1",
     "framer-motion": "^12.18.1",
     "jwt-decode": "^4.0.0",
