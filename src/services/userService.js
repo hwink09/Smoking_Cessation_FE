@@ -83,6 +83,7 @@ const userService = {
       throw error;
     }
   },
+  
 };
 
 export default userService;

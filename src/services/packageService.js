@@ -50,6 +50,10 @@ const PackageService = {
       throw error;
     }
   },
+    getAllPackagesAdmin: async () => {
+    const response = await api.get('/packages/admin/all');
+    return response.data.packages;
+  },
 };
 
 export default PackageService;
