@@ -199,6 +199,17 @@ const QuitPlans = () => {
       {errors.target_quit_date && (
         <div style={{ color: "#ff4d4f" }}>{errors.target_quit_date}</div>
       )}
+          <Input
+        placeholder="Đường dẫn hình ảnh"
+        value={formData.image || ""}
+        onChange={e => setFormData({ ...formData, image: e.target.value })}
+        status={errors.image ? "error" : ""}
+      />
+      {formData.image && (
+        <div style={{ margin: '8px 0', textAlign: 'center' }}>
+          <img src={formData.image} alt="Preview" style={{ maxWidth: 200, maxHeight: 120, borderRadius: 8, border: '1px solid #eee' }} />
+        </div>
+      )}
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span>Công khai:</span>
         <Switch
